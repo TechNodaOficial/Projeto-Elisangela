@@ -1,8 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function Home() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
-      <h1 className="text-3xl font-semibold tracking-tight">Painel de Festas</h1>
-      <p className="text-muted-foreground">Em construção.</p>
-    </main>
-  );
+  redirect("/painel");
 }

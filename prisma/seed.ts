@@ -1,5 +1,5 @@
 // Cria (ou atualiza) o usuário da Elisangela, o único com acesso ao painel.
-// Rodar de novo com outra SEED_SENHA serve para redefinir a senha.
+// Rodar de novo com outra SEED_SENHA serve para redefinir a senha e encerra as sessões abertas.
 // Não carrega .env sozinho: as variáveis vêm da config do Prisma que chamou o seed
 // (npm run db:seed → .env local; npm run db:seed:prod → .env.producao).
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -37,7 +37,9 @@ async function main() {
       update: { nome, senhaHash },
       create: { email, nome, senhaHash },
     });
-    console.log(`Usuário pronto: ${usuario.nome} <${usuario.email}>`);
+    // Senha nova invalida todos os logins abertos (ex.: celular perdido).
+    const { count } = await prisma.sessao.deleteMany({ where: { usuarioId: usuario.id } });
+    console.log(`Usuário pronto: ${usuario.nome} <${usuario.email}> (${count} sessões encerradas)`);
   } finally {
     await prisma.$disconnect();
   }

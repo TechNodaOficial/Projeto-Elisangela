@@ -13,8 +13,33 @@ model Usuario {
   nome      String
   senhaHash String
   criadoEm  DateTime @default(now()) @db.Timestamptz(3)
+  sessoes   Sessao[]
 
   @@map("usuarios")
+}
+
+model Sessao {
+  id        String   @id @default(cuid())
+  // SHA-256 do token que fica no cookie. O token em si nunca é salvo.
+  tokenHash String   @unique
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  expiraEm  DateTime @db.Timestamptz(3)
+  criadoEm  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([usuarioId])
+  @@map("sessoes")
+}
+
+// Tentativas de login que falharam, para o rate limit.
+// chave = "ip:<endereço>" ou "email:<email>".
+model TentativaLogin {
+  id       String   @id @default(cuid())
+  chave    String
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([chave, criadoEm])
+  @@map("tentativas_login")
 }
 
 model Festa {
