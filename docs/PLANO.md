@@ -62,7 +62,7 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 - [x] **0. Setup:** Next.js + TypeScript + Tailwind + shadcn/ui, ESLint + Prettier, Prisma, health check em `/api/health`, GitHub, Vercel + Neon
 - [x] **1. Banco:** schema Prisma, primeira migration, seed com o usuário da Elisangela, geração de tokens
 - [x] **2. Autenticação:** sessões no banco (bcrypt + cookie HttpOnly), `proxy.ts` + DAL protegendo `/painel`, rate limit no Postgres (5 falhas por e-mail / 20 por IP em 15 min)
-- [ ] **3. Festas:** layout do painel, lista com abas, criar/editar/excluir com Zod
+- [x] **3. Festas:** layout do painel (visual "Prancheta da Cerimonialista", ver `PRODUCT.md` e `.impeccable/surfaces/`), listas de pendentes e concluídas, detalhe, criar/editar/excluir com Zod; datas sempre no fuso de São Paulo
 - [ ] **4. Convidados:** detalhe da festa, contadores, CRUD de convidados, copiar link e WhatsApp
 - [ ] **5. Convite + QR:** `/c/[token]`, confirmar/recusar (pode mudar até a data da festa), QR com download, rate limit
 - [ ] **6. Check-in:** leitor pela câmera, validações, busca manual, testes Vitest, teste num celular real

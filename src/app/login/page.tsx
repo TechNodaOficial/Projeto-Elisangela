@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { destinoSeguro } from "@/lib/auth/destino";
 import { obterUsuarioLogado } from "@/lib/dal";
 
@@ -19,15 +18,15 @@ export default async function PaginaLogin(props: PageProps<"/login">) {
 
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">Painel de Festas</CardTitle>
-          <CardDescription>Entre para gerenciar suas festas e convidados.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FormularioLogin de={destino} />
-        </CardContent>
-      </Card>
+      <div className="folha folha-lisa w-full max-w-sm py-8 pr-6 pl-[calc(var(--margem)+0.875rem)]">
+        <p className="mb-6 flex items-baseline gap-1.5">
+          <span className="text-[1.0625rem] font-semibold tracking-[-0.02em]">Elisangela</span>
+          <span className="text-tinta-suave text-sm">Eventos</span>
+        </p>
+        <h1 className="text-2xl font-semibold tracking-[-0.02em]">Entrar</h1>
+        <p className="text-tinta-suave mt-1 mb-6 text-sm">Acesse o painel das suas festas.</p>
+        <FormularioLogin de={destino} />
+      </div>
     </main>
   );
 }

@@ -47,3 +47,9 @@ next-env.d.ts
 
 # prisma client gerado
 /src/generated/
+
+# impeccable: capturas e arquivos temporários (o brief em .impeccable/surfaces é versionado)
+/.impeccable/review/
+/.impeccable/questions/
+/.impeccable/build/
+/.impeccable/config.local.json

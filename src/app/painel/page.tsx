@@ -1,12 +1,24 @@
-import { exigirUsuario } from "@/lib/dal";
+import { listarFestas } from "@/lib/festas/consultas";
 
-export default async function PaginaPainel() {
-  const usuario = await exigirUsuario();
+import { CabecalhoSecao, FolhaFesta, FolhaNovaFesta, GradeFolhas } from "./folhas";
+
+export default async function PaginaPendentes() {
+  const festas = await listarFestas("pendentes");
+
+  const descricao =
+    festas.length === 0
+      ? "Nenhuma festa marcada. Comece pela folha em branco."
+      : `${festas.length} ${festas.length === 1 ? "festa" : "festas"}, da mais próxima para a mais distante.`;
 
   return (
-    <div className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold tracking-tight">Olá, {usuario.nome}!</h1>
-      <p className="text-muted-foreground">Suas festas vão aparecer aqui.</p>
-    </div>
+    <>
+      <CabecalhoSecao titulo="Festas pendentes" descricao={descricao} />
+      <GradeFolhas>
+        <FolhaNovaFesta />
+        {festas.map((festa) => (
+          <FolhaFesta key={festa.id} festa={festa} concluida={false} />
+        ))}
+      </GradeFolhas>
+    </>
   );
 }

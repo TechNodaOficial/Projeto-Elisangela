@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import { exigirUsuario } from "@/lib/dal";
+import { partesData } from "@/lib/datas";
+import { contarFestas } from "@/lib/festas/consultas";
 
-import { sair } from "./actions";
+import { BotaoSairRodape, NavegacaoInferior, NavegacaoLateral } from "./navegacao";
 
 export const metadata: Metadata = {
   title: "Painel de Festas",
@@ -11,24 +13,36 @@ export const metadata: Metadata = {
 };
 
 export default async function LayoutPainel({ children }: LayoutProps<"/painel">) {
-  const usuario = await exigirUsuario();
+  const [usuario, contagens] = await Promise.all([exigirUsuario(), contarFestas()]);
+  const hoje = partesData(new Date());
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="border-b">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-3">
-          <span className="font-semibold">Painel de Festas</span>
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground hidden text-sm sm:inline">{usuario.nome}</span>
-            <form action={sair}>
-              <Button type="submit" variant="outline" size="sm">
-                Sair
-              </Button>
-            </form>
-          </div>
+      <header className="bg-background sticky top-0 z-20">
+        <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-8">
+          <p className="text-tinta-suave text-sm first-letter:uppercase">
+            <span className="hidden md:inline">{hoje.extenso}</span>
+            <span className="md:hidden">
+              {hoje.semana}, {Number(hoje.dia)} {hoje.mes}
+            </span>
+          </p>
+          <Logo />
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
+
+      <div className="flex flex-1 md:pl-4">
+        <aside className="hidden w-60 shrink-0 md:block">
+          <div className="sticky top-14 h-[calc(100dvh-3.5rem)] pt-6 pb-6">
+            <NavegacaoLateral contagens={contagens} nome={usuario.nome} />
+          </div>
+        </aside>
+        <main className="min-w-0 flex-1 px-4 pt-4 pb-28 md:px-8 md:pt-6 md:pb-12">
+          {children}
+          <BotaoSairRodape nome={usuario.nome} />
+        </main>
+      </div>
+
+      <NavegacaoInferior contagens={contagens} />
     </div>
   );
 }

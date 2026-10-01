@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-01T19:31:49+00:00",
+  "title": "Design System: Painel de Festas · Elisangela Eventos",
+  "extensions": {
+    "colorMeta": {
+      "tinta": {
+        "role": "primary",
+        "displayName": "Tinta Grafite",
+        "canonical": "oklch(0.255 0.004 250)",
+        "cssVar": "--tinta",
+        "tonalRamp": [
+          "oklch(0.15 0.004 250)",
+          "oklch(0.25 0.004 250)",
+          "oklch(0.35 0.004 250)",
+          "oklch(0.45 0.004 250)",
+          "oklch(0.55 0.004 250)",
+          "oklch(0.65 0.004 250)",
+          "oklch(0.8 0.004 250)",
+          "oklch(0.95 0.004 250)"
+        ]
+      },
+      "grifo": {
+        "role": "secondary",
+        "displayName": "Marca-texto",
+        "canonical": "oklch(0.92 0.15 103)",
+        "cssVar": "--grifo",
+        "tonalRamp": [
+          "oklch(0.15 0.15 103)",
+          "oklch(0.25 0.15 103)",
+          "oklch(0.35 0.15 103)",
+          "oklch(0.45 0.15 103)",
+          "oklch(0.55 0.15 103)",
+          "oklch(0.65 0.15 103)",
+          "oklch(0.8 0.15 103)",
+          "oklch(0.95 0.15 103)"
+        ]
+      },
+      "pauta": {
+        "role": "tertiary",
+        "displayName": "Pauta",
+        "canonical": "oklch(0.86 0.045 255)",
+        "cssVar": "--pauta",
+        "tonalRamp": [
+          "oklch(0.15 0.045 255)",
+          "oklch(0.25 0.045 255)",
+          "oklch(0.35 0.045 255)",
+          "oklch(0.45 0.045 255)",
+          "oklch(0.55 0.045 255)",
+          "oklch(0.65 0.045 255)",
+          "oklch(0.8 0.045 255)",
+          "oklch(0.95 0.045 255)"
+        ]
+      },
+      "pauta-forte": {
+        "role": "tertiary",
+        "displayName": "Pauta Forte",
+        "canonical": "oklch(0.7 0.09 258)",
+        "cssVar": "--pauta-forte",
+        "tonalRamp": [
+          "oklch(0.15 0.09 258)",
+          "oklch(0.25 0.09 258)",
+          "oklch(0.35 0.09 258)",
+          "oklch(0.45 0.09 258)",
+          "oklch(0.55 0.09 258)",
+          "oklch(0.65 0.09 258)",
+          "oklch(0.8 0.09 258)",
+          "oklch(0.95 0.09 258)"
+        ]
+      },
+      "mesa": {
+        "role": "neutral",
+        "displayName": "Mesa",
+        "canonical": "oklch(0.935 0.004 250)",
+        "cssVar": "--mesa",
+        "tonalRamp": [
+          "oklch(0.15 0.004 250)",
+          "oklch(0.25 0.004 250)",
+          "oklch(0.35 0.004 250)",
+          "oklch(0.45 0.004 250)",
+          "oklch(0.55 0.004 250)",
+          "oklch(0.65 0.004 250)",
+          "oklch(0.8 0.004 250)",
+          "oklch(0.95 0.004 250)"
+        ]
+      },
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "oklch(1 0 0)",
+        "cssVar": "--papel",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.55 0 0)",
+          "oklch(0.65 0 0)",
+          "oklch(0.8 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "tinta-suave": {
+        "role": "neutral",
+        "displayName": "Tinta Suave",
+        "canonical": "oklch(0.47 0.008 250)",
+        "cssVar": "--tinta-suave",
+        "tonalRamp": [
+          "oklch(0.15 0.008 250)",
+          "oklch(0.25 0.008 250)",
+          "oklch(0.35 0.008 250)",
+          "oklch(0.45 0.008 250)",
+          "oklch(0.55 0.008 250)",
+          "oklch(0.65 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.95 0.008 250)"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Superfície",
+        "canonical": "oklch(0.965 0.003 250)",
+        "cssVar": "--secondary",
+        "tonalRamp": [
+          "oklch(0.15 0.003 250)",
+          "oklch(0.25 0.003 250)",
+          "oklch(0.35 0.003 250)",
+          "oklch(0.45 0.003 250)",
+          "oklch(0.55 0.003 250)",
+          "oklch(0.65 0.003 250)",
+          "oklch(0.8 0.003 250)",
+          "oklch(0.95 0.003 250)"
+        ]
+      },
+      "borda": {
+        "role": "neutral",
+        "displayName": "Borda",
+        "canonical": "oklch(0.875 0.006 250)",
+        "cssVar": "--border",
+        "tonalRamp": [
+          "oklch(0.15 0.006 250)",
+          "oklch(0.25 0.006 250)",
+          "oklch(0.35 0.006 250)",
+          "oklch(0.45 0.006 250)",
+          "oklch(0.55 0.006 250)",
+          "oklch(0.65 0.006 250)",
+          "oklch(0.8 0.006 250)",
+          "oklch(0.95 0.006 250)"
+        ]
+      },
+      "borda-campo": {
+        "role": "neutral",
+        "displayName": "Borda de Campo",
+        "canonical": "oklch(0.83 0.008 250)",
+        "cssVar": "--input",
+        "tonalRamp": [
+          "oklch(0.15 0.008 250)",
+          "oklch(0.25 0.008 250)",
+          "oklch(0.35 0.008 250)",
+          "oklch(0.45 0.008 250)",
+          "oklch(0.55 0.008 250)",
+          "oklch(0.65 0.008 250)",
+          "oklch(0.8 0.008 250)",
+          "oklch(0.95 0.008 250)"
+        ]
+      },
+      "destrutivo": {
+        "role": "status",
+        "displayName": "Destrutivo",
+        "canonical": "oklch(0.52 0.19 27)",
+        "cssVar": "--destructive",
+        "tonalRamp": [
+          "oklch(0.15 0.19 27)",
+          "oklch(0.25 0.19 27)",
+          "oklch(0.35 0.19 27)",
+          "oklch(0.45 0.19 27)",
+          "oklch(0.55 0.19 27)",
+          "oklch(0.65 0.19 27)",
+          "oklch(0.8 0.19 27)",
+          "oklch(0.95 0.19 27)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Dia (folha)",
+        "purpose": "Dia do mês no topo de cada folha de festa; altura de 2 pautas."
+      },
+      "display-detalhe": {
+        "displayName": "Dia (detalhe)",
+        "purpose": "Dia do mês na folha de detalhe; altura de 3 pautas."
+      },
+      "headline": {
+        "displayName": "Título de seção",
+        "purpose": "h1 de seção, formulário e login; 1.75rem no detalhe a partir de sm."
+      },
+      "title": {
+        "displayName": "Título de folha",
+        "purpose": "Nome da festa (até 2 linhas), Nova festa, logo."
+      },
+      "body": {
+        "displayName": "Texto na pauta",
+        "purpose": "Valores do roteiro na folha de detalhe, assentados na pauta."
+      },
+      "body-sm": {
+        "displayName": "Texto de apoio",
+        "purpose": "Descrições, local, contagens, rótulos de campo."
+      },
+      "label": {
+        "displayName": "Mês e semana",
+        "purpose": "Rótulo maiúsculo ao lado do numeral do dia."
+      },
+      "dado": {
+        "displayName": "Dado mono",
+        "purpose": "Horário, contagens da navegação, campos de data e hora."
+      }
+    },
+    "shadows": [
+      {
+        "name": "folha-repouso",
+        "value": "0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%)",
+        "purpose": "Toda .folha: papel apoiado na mesa."
+      },
+      {
+        "name": "folha-levantada",
+        "value": "0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%)",
+        "purpose": "Hover das folhas clicáveis, com translateY(-2px)."
+      },
+      {
+        "name": "veu-dialogo",
+        "value": "oklch(0.2 0.01 250 / 35%)",
+        "purpose": "Cor de fundo do overlay atrás do diálogo de confirmação."
+      }
+    ],
+    "motion": [
+      {
+        "name": "grifo-varre",
+        "value": "200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Varredura do marca-texto via clip-path, ao aparecer e no hover; desligada com prefers-reduced-motion."
+      },
+      {
+        "name": "folha-levanta",
+        "value": "200ms ease-out",
+        "purpose": "translate + box-shadow das folhas clicáveis no hover; desligado com prefers-reduced-motion."
+      },
+      {
+        "name": "dialogo",
+        "value": "100ms",
+        "purpose": "Fade + zoom-95 de entrada e saída do diálogo."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      }
+    ],
+    "paper": {
+      "linha": "1.75rem",
+      "margem": "2.75rem",
+      "folhaTopo": "-0.375rem",
+      "pautaWidth": "1px",
+      "grifoShape": {
+        "inset": "0.1em -0.3em 0.05em",
+        "borderRadius": "0.25em 0.55em 0.3em 0.5em",
+        "rotate": "-0.8deg"
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal de formulário (Salvar, Entrar): tinta grafite sobre papel invertido.",
+      "html": "<button class=\"ds-btn-primario\">Salvar festa</button>",
+      "css": ".ds-btn-primario { font-family:Geist, ui-sans-serif, system-ui, sans-serif; font-size:0.875rem; font-weight:500; height:40px; padding:0 20px; background:var(--tinta, oklch(0.255 0.004 250)); color:var(--papel, oklch(1 0 0)); border:1px solid transparent; border-radius:0.375rem; cursor:pointer; transition:background 150ms, transform 150ms; } .ds-btn-primario:hover { background:oklch(0.255 0.004 250 / 80%); } .ds-btn-primario:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); } .ds-btn-primario:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Botão outline",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação secundária sobre a mesa (Editar, Cancelar no diálogo).",
+      "html": "<button class=\"ds-btn-outline\">Editar</button>",
+      "css": ".ds-btn-outline { font-family:Geist, ui-sans-serif, system-ui, sans-serif; font-size:0.875rem; font-weight:500; height:36px; padding:0 10px; background:var(--papel, oklch(1 0 0)); color:var(--tinta, oklch(0.255 0.004 250)); border:1px solid var(--border, oklch(0.875 0.006 250)); border-radius:0.375rem; cursor:pointer; transition:background 150ms; } .ds-btn-outline:hover { background:var(--secondary, oklch(0.965 0.003 250)); } .ds-btn-outline:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); } .ds-btn-outline:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Botão excluir (ghost destrutivo)",
+      "kind": "button",
+      "refersTo": "button-ghost-destrutivo",
+      "description": "Abre a confirmação de exclusão; só texto destrutivo com ícone.",
+      "html": "<button class=\"ds-btn-excluir\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18\"/><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\"/><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\"/><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\"/><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\"/></svg>Excluir</button>",
+      "css": ".ds-btn-excluir { display:inline-flex; align-items:center; gap:6px; font-family:Geist, ui-sans-serif, system-ui, sans-serif; font-size:0.875rem; font-weight:500; height:36px; padding:0 10px; background:transparent; color:var(--destructive, oklch(0.52 0.19 27)); border:1px solid transparent; border-radius:0.375rem; cursor:pointer; } .ds-btn-excluir:hover { background:var(--secondary, oklch(0.965 0.003 250)); } .ds-btn-excluir:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo de formulário com rótulo acima, fundo papel e foco azul de margem.",
+      "html": "<label class=\"ds-campo\"><span class=\"ds-campo-rotulo\">Nome da festa</span><input class=\"ds-input\" placeholder=\"Ex.: Casamento Ana e João\"></label>",
+      "css": ".ds-campo { display:flex; flex-direction:column; gap:8px; width:280px; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-campo-rotulo { font-size:0.875rem; font-weight:500; line-height:1; } .ds-input { font-family:inherit; font-size:0.875rem; height:40px; padding:4px 10px; background:var(--papel, oklch(1 0 0)); color:var(--tinta, oklch(0.255 0.004 250)); border:1px solid var(--input, oklch(0.83 0.008 250)); border-radius:0.375rem; transition:border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-input:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); } .ds-input[aria-invalid=true] { border-color:var(--destructive, oklch(0.52 0.19 27)); }"
+    },
+    {
+      "name": "Índice pautado (navegação lateral)",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Seções como linhas de um índice pautado; a ativa fica grifada, o hover varre o grifo.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-ativo\" aria-current=\"page\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5\"/><path d=\"M16 2v4\"/><path d=\"M8 2v4\"/><path d=\"M3 10h5\"/><path d=\"M17.5 17.5 16 16.3V14\"/><circle cx=\"16\" cy=\"16\" r=\"6\"/></svg><span class=\"ds-grifo\">Festas pendentes</span><span class=\"ds-nav-n\">7</span></a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/><path d=\"M10 12h4\"/></svg><span class=\"ds-grifo-passar\">Festas concluídas</span><span class=\"ds-nav-n\">12</span></a><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/><path d=\"M7 12h10\"/></svg><span class=\"ds-grifo-passar\">Leitor QR Code</span></a></nav>",
+      "css": ".ds-nav { width:240px; border-top:1px solid var(--pauta, oklch(0.86 0.045 255)); font-family:Geist, ui-sans-serif, system-ui, sans-serif; background:var(--mesa, oklch(0.935 0.004 250)); } .ds-nav-item { display:flex; align-items:center; gap:12px; height:44px; padding:0 8px; border-bottom:1px solid var(--pauta, oklch(0.86 0.045 255)); font-size:0.9375rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); text-decoration:none; } .ds-nav-item:hover { color:var(--tinta, oklch(0.255 0.004 250)); } .ds-nav-item:hover .ds-grifo-passar::before, .ds-nav-item:focus-visible .ds-grifo-passar::before { clip-path: inset(0 0 0 0); } .ds-nav-item:focus-visible { outline:2px solid var(--pauta-forte, oklch(0.7 0.09 258)); outline-offset:-2px; } .ds-ativo { color:var(--tinta, oklch(0.255 0.004 250)); font-weight:600; } .ds-nav-n { margin-left:auto; font-family:'Geist Mono', ui-monospace, monospace; font-size:0.8125rem; font-weight:400; font-variant-numeric:tabular-nums; } .ds-grifo, .ds-grifo-passar { position:relative; isolation:isolate; } .ds-grifo::before, .ds-grifo-passar::before { content:''; position:absolute; inset:0.1em -0.3em 0.05em; z-index:-1; background:var(--grifo, oklch(0.92 0.15 103)); border-radius:0.25em 0.55em 0.3em 0.5em; transform:rotate(-0.8deg); } .ds-grifo-passar::before { clip-path: inset(0 100% 0 0); transition: clip-path 200ms cubic-bezier(0.16,1,0.3,1); } @media (prefers-reduced-motion: reduce) { .ds-grifo-passar::before { transition:none; } }"
+    },
+    {
+      "name": "Folha de festa",
+      "kind": "card",
+      "refersTo": "folha-festa",
+      "description": "Assinatura: folha pautada clicável com o dia em mono grande; levanta 2px no hover.",
+      "html": "<a class=\"ds-folha\" href=\"#\"><div class=\"ds-folha-topo\"><div class=\"ds-folha-data\"><span class=\"ds-dia\">14</span><span class=\"ds-mes\"><b>NOV</b><span>SÁB</span></span></div><div class=\"ds-folha-hora\"><span class=\"ds-mono\">19:30</span><b class=\"ds-grifo\">Em 5 dias</b></div></div><h2 class=\"ds-folha-titulo\">Casamento Ana e João</h2><p class=\"ds-folha-sub\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/></svg><span>Espaço Jardim das Flores</span></p><p class=\"ds-folha-sub\"><span><b>31</b> de <b>48</b> confirmados</span></p></a>",
+      "css": ".ds-folha { display:block; width:300px; background-color:var(--papel, oklch(1 0 0)); background-image: linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem), repeating-linear-gradient(to bottom, transparent 0 calc(1.75rem - 1px), var(--pauta, oklch(0.86 0.045 255)) calc(1.75rem - 1px) 1.75rem); background-position: 0 0, 0 -0.375rem; border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); padding:1.75rem 1.25rem 1.75rem 3.625rem; line-height:1.75rem; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); text-decoration:none; transition: transform 200ms ease-out, box-shadow 200ms ease-out; } .ds-folha:hover { transform:translateY(-2px); box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%); } .ds-folha:focus-visible { outline:2px solid var(--pauta-forte, oklch(0.7 0.09 258)); outline-offset:2px; } .ds-folha-topo { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; } .ds-folha-data { display:flex; align-items:flex-start; gap:10px; } .ds-dia { font-family:'Geist Mono', ui-monospace, monospace; font-size:2.75rem; line-height:3.5rem; font-weight:500; letter-spacing:-0.04em; font-variant-numeric:tabular-nums; } .ds-mes { display:flex; flex-direction:column; font-size:0.8125rem; letter-spacing:0.04em; } .ds-mes span { color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-folha-hora { display:flex; flex-direction:column; align-items:flex-end; font-size:0.8125rem; } .ds-mono { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; } .ds-folha-titulo { margin:0; min-height:3.5rem; font-size:1.0625rem; font-weight:600; letter-spacing:-0.01em; line-height:1.75rem; } .ds-folha-sub { margin:0; display:flex; align-items:center; gap:6px; font-size:0.875rem; line-height:1.75rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-folha-sub b { color:var(--tinta, oklch(0.255 0.004 250)); font-weight:600; } .ds-grifo, .ds-grifo-passar { position:relative; isolation:isolate; } .ds-grifo::before, .ds-grifo-passar::before { content:''; position:absolute; inset:0.1em -0.3em 0.05em; z-index:-1; background:var(--grifo, oklch(0.92 0.15 103)); border-radius:0.25em 0.55em 0.3em 0.5em; transform:rotate(-0.8deg); } .ds-grifo-passar::before { clip-path: inset(0 100% 0 0); transition: clip-path 200ms cubic-bezier(0.16,1,0.3,1); } @media (prefers-reduced-motion: reduce) { .ds-grifo-passar::before { transition:none; } } @media (prefers-reduced-motion: reduce) { .ds-folha { transition:none; } .ds-folha:hover { transform:none; } }"
+    },
+    {
+      "name": "Folha em branco (Nova festa)",
+      "kind": "custom",
+      "refersTo": "folha-festa",
+      "description": "Primeira folha da pilha: criar é pegar a folha do topo. O rótulo se grifa no hover.",
+      "html": "<a class=\"ds-folha-nova\" href=\"#\"><span class=\"ds-disco\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></span><span class=\"ds-nova-txt\"><span class=\"ds-nova-t\"><span class=\"ds-grifo-passar\">Nova festa</span></span><span class=\"ds-nova-s\">Folha em branco para cadastrar</span></span></a>",
+      "css": ".ds-folha-nova { display:flex; align-items:center; gap:12px; width:300px; min-height:14rem; box-sizing:border-box; background-color:var(--papel, oklch(1 0 0)); background-image: linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem), repeating-linear-gradient(to bottom, transparent 0 calc(1.75rem - 1px), var(--pauta, oklch(0.86 0.045 255)) calc(1.75rem - 1px) 1.75rem); background-position: 0 0, 0 -0.375rem; border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); padding:1.75rem 1.25rem 1.75rem 3.625rem; line-height:1.75rem; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); text-decoration:none; transition: transform 200ms ease-out, box-shadow 200ms ease-out; } .ds-folha-nova:hover { transform:translateY(-2px); box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%); } .ds-folha-nova:hover .ds-grifo-passar::before, .ds-folha-nova:focus-visible .ds-grifo-passar::before { clip-path: inset(0 0 0 0); } .ds-folha-nova:focus-visible { outline:2px solid var(--pauta-forte, oklch(0.7 0.09 258)); outline-offset:2px; } .ds-disco { display:flex; align-items:center; justify-content:center; width:32px; height:32px; flex-shrink:0; border:1px solid var(--tinta, oklch(0.255 0.004 250)); border-radius:9999px; } .ds-nova-txt { display:flex; flex-direction:column; } .ds-nova-t { font-size:1.0625rem; font-weight:600; } .ds-nova-s { font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-grifo, .ds-grifo-passar { position:relative; isolation:isolate; } .ds-grifo::before, .ds-grifo-passar::before { content:''; position:absolute; inset:0.1em -0.3em 0.05em; z-index:-1; background:var(--grifo, oklch(0.92 0.15 103)); border-radius:0.25em 0.55em 0.3em 0.5em; transform:rotate(-0.8deg); } .ds-grifo-passar::before { clip-path: inset(0 100% 0 0); transition: clip-path 200ms cubic-bezier(0.16,1,0.3,1); } @media (prefers-reduced-motion: reduce) { .ds-grifo-passar::before { transition:none; } } @media (prefers-reduced-motion: reduce) { .ds-folha-nova { transition:none; } .ds-folha-nova:hover { transform:none; } }"
+    },
+    {
+      "name": "Folha lisa (aviso)",
+      "kind": "card",
+      "refersTo": "folha-festa",
+      "description": "Folha sem pautas, só a linha de margem: formulários, avisos e estados vazios.",
+      "html": "<div class=\"ds-folha-lisa\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/><path d=\"M10 12h4\"/></svg><div><p class=\"ds-lisa-t\">Nenhuma festa concluída ainda.</p><p class=\"ds-lisa-s\">Cada festa passa para cá automaticamente no dia seguinte à data dela.</p></div></div>",
+      "css": ".ds-folha-lisa { display:flex; align-items:flex-start; gap:12px; max-width:36rem; background-color:var(--papel, oklch(1 0 0)); background-image:linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); padding:1.5rem 1.5rem 1.5rem 3.625rem; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-folha-lisa svg { margin-top:2px; flex-shrink:0; } .ds-lisa-t { margin:0 0 4px; font-weight:600; } .ds-lisa-s { margin:0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Prancheta da Cerimonialista",
+    "overview": "O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.\n\nA densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, contagens), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o \"casamento romântico\" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.\n\nA interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.",
+    "keyCharacteristics": [
+      "Folhas pautadas com linha de margem sobre mesa cinza fria.",
+      "Tinta grafite como cor de ação; marca-texto amarelo reservado para seleção e urgência.",
+      "Texto assentado em pautas de 1.75rem; recuo do texto depois da margem.",
+      "Geist para tudo, Geist Mono só para dados, sempre tabulares.",
+      "Cantos discretos (3px nas folhas, 6px nos controles), sombra de papel sobre mesa.",
+      "Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração."
+    ],
+    "rules": [
+      {
+        "name": "The Marca-texto Rule",
+        "body": "O amarelo só existe como grifo atrás de texto grafite e só marca uma de três coisas: onde ela está, o que está chegando (≤ 7 dias) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tinta Rule",
+        "body": "Ação primária é grafite sobre papel. Não há cor de marca para botões; a hierarquia vem do contraste tinta/papel.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mesa e Papel Rule",
+        "body": "Conteúdo vive em papel (`papel`); o fundo é sempre mesa (`mesa`). Campos sobre folha também recebem fundo papel explícito para não herdar transparência.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono-Só-Para-Dados Rule",
+        "body": "Geist Mono aparece apenas em dia, horário, contagens e campos de data/hora. Nunca em títulos ou rótulos de texto.",
+        "section": "typography"
+      },
+      {
+        "name": "The Pauta Rule",
+        "body": "Dentro de uma folha pautada, todo texto usa `line-height` igual a `--linha` (ou múltiplos dela); o texto assenta nas pautas. Um elemento que quebra o ritmo da pauta quebra o papel.",
+        "section": "typography"
+      },
+      {
+        "name": "The Recuo de Margem Rule",
+        "body": "Todo conteúdo de folha, pautada ou lisa, começa depois da linha de margem: `padding-left: calc(var(--margem) + 0.875rem)`. Nada cruza a margem.",
+        "section": "layout"
+      },
+      {
+        "name": "The Papel-Sobre-Mesa Rule",
+        "body": "Só folhas têm sombra. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** colocar todo conteúdo novo numa folha (`.folha`, ou `.folha .folha-lisa` quando houver campos) sobre a mesa, com `padding-left: calc(var(--margem) + 0.875rem)`.",
+      "**Do** usar `line-height: var(--linha)` (1.75rem) ou múltiplos dela para todo texto dentro de folha pautada.",
+      "**Do** reservar o grifo para a seção atual, festas a até 7 dias e o hover do que está para ser escolhido.",
+      "**Do** escrever dia, horário e contagens em Geist Mono tabular; todo o resto em Geist.",
+      "**Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.",
+      "**Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.",
+      "**Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha."
+    ],
+    "donts": [
+      "**Don't** usar o amarelo `grifo` como cor de texto, borda, fundo de botão ou fundo de superfície.",
+      "**Don't** usar gradientes decorativos; os únicos gradientes do sistema são os fios da pauta e a linha de margem desenhados no fundo da folha.",
+      "**Don't** usar vidro (backdrop-blur), cantos acima de 6px em contêineres, ou rosa e tipografia cursiva de \"casamento romântico\".",
+      "**Don't** montar grades de cards brancos idênticos com sombra e ícone no topo; a festa é uma folha com o dia como âncora.",
+      "**Don't** dar sombra a controles; só folhas têm sombra.",
+      "**Don't** pôr texto ou controles sobre a linha de margem.",
+      "**Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo."
+    ]
+  }
+}

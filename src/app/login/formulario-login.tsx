@@ -12,7 +12,7 @@ export function FormularioLogin({ de }: { de?: string }) {
   const [estado, acao, enviando] = useActionState<EstadoLogin, FormData>(entrar, {});
 
   return (
-    <form action={acao} className="flex flex-col gap-4">
+    <form action={acao} className="flex flex-col gap-5">
       {de && <input type="hidden" name="de" value={de} />}
 
       <div className="flex flex-col gap-2">
@@ -22,6 +22,7 @@ export function FormularioLogin({ de }: { de?: string }) {
           name="email"
           type="email"
           autoComplete="username"
+          className="bg-card h-10"
           defaultValue={estado.email}
           required
           autoFocus
@@ -30,7 +31,14 @@ export function FormularioLogin({ de }: { de?: string }) {
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="senha">Senha</Label>
-        <Input id="senha" name="senha" type="password" autoComplete="current-password" required />
+        <Input
+          id="senha"
+          name="senha"
+          type="password"
+          autoComplete="current-password"
+          required
+          className="bg-card h-10"
+        />
       </div>
 
       {estado.erro && (
@@ -39,7 +47,7 @@ export function FormularioLogin({ de }: { de?: string }) {
         </p>
       )}
 
-      <Button type="submit" size="lg" disabled={enviando}>
+      <Button type="submit" size="lg" disabled={enviando} className="h-10">
         {enviando ? "Entrando…" : "Entrar"}
       </Button>
     </form>
