@@ -60,7 +60,7 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 ## Etapas
 
 - [x] **0. Setup:** Next.js + TypeScript + Tailwind + shadcn/ui, ESLint + Prettier, Prisma, health check em `/api/health`, GitHub, Vercel + Neon
-- [ ] **1. Banco:** schema Prisma, primeira migration, seed com o usuário da Elisangela, geração de tokens. _Falta:_ aplicar a migration e rodar o seed (local e produção)
+- [x] **1. Banco:** schema Prisma, primeira migration, seed com o usuário da Elisangela, geração de tokens
 - [ ] **2. Autenticação:** Auth.js (bcrypt), proteção de `/painel`, rate limit no login
 - [ ] **3. Festas:** layout do painel, lista com abas, criar/editar/excluir com Zod
 - [ ] **4. Convidados:** detalhe da festa, contadores, CRUD de convidados, copiar link e WhatsApp
