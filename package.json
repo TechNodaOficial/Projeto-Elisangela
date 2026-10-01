@@ -12,11 +12,17 @@
     "format:check": "prettier --check .",
     "typecheck": "next typegen && tsc --noEmit",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test": "vitest run",
+    "db:seed": "prisma db seed",
+    "db:deploy:prod": "prisma migrate deploy --config prisma.producao.config.ts",
+    "db:seed:prod": "prisma db seed --config prisma.producao.config.ts",
+    "db:status:prod": "prisma migrate status --config prisma.producao.config.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.49.0",
@@ -31,7 +37,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.19.0",
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -43,6 +49,8 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "prisma": "^7.10.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   }
 }

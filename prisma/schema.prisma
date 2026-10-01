@@ -1,5 +1,3 @@
-// Modelos são adicionados na Etapa 1 (ver docs/PLANO.md).
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -7,4 +5,63 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nome      String
+  senhaHash String
+  criadoEm  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@map("usuarios")
+}
+
+model Festa {
+  id           String      @id @default(cuid())
+  titulo       String
+  // Data e horário juntos, como instante (timestamptz). A exibição converte para o fuso de São Paulo.
+  dataHora     DateTime    @db.Timestamptz(3)
+  localNome    String
+  endereco     String
+  traje        String?
+  observacoes  String?
+  criadoEm     DateTime    @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime    @updatedAt @db.Timestamptz(3)
+  convidados   Convidado[]
+
+  @@index([dataHora])
+  @@map("festas")
+}
+
+enum StatusRsvp {
+  PENDENTE
+  CONFIRMADO
+  RECUSADO
+}
+
+model Convidado {
+  id            String      @id @default(cuid())
+  festaId       String
+  festa         Festa       @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  nome          String
+  telefone      String?
+  // Vai no link do convite (/c/[tokenConvite]).
+  tokenConvite  String      @unique
+  // Vai dentro do QR Code. Separado do token do convite para que uma foto do QR
+  // não permita alterar a resposta do convidado.
+  codigoCheckin String      @unique
+  rsvp          StatusRsvp  @default(PENDENTE)
+  respondidoEm  DateTime?   @db.Timestamptz(3)
+  presenteEm    DateTime?   @db.Timestamptz(3)
+  // Reservado para acompanhantes (fora do MVP): o acompanhante aponta para o titular.
+  titularId     String?
+  titular       Convidado?  @relation("Acompanhantes", fields: [titularId], references: [id], onDelete: Cascade)
+  acompanhantes Convidado[] @relation("Acompanhantes")
+  criadoEm      DateTime    @default(now()) @db.Timestamptz(3)
+  atualizadoEm  DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@index([titularId])
+  @@map("convidados")
 }

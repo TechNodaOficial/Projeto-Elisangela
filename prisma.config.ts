@@ -1,14 +1,15 @@
+// Configuração do dia a dia: banco local definido no .env.
+// Para produção, use os scripts *:prod (prisma.producao.config.ts).
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
-// Migrations precisam de conexão direta (sem pooler). A integração Neon + Vercel
-// expõe essa URL como DATABASE_URL_UNPOOLED; localmente cai na DATABASE_URL.
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
 });

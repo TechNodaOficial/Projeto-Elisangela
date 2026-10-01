@@ -24,17 +24,21 @@ Usuario
   id, email, senhaHash, nome
 
 Festa
-  id, titulo, data, horario, localNome, endereco, traje, observacoes, criadoEm
+  id, titulo, dataHora, localNome, endereco, traje?, observacoes?, criadoEm, atualizadoEm
   status → calculado pela data (passou = concluída)
 
 Convidado
-  id, festaId, nome, telefone
+  id, festaId, nome, telefone?
   tokenConvite    → aleatório, vai no link /c/[token]
   codigoCheckin   → aleatório, vai dentro do QR Code
   rsvp            → PENDENTE | CONFIRMADO | RECUSADO
-  confirmadoEm, presenteEm (vazio = ainda não chegou)
+  respondidoEm    → quando confirmou ou recusou
+  presenteEm      → vazio = ainda não chegou
   titularId?      → reservado para acompanhantes (não usado no MVP)
 ```
+
+Todas as datas são `timestamptz` (instante absoluto); a exibição converte para o fuso de São Paulo.
+`dataHora` junta data e horário num campo só.
 
 Os tokens são separados para que uma foto do QR de alguém não permita alterar a confirmação dessa pessoa.
 
@@ -55,8 +59,8 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 
 ## Etapas
 
-- [x] **0. Setup:** Next.js + TypeScript + Tailwind + shadcn/ui, ESLint + Prettier, Prisma, health check em `/api/health`. _Falta:_ GitHub, Vercel e Neon (contas da dona do projeto)
-- [ ] **1. Banco:** schema Prisma, primeira migration, seed com o usuário da Elisangela, geração de tokens
+- [x] **0. Setup:** Next.js + TypeScript + Tailwind + shadcn/ui, ESLint + Prettier, Prisma, health check em `/api/health`, GitHub, Vercel + Neon
+- [ ] **1. Banco:** schema Prisma, primeira migration, seed com o usuário da Elisangela, geração de tokens. _Falta:_ aplicar a migration e rodar o seed (local e produção)
 - [ ] **2. Autenticação:** Auth.js (bcrypt), proteção de `/painel`, rate limit no login
 - [ ] **3. Festas:** layout do painel, lista com abas, criar/editar/excluir com Zod
 - [ ] **4. Convidados:** detalhe da festa, contadores, CRUD de convidados, copiar link e WhatsApp
