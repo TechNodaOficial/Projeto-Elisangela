@@ -72,8 +72,9 @@ export function SecaoConvidados({
 
   return (
     <section
+      id="convidados"
       aria-labelledby="titulo-convidados"
-      className="folha folha-lisa mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha) sm:pr-8"
+      className="folha folha-lisa @container pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
     >
       <h2 id="titulo-convidados" className="text-lg font-semibold">
         Convidados
@@ -99,7 +100,7 @@ export function SecaoConvidados({
       ) : (
         <>
           {convidados.length >= MOSTRAR_BUSCA_A_PARTIR_DE && (
-            <div className="relative mt-(--linha) sm:max-w-xs">
+            <div className="relative mt-(--linha) @md:max-w-xs">
               <Search
                 aria-hidden
                 className="text-tinta-suave pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"

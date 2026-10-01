@@ -7,8 +7,11 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
 import { diasAte, festaConcluida, partesData, rotuloProximidade } from "@/lib/datas";
-import { buscarFesta } from "@/lib/festas/consultas";
+import { buscarFesta, listarColunas } from "@/lib/festas/consultas";
 
+import { ColunaCronograma } from "./colunas/coluna-cronograma";
+import { ColunaFornecedores } from "./colunas/coluna-fornecedores";
+import { ColunaMesas } from "./colunas/coluna-mesas";
 import { SecaoConvidados } from "./convidados/secao-convidados";
 import { ExcluirFesta } from "./excluir-festa";
 
@@ -32,7 +35,11 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   const festa = await buscarFesta(id);
   if (!festa) notFound();
 
-  const [convidados, origem] = await Promise.all([listarConvidados(festa.id), origemDoSite()]);
+  const [convidados, colunas, origem] = await Promise.all([
+    listarConvidados(festa.id),
+    listarColunas(festa.id),
+    origemDoSite(),
+  ]);
   const data = partesData(festa.dataHora);
   const concluida = festaConcluida(festa.dataHora);
   const dias = diasAte(festa.dataHora);
@@ -49,7 +56,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   ];
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Link
           href={voltar.href}
@@ -69,56 +76,134 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </div>
       </div>
 
-      <article className="folha pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha) sm:pr-8">
-        <header className="flex flex-wrap items-start justify-between gap-x-6">
-          <div className="flex items-start gap-3">
-            <span className="font-mono text-[4.25rem] leading-[calc(var(--linha)*3)] font-medium tracking-[-0.04em]">
-              {data.dia}
-            </span>
-            <span className="flex flex-col text-sm leading-(--linha)">
-              <span className="font-semibold tracking-[0.04em] uppercase">
-                {data.mes} {data.ano}
+      {/* Quatro colunas lado a lado em telas largas; 2×2 em telas médias; uma no celular. */}
+      {/* Nas colunas estreitas a linha de margem fica mais perto da borda. */}
+      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-[1.25fr_1fr_1fr_1fr] xl:[--margem:1.75rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <article className="folha @container pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)">
+            <header className="flex flex-wrap items-start justify-between gap-x-6">
+              <div className="flex items-start gap-3">
+                <span className="font-mono text-[4.25rem] leading-[calc(var(--linha)*3)] font-medium tracking-[-0.04em]">
+                  {data.dia}
+                </span>
+                <span className="flex flex-col text-sm leading-(--linha)">
+                  <span className="font-semibold tracking-[0.04em] uppercase">
+                    {data.mes} {data.ano}
+                  </span>
+                  <span className="text-tinta-suave first-letter:uppercase">
+                    {data.extenso.split(",")[0]}
+                  </span>
+                  <span className="font-mono">{data.hora}</span>
+                </span>
+              </div>
+              <span
+                className={
+                  !concluida && dias <= 7
+                    ? "grifo text-sm font-semibold"
+                    : "text-tinta-suave text-sm"
+                }
+              >
+                {concluida
+                  ? `Concluída · ${rotuloProximidade(dias).toLowerCase()}`
+                  : rotuloProximidade(dias)}
               </span>
-              <span className="text-tinta-suave first-letter:uppercase">
-                {data.extenso.split(",")[0]}
-              </span>
-              <span className="font-mono">{data.hora}</span>
-            </span>
-          </div>
-          <span
-            className={
-              !concluida && dias <= 7 ? "grifo text-sm font-semibold" : "text-tinta-suave text-sm"
-            }
+            </header>
+
+            <h1 className="min-h-[calc(var(--linha)*2)] pt-[calc(var(--linha)*0.25)] text-2xl leading-(--linha) font-semibold tracking-[-0.02em] text-balance @md:text-[1.75rem]">
+              {festa.titulo}
+            </h1>
+
+            <dl className="mt-(--linha)">
+              {linhas.map((linha) => (
+                <div key={linha.rotulo} className="grid grid-cols-1 @md:grid-cols-[8.5rem_1fr]">
+                  <dt className="text-tinta-suave text-sm leading-(--linha)">{linha.rotulo}</dt>
+                  <dd className={linha.valor ? "whitespace-pre-line" : "text-tinta-suave"}>
+                    {linha.valor ?? "—"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+
+          {/* No celular as colunas ficam uma embaixo da outra: o índice leva direto a cada uma. */}
+          <nav
+            aria-label="Seções da festa"
+            className="folha folha-lisa py-(--linha) pr-5 pl-[calc(var(--margem)+0.875rem)] leading-(--linha) md:hidden"
           >
-            {concluida
-              ? `Concluída · ${rotuloProximidade(dias).toLowerCase()}`
-              : rotuloProximidade(dias)}
-          </span>
-        </header>
+            <ul className="pautado">
+              {[
+                ["#convidados", "Convidados", `${convidados.length}`],
+                ["#fornecedores", "Fornecedores", `${colunas.fornecedores.length}`],
+                ["#mesas", "Mesas", `${colunas.mesas.length}`],
+                ["#cronograma", "Cronograma", `${colunas.cronograma.length}`],
+                ["#planta", "Planta e PDFs", ""],
+              ].map(([href, rotulo, n]) => (
+                <li key={href}>
+                  <a
+                    href={href}
+                    className="group focus-visible:outline-ring flex h-[calc(var(--linha)*2)] items-end justify-between rounded-sm focus-visible:outline-2"
+                  >
+                    <span className="grifo-ao-passar">{rotulo}</span>
+                    <span className="text-tinta-suave font-mono text-[0.8125rem]">{n}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <h1 className="min-h-[calc(var(--linha)*2)] pt-[calc(var(--linha)*0.25)] text-2xl leading-(--linha) font-semibold tracking-[-0.02em] text-balance sm:text-[1.75rem]">
-          {festa.titulo}
-        </h1>
+          <SecaoConvidados
+            festaId={festa.id}
+            festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
+            convidados={convidados}
+            contagem={contarPorStatus(convidados)}
+            origem={origem}
+          />
+        </div>
+        {/* Em telas médias, as três colunas empilham à direita; em telas largas viram colunas. */}
+        <div className="flex min-w-0 flex-col gap-6 xl:contents">
+          <ColunaFornecedores festaId={festa.id} fornecedores={colunas.fornecedores} />
+          <ColunaMesas
+            festaId={festa.id}
+            mesas={colunas.mesas}
+            convidados={convidados.map((c) => ({ id: c.id, nome: c.nome, mesaId: c.mesaId }))}
+          />
+          <ColunaCronograma
+            festaId={festa.id}
+            cronograma={colunas.cronograma}
+            fornecedores={colunas.fornecedores}
+          />
+        </div>
+      </div>
 
-        <dl className="mt-(--linha)">
-          {linhas.map((linha) => (
-            <div key={linha.rotulo} className="grid grid-cols-1 sm:grid-cols-[8.5rem_1fr]">
-              <dt className="text-tinta-suave text-sm leading-(--linha)">{linha.rotulo}</dt>
-              <dd className={linha.valor ? "whitespace-pre-line" : "text-tinta-suave"}>
-                {linha.valor ?? "—"}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </article>
+      {/* Etapa 4c: planta do salão e PDFs (por enquanto, o lugar reservado). */}
+      <section
+        id="planta"
+        aria-labelledby="titulo-planta"
+        className="folha folha-lisa mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
+      >
+        <h2 id="titulo-planta" className="text-lg font-semibold">
+          Planta do salão
+        </h2>
+        <p className="text-tinta-suave text-sm leading-(--linha)">
+          Em breve: a imagem do salão visto de cima, feita por você.
+        </p>
+        <div
+          aria-hidden
+          className="border-pauta-forte/60 mt-(--linha) aspect-video w-full max-w-3xl rounded-[3px] border border-dashed"
+        />
 
-      <SecaoConvidados
-        festaId={festa.id}
-        festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
-        convidados={convidados}
-        contagem={contarPorStatus(convidados)}
-        origem={origem}
-      />
+        <h2 className="mt-(--linha) pt-(--linha) text-lg font-semibold">PDFs</h2>
+        <ul className="pautado">
+          <li className="flex items-center justify-between gap-3">
+            <span>Convite para os convidados</span>
+            <span className="text-tinta-suave text-sm leading-(--linha)">em breve</span>
+          </li>
+          <li className="flex items-center justify-between gap-3">
+            <span>Roteiro completo da festa</span>
+            <span className="text-tinta-suave text-sm leading-(--linha)">em breve</span>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

@@ -43,17 +43,20 @@ model TentativaLogin {
 }
 
 model Festa {
-  id           String      @id @default(cuid())
+  id           String           @id @default(cuid())
   titulo       String
   // Data e horário juntos, como instante (timestamptz). A exibição converte para o fuso de São Paulo.
-  dataHora     DateTime    @db.Timestamptz(3)
+  dataHora     DateTime         @db.Timestamptz(3)
   localNome    String
   endereco     String
   traje        String?
   observacoes  String?
-  criadoEm     DateTime    @default(now()) @db.Timestamptz(3)
-  atualizadoEm DateTime    @updatedAt @db.Timestamptz(3)
+  criadoEm     DateTime         @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime         @updatedAt @db.Timestamptz(3)
   convidados   Convidado[]
+  fornecedores Fornecedor[]
+  mesas        Mesa[]
+  cronograma   ItemCronograma[]
 
   @@index([dataHora])
   @@map("festas")
@@ -83,10 +86,64 @@ model Convidado {
   titularId     String?
   titular       Convidado?  @relation("Acompanhantes", fields: [titularId], references: [id], onDelete: Cascade)
   acompanhantes Convidado[] @relation("Acompanhantes")
+  // Mesa onde o convidado vai sentar. Remover a mesa deixa o convidado sem mesa.
+  mesaId        String?
+  mesa          Mesa?       @relation(fields: [mesaId], references: [id], onDelete: SetNull)
   criadoEm      DateTime    @default(now()) @db.Timestamptz(3)
   atualizadoEm  DateTime    @updatedAt @db.Timestamptz(3)
 
   @@index([festaId])
   @@index([titularId])
+  @@index([mesaId])
   @@map("convidados")
+}
+
+model Fornecedor {
+  id            String           @id @default(cuid())
+  festaId       String
+  festa         Festa            @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  nome          String
+  servico       String
+  telefone      String?
+  // Em centavos, para não ter erro de arredondamento. Vazio = valor ainda não definido.
+  valorCentavos Int?
+  pago          Boolean          @default(false)
+  cronograma    ItemCronograma[]
+  criadoEm      DateTime         @default(now()) @db.Timestamptz(3)
+  atualizadoEm  DateTime         @updatedAt @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("fornecedores")
+}
+
+model Mesa {
+  id           String      @id @default(cuid())
+  festaId      String
+  festa        Festa       @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  nome         String
+  lugares      Int
+  convidados   Convidado[]
+  criadoEm     DateTime    @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("mesas")
+}
+
+model ItemCronograma {
+  id               String      @id @default(cuid())
+  festaId          String
+  festa            Festa       @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  // "HH:MM" no horário de São Paulo. Horários antes das 06:00 contam como madrugada (fim da festa).
+  hora             String
+  atividade        String
+  // Responsável: um fornecedor cadastrado ou um texto livre (ex.: "Cerimonialista").
+  fornecedorId     String?
+  fornecedor       Fornecedor? @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  responsavelTexto String?
+  criadoEm         DateTime    @default(now()) @db.Timestamptz(3)
+  atualizadoEm     DateTime    @updatedAt @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("itens_cronograma")
 }

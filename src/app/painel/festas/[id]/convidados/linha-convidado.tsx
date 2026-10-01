@@ -39,7 +39,7 @@ const STATUS = {
 function Status({ convidado }: { convidado: ConvidadoResumo }) {
   if (convidado.presenteEm) {
     return (
-      <span className="grifo text-sm font-semibold">
+      <span className="grifo text-sm leading-(--linha) font-semibold">
         Chegou <span className="font-mono">{paraCampos(convidado.presenteEm).hora}</span>
       </span>
     );
@@ -47,7 +47,7 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
   const s = STATUS[convidado.rsvp];
   const Icone = s.icone;
   return (
-    <span className={`flex items-center gap-1 text-sm ${s.classe}`}>
+    <span className={`flex items-center gap-1 text-sm leading-(--linha) ${s.classe}`}>
       <Icone aria-hidden className="size-3.5" strokeWidth={2} />
       {s.rotulo}
     </span>
@@ -102,38 +102,32 @@ export function LinhaConvidado({
   }
 
   return (
-    // Grade de duas pautas exatas: nome e status na primeira, telefone e ações na segunda.
-    // As faixas têm altura fixa; botões maiores que a pauta transbordam sem empurrar a linha.
-    <li className="group/linha grid h-[calc(var(--linha)*2)] grid-cols-[minmax(0,1fr)_auto] grid-rows-[var(--linha)_var(--linha)] gap-x-3">
-      <div className="col-span-2 flex min-w-0 items-baseline gap-x-3">
-        <span className="truncate font-semibold">{convidado.nome}</span>
-        <span className="shrink-0">
-          <Status convidado={convidado} />
-        </span>
+    // Pautas inteiras: nome e status (quebram em mais pautas se a coluna for estreita),
+    // depois telefone e mesa com as ações. Todo texto usa a altura da pauta (alinhado ao centro,
+    // não pela linha de base, que somaria pixels); os botões ficam numa faixa da altura da
+    // pauta e transbordam sem empurrar a linha.
+    <li className="group/linha grid grid-cols-[minmax(0,1fr)_auto] gap-x-3">
+      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-3">
+        <span className="font-semibold break-words hyphens-auto">{convidado.nome}</span>
+        <Status convidado={convidado} />
       </div>
-      <p className="text-tinta-suave col-start-1 row-start-2 truncate text-sm leading-(--linha)">
-        {convidado.telefone ? (
-          <span className="font-mono">{formatarTelefone(convidado.telefone)}</span>
+      {/* Telefone e mesa na mesma pauta; a mesa desce para a pauta seguinte se não couber. */}
+      <p className="text-tinta-suave col-start-1 flex flex-wrap gap-x-1.5 text-sm leading-(--linha)">
+        {copiado ? (
+          <span className="text-foreground font-medium">Link copiado</span>
+        ) : convidado.telefone ? (
+          <span className="font-mono whitespace-nowrap">
+            {formatarTelefone(convidado.telefone)}
+          </span>
         ) : (
           "Sem WhatsApp"
         )}
+        {convidado.mesa && !copiado && (
+          <span className="whitespace-nowrap">· {convidado.mesa.nome}</span>
+        )}
       </p>
 
-      <div className="text-tinta-suave group-focus-within/linha:text-foreground group-hover/linha:text-foreground col-start-2 row-start-2 flex items-center gap-0.5 self-center transition-colors duration-150">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={copiar}
-          aria-label={copiado ? "Link copiado" : `Copiar link de ${convidado.nome}`}
-          className="h-11 min-w-11 px-2.5 sm:h-9 sm:min-w-0"
-        >
-          {copiado ? (
-            <Check aria-hidden strokeWidth={2} />
-          ) : (
-            <Copy aria-hidden strokeWidth={1.75} />
-          )}
-          <span className="hidden sm:inline">{copiado ? "Copiado" : "Copiar link"}</span>
-        </Button>
+      <div className="text-tinta-suave group-focus-within/linha:text-foreground group-hover/linha:text-foreground col-start-2 flex h-(--linha) items-center gap-0.5 transition-colors duration-150">
         <Button asChild variant="ghost" className="h-11 min-w-11 px-2.5 sm:h-9 sm:min-w-0">
           <a
             href={whatsapp}
@@ -142,7 +136,6 @@ export function LinhaConvidado({
             aria-label={`Enviar convite para ${convidado.nome} pelo WhatsApp`}
           >
             <MessageCircle aria-hidden strokeWidth={1.75} />
-            <span className="hidden sm:inline">WhatsApp</span>
           </a>
         </Button>
         <DropdownMenu>
@@ -156,7 +149,11 @@ export function LinhaConvidado({
               <MoreHorizontal aria-hidden strokeWidth={1.75} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="papel-solto w-44 rounded-[3px] ring-0">
+          <DropdownMenuContent align="end" className="papel-solto w-48 rounded-[3px] ring-0">
+            <DropdownMenuItem onSelect={copiar}>
+              <Copy aria-hidden strokeWidth={1.75} />
+              Copiar link do convite
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setEditando(true)}>
               <Pencil aria-hidden strokeWidth={1.75} />
               Editar

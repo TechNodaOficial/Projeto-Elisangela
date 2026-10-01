@@ -64,9 +64,11 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 - [x] **2. Autenticação:** sessões no banco (bcrypt + cookie HttpOnly), `proxy.ts` + DAL protegendo `/painel`, rate limit no Postgres (5 falhas por e-mail / 20 por IP em 15 min)
 - [x] **3. Festas:** layout do painel (visual "Prancheta da Cerimonialista", ver `PRODUCT.md` e `.impeccable/surfaces/`), listas de pendentes e concluídas, detalhe, criar/editar/excluir com Zod; datas sempre no fuso de São Paulo
 - [x] **4. Convidados:** rol de convidados na folha da festa (adicionar em sequência, editar, remover, busca), contagens, copiar link pessoal e enviar convite pelo WhatsApp com mensagem pronta. O link `/c/[token]` passa a funcionar na Etapa 5
+- [x] **4b. Página da festa em 4 colunas:** (1) dados + convidados, (2) fornecedores (nome, serviço, WhatsApp, valor contratado, pago/pendente, totais), (3) mesas (nome, lugares, convidados distribuídos; o check-in mostrará a mesa), (4) cronograma (horário, atividade, responsável: fornecedor cadastrado ou texto). Celular: uma coluna; telas médias: 2×2
+- [ ] **4c. Planta do salão e PDFs:** imagem do salão visto de cima enviada pela Elisangela (Vercel Blob), abaixo das colunas; no fim da página, dois PDFs: convite (dados da festa, para convidados) e roteiro completo (dados, fornecedores, mesas, cronograma, planta)
 - [ ] **5. Convite + QR:** `/c/[token]`, confirmar/recusar (pode mudar até a data da festa), QR com download, rate limit
 - [ ] **6. Check-in:** leitor pela câmera, validações, busca manual, testes Vitest, teste num celular real
-- [ ] **7. PDF:** modelo com `@react-pdf/renderer`, botão de download
+- [ ] **7. PDF:** incorporada à etapa 4c
 - [ ] **8. Produção:** domínio, Vercel Pro, backups, revisão de segurança, aviso LGPD, ensaio completo
 
 ## Segurança (vale para todas as etapas)

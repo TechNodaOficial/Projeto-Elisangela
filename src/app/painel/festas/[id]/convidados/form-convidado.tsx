@@ -52,7 +52,7 @@ export function FormConvidado({
     <form
       action={enviar}
       noValidate
-      className={cn("flex flex-col gap-3 sm:flex-row sm:items-start", className)}
+      className={cn("flex flex-col gap-3 @xl:flex-row @xl:items-start", className)}
     >
       <div className="flex flex-1 flex-col gap-1.5">
         <Label htmlFor={id("nome")}>Nome</Label>
@@ -75,7 +75,7 @@ export function FormConvidado({
         )}
       </div>
 
-      <div className="flex flex-col gap-1.5 sm:w-52">
+      <div className="flex flex-col gap-1.5 @xl:w-52">
         <Label htmlFor={id("telefone")}>
           WhatsApp <span className="text-tinta-suave font-normal">(opcional)</span>
         </Label>
@@ -99,7 +99,7 @@ export function FormConvidado({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label aria-hidden className="invisible hidden sm:flex">
+        <Label aria-hidden className="invisible hidden @xl:flex">
           &nbsp;
         </Label>
         <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export function FormConvidado({
       </div>
 
       {estado.erroGeral && (
-        <p role="alert" className="text-destructive text-sm sm:basis-full">
+        <p role="alert" className="text-destructive text-sm @xl:basis-full">
           {estado.erroGeral}
         </p>
       )}

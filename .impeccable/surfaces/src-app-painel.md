@@ -31,3 +31,5 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
 - O topo mostra a data de hoje (à direita), não o título da seção: o título já é o h1 logo abaixo, repeti-lo seria redundante; a data serve à rotina da cerimonialista. No celular, a data curta; "Sair" fica no fim da página.
 - Formulários usam folha lisa (sem pautas): campos precisam de caixa própria para serem reconhecíveis e acessíveis. A seção de convidados também é folha lisa por conter o formulário de adicionar, mas o rol em si é pautado (cada convidado ocupa duas pautas).
+- Página da festa em 4 colunas (pedido da dona): dados + convidados · fornecedores · mesas · cronograma. Telas médias: coluna 1 à esquerda, as outras três empilhadas à direita; celular: uma coluna com um índice pautado logo abaixo da folha da festa. Nas colunas estreitas (xl) a linha de margem fica a 1.75rem para sobrar largura. Abaixo das colunas, uma folha com a planta do salão e os PDFs.
+- No rol de convidados, o WhatsApp fica à mão e "Copiar link do convite" foi para o menu ⋯, para o telefone caber inteiro na coluna estreita.

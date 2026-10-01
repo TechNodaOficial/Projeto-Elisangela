@@ -16,6 +16,8 @@ export async function listarConvidados(festaId: string) {
       rsvp: true,
       respondidoEm: true,
       presenteEm: true,
+      mesaId: true,
+      mesa: { select: { nome: true } },
     },
   });
   // Ordem alfabética do português (acentos junto da letra base).
