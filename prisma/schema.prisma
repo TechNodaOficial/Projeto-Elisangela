@@ -1,0 +1,10 @@
+// Modelos são adicionados na Etapa 1 (ver docs/PLANO.md).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
