@@ -19,14 +19,14 @@ export default async function LayoutPainel({ children }: LayoutProps<"/painel">)
   return (
     <div className="flex flex-1 flex-col">
       <header className="bg-background sticky top-0 z-20">
-        <div className="flex h-14 items-center justify-between gap-4 px-4 md:px-8">
+        <div className="flex h-14 items-center justify-between gap-4 px-4 md:pr-8 md:pl-6">
+          <Logo />
           <p className="text-tinta-suave text-sm first-letter:uppercase">
             <span className="hidden md:inline">{hoje.extenso}</span>
             <span className="md:hidden">
               {hoje.semana}, {Number(hoje.dia)} {hoje.mes}
             </span>
           </p>
-          <Logo />
         </div>
       </header>
 

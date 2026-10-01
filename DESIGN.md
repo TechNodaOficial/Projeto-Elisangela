@@ -34,6 +34,17 @@ typography:
     fontWeight: 600
     lineHeight: "2rem"
     letterSpacing: "-0.02em"
+  headline-detalhe:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 600
+    lineHeight: "1.75rem"
+    letterSpacing: "-0.02em"
+  title-lg:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 600
+    lineHeight: "1.75rem"
   title:
     fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.0625rem"
@@ -50,6 +61,10 @@ typography:
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: "1.25rem"
+  nav:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.9375rem"
+    fontWeight: 400
   label:
     fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.8125rem"
@@ -65,6 +80,7 @@ rounded:
   sm: "0.225rem"
   lg: "0.375rem"
   full: "9999px"
+  grifo: "0.25em 0.55em 0.3em 0.5em"
 spacing:
   linha: "1.75rem"
   margem: "2.75rem"
@@ -113,8 +129,43 @@ components:
     textColor: "{colors.tinta}"
     rounded: "{rounded.folha}"
     padding: "1.75rem 1.25rem 1.75rem 3.625rem"
+  linha-convidado:
+    textColor: "{colors.tinta}"
+    typography: "{typography.body}"
+    height: "3.5rem"
+  acao-linha:
+    textColor: "{colors.tinta-suave}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.lg}"
+    padding: "0 10px"
+    height: "44px"
+  acao-linha-sm:
+    height: "36px"
+  acao-linha-ativa:
+    textColor: "{colors.tinta}"
+  papel-solto:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.folha}"
+    padding: "4px"
+    width: "11rem"
+  dialogo-confirmacao:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.folha}"
+    padding: "1.5rem 1.5rem 1.5rem 3.625rem"
+    width: "28rem"
+  busca:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.lg}"
+    padding: "4px 10px 4px 36px"
+    height: "36px"
   nav-item:
     textColor: "{colors.tinta-suave}"
+    typography: "{typography.nav}"
     height: "44px"
     padding: "0 8px"
   nav-item-ativo:
@@ -129,7 +180,7 @@ components:
 
 O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.
 
-A densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, contagens), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o "casamento romântico" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.
+A densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, telefone, contagens do índice), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o "casamento romântico" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.
 
 A interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.
 
@@ -139,8 +190,8 @@ A interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o
 - Tinta grafite como cor de ação; marca-texto amarelo reservado para seleção e urgência.
 - Texto assentado em pautas de 1.75rem; recuo do texto depois da margem.
 - Geist para tudo, Geist Mono só para dados, sempre tabulares.
-- Cantos discretos (3px nas folhas, 6px nos controles), sombra de papel sobre mesa.
-- Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração.
+- Cantos discretos (3px nas folhas e no papel solto, 6px nos controles), sombra de papel sobre mesa.
+- Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração; só-ícone apenas em ações compactas com `aria-label`.
 
 ## Colors
 
@@ -148,30 +199,30 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 
 ### Primary
 
-- **Tinta Grafite** (`tinta`): cor do texto e de toda ação primária (botão "Salvar", "Entrar"). Também é o `foreground` e o `primary` do tema shadcn. O botão primário é tinta sobre papel invertido, nunca colorido.
+- **Tinta Grafite** (`tinta`): cor do texto e de toda ação primária (botão "Salvar", "Entrar"). Também é o `foreground` e o `primary` do tema shadcn. O botão primário é tinta sobre papel invertido, nunca colorido. Também marca o status "Confirmou" (peso 500) e as ações de uma linha do rol quando ela está sob o cursor ou com foco dentro.
 
 ### Secondary
 
-- **Marca-texto** (`grifo`): exclusivamente o fundo irregular do grifo atrás de texto em tinta, e o `::selection` do navegador. Marca a seção ativa da navegação, o rótulo de proximidade de festas a até 7 dias ("Hoje", "Amanhã", "Em 3 dias") e o hover dos itens grifáveis. Nunca é cor de texto, de borda ou de fundo de superfície.
+- **Marca-texto** (`grifo`): exclusivamente o fundo irregular do grifo atrás de texto em tinta, e o `::selection` do navegador. Marca a seção ativa da navegação, o rótulo de proximidade de festas a até 7 dias ("Hoje", "Amanhã", "Em 3 dias"), o status "Chegou HH:MM" de um convidado que já fez check-in e o hover dos itens grifáveis. Nunca é cor de texto, de borda ou de fundo de superfície.
 
 ### Tertiary
 
-- **Pauta** (`pauta`): os fios horizontais de 1px das folhas e os divisores do índice lateral de navegação.
+- **Pauta** (`pauta`): os fios horizontais de 1px das folhas, do trecho pautado do rol de convidados e os divisores do índice lateral de navegação.
 - **Pauta Forte** (`pauta-forte`): a linha vertical de margem das folhas e o anel de foco (`ring`) de todo o sistema. Foco e margem são a mesma tinta azul de caderno.
 
 ### Neutral
 
 - **Mesa** (`mesa`): fundo da página e do topo fixo; a superfície sobre a qual as folhas estão apoiadas.
-- **Papel** (`papel`): fundo das folhas, dos campos, da barra inferior do celular e dos diálogos (`card`, `popover`).
-- **Tinta Suave** (`tinta-suave`): texto secundário (descrições, datas no topo, rótulos de definição, itens de navegação inativos, "(opcional)").
-- **Superfície** (`superficie`): hover dos botões outline/ghost (`secondary`, `muted`, `accent`).
+- **Papel** (`papel`): fundo das folhas, dos campos, da barra inferior do celular, dos diálogos e do menu de papel solto (`card`, `popover`).
+- **Tinta Suave** (`tinta-suave`): texto secundário (descrições, datas no topo, rótulos de definição, itens de navegação inativos, "(opcional)", telefone e "Sem WhatsApp" no rol, os status "Não vai" e "Aguardando", as ações da linha em repouso).
+- **Superfície** (`superficie`): hover dos botões outline/ghost e foco dos itens do menu (`secondary`, `muted`, `accent`).
 - **Borda** (`borda`): bordas gerais e o topo da barra inferior; também a cor dos esqueletos de carregamento.
 - **Borda de Campo** (`borda-campo`): contorno dos inputs e textareas, um passo mais escuro que a borda geral para o campo ser reconhecível.
-- **Destrutivo** (`destrutivo`): mensagens de erro de formulário, borda de campo inválido, ação "Excluir".
+- **Destrutivo** (`destrutivo`): mensagens de erro de formulário, borda de campo inválido, ações "Excluir" e "Remover" (no menu: texto destrutivo, foco em `destrutivo` a 10%).
 
 ### Named Rules
 
-**The Marca-texto Rule.** O amarelo só existe como grifo atrás de texto grafite e só marca uma de três coisas: onde ela está, o que está chegando (≤ 7 dias) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo.
+**The Marca-texto Rule.** O amarelo só existe como grifo atrás de texto grafite e só marca uma de quatro coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo.
 
 **The Tinta Rule.** Ação primária é grafite sobre papel. Não há cor de marca para botões; a hierarquia vem do contraste tinta/papel.
 
@@ -188,27 +239,33 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 ### Hierarchy
 
 - **Display** (Geist Mono 500, 2.75rem, altura de 2 pautas, -0.04em): o dia do mês no topo de cada folha de festa. Na folha de detalhe, **Display Detalhe** (4.25rem, altura de 3 pautas).
-- **Headline** (600, 1.5rem, -0.02em): título da seção (h1) e título de formulário/login. No detalhe da festa sobe para 1.75rem a partir de `sm`.
+- **Headline** (600, 1.5rem, -0.02em): título da seção (h1) e título de formulário/login.
+- **Headline Detalhe** (600, 1.75rem, altura de pauta, -0.02em): nome da festa no h1 da folha de detalhe a partir de `sm` (abaixo de `sm`, Headline), com no mínimo duas pautas.
+- **Title Large** (600, 1.125rem, altura de pauta): título de bloco dentro de folha lisa ("Convidados") e título do diálogo de confirmação.
 - **Title** (600, 1.0625rem, -0.01em, altura de pauta): nome da festa na folha (até 2 linhas, `text-balance`), "Nova festa", a palavra "Elisangela" da logo.
 - **Body** (400, 1rem, altura de pauta 1.75rem): valores do roteiro na folha de detalhe. **Body Small** (0.875rem) para descrições, local, contagens, rótulos de campo e texto de apoio.
 - **Label** (600, 0.8125rem, maiúsculas, +0.04em): mês e dia da semana ao lado do numeral; o mês em semibold, a semana em tinta suave.
-- **Dado** (Geist Mono 400, 0.8125rem, tabular): horário, contagens da navegação, campos de data e hora.
+- **Nav** (400, 0.9375rem; 600 quando ativo): rótulo dos itens do índice lateral.
+- **Dado** (Geist Mono 400, 0.8125rem, tabular): horário, contagens da navegação, campos de data e hora. O telefone do convidado e o campo de WhatsApp usam Geist Mono no tamanho do texto ao redor (0.875rem).
+- **Número em frase** (Geist 600 em tinta, tabular): contagens lidas dentro de uma frase em tinta suave, como "**31** de **48** confirmados" na folha e o contador do rol ("**12** convidados · **8** confirmaram · …").
 
 ### Named Rules
 
-**The Mono-Só-Para-Dados Rule.** Geist Mono aparece apenas em dia, horário, contagens e campos de data/hora. Nunca em títulos ou rótulos de texto.
+**The Mono-Só-Para-Dados Rule.** Geist Mono aparece apenas em dia, horário, telefone, contagens do índice lateral e campos de data/hora/telefone. Nunca em títulos ou rótulos de texto. Números lidos dentro de uma frase ficam em Geist semibold tinta, tabulares pelo `tabular-nums` global.
 
 **The Pauta Rule.** Dentro de uma folha pautada, todo texto usa `line-height` igual a `--linha` (ou múltiplos dela); o texto assenta nas pautas. Um elemento que quebra o ritmo da pauta quebra o papel.
 
 ## Layout
 
-Estrutura de prancheta: topo fino fixo (56px) sobre a mesa, com a data de hoje à esquerda (por extenso no computador, curta no celular) e a logo em texto à direita. No computador (`md`, 768px), uma coluna lateral de 240px traz as três seções como linhas de um índice pautado (itens de 44px separados por fios de pauta, contagens em mono alinhadas à direita), com o nome da usuária e "Sair" no pé. O centro tem gutter de 1rem no celular e 2rem no computador.
+Estrutura de prancheta: topo fino fixo (56px) sobre a mesa, com a logo em texto à esquerda (alinhada ao índice lateral) e a data de hoje à direita (por extenso no computador, curta no celular). No computador (`md`, 768px), uma coluna lateral de 240px traz as três seções como linhas de um índice pautado (itens de 44px separados por fios de pauta, contagens em mono alinhadas à direita), com o nome da usuária e "Sair" no pé. O centro tem gutter de 1rem no celular e 2rem no computador.
 
 As folhas de festa ficam numa grade `auto-fill` com mínimo de 17.5rem (280px) por folha e espaço de 1.25rem (1.5rem a partir de `sm`, 640px); no celular, uma coluna. A primeira folha da grade de pendentes é sempre a folha em branco "Nova festa". Detalhe da festa até 48rem de largura, formulários até 42rem, login até 24rem, avisos até 36rem.
 
 No celular as seções viram uma barra inferior fixa de três itens (64px de altura, fundo papel, respeitando `safe-area-inset-bottom`) e "Sair" desce para o fim da página, longe dos toques frequentes; o conteúdo reserva 7rem de respiro inferior para a barra.
 
 Ritmo vertical dentro das folhas: a pauta (`linha`, 1.75rem / 28px). Dentro de toda folha, o texto começa no recuo `recuo-texto` (margem 2.75rem + 0.875rem), à direita da linha de margem; a padding direita é 1.25rem (2rem em telas maiores nos formulários e detalhe).
+
+Na folha de detalhe, o roteiro vem primeiro (folha pautada) e, 1.5rem abaixo, a seção de convidados (folha lisa). Dentro dela, em pautas: título, contador, formulário de adicionar, busca (só a partir de 8 convidados, até 20rem de largura) e o rol. Cada convidado ocupa exatamente duas pautas numa grade fixa (2 × `linha`, 3.5rem): nome e status na primeira; telefone (ou "Sem WhatsApp") e ações na segunda, à direita. As ações têm alvo de 44px abaixo de `sm` e 36px a partir de `sm`, e transbordam a pauta sem empurrar a linha. O formulário de adicionar empilha no celular e vira uma linha a partir de `sm` (nome flexível, WhatsApp em 13rem, botão), com um rótulo invisível sobre o botão para alinhá-lo aos campos.
 
 **The Recuo de Margem Rule.** Todo conteúdo de folha, pautada ou lisa, começa depois da linha de margem: `padding-left: calc(var(--margem) + 0.875rem)`. Nada cruza a margem.
 
@@ -220,17 +277,18 @@ Profundidade de papel sobre mesa: uma sombra curta de contato mais uma sombra di
 
 - **Folha em repouso** (`box-shadow: 0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%)`): toda `.folha`.
 - **Folha levantada** (`box-shadow: 0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%)` + `translateY(-2px)`, 200ms ease-out): hover das folhas clicáveis; desligado com `prefers-reduced-motion`.
+- **Papel solto** (`box-shadow: 0 1px 1px oklch(0.2 0.01 250 / 8%), 0 10px 24px -10px oklch(0.2 0.01 250 / 30%)`): menus flutuantes (o menu ⋯ da linha do convidado); um pedaço de papel um pouco mais alto que a folha.
 - **Véu do diálogo** (`background: oklch(0.2 0.01 250 / 35%)`): overlay atrás do diálogo de confirmação.
 
 ### Named Rules
 
-**The Papel-Sobre-Mesa Rule.** Só folhas têm sombra. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.
+**The Papel-Sobre-Mesa Rule.** Só papel tem sombra: folhas, diálogos e o papel solto dos menus. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.
 
 ## Shapes
 
-Forma de material de papelaria: folhas com cantos quase retos (3px), controles com canto discreto de 6px (`--radius: 0.375rem`), links de texto e anéis de foco com 3.6px. O único círculo do sistema é o disco de contorno 1px com o "+" na folha "Nova festa". O grifo do marca-texto é a única forma irregular: cantos assimétricos (0.25em 0.55em 0.3em 0.5em), girado -0.8°, transbordando 0.3em para os lados do texto — como um traço de caneta, não um retângulo.
+Forma de material de papelaria: folhas com cantos quase retos (3px), controles com canto discreto de 6px (`--radius: 0.375rem`), links de texto e anéis de foco com 3.6px. O único círculo do sistema é o disco de contorno 1px com o "+" na folha "Nova festa". O grifo do marca-texto é a única forma irregular: cantos assimétricos (`rounded.grifo`), girado -0.8°, transbordando 0.3em para os lados do texto — como um traço de caneta, não um retângulo.
 
-As pautas e a linha de margem são desenhadas com `linear-gradient` no fundo da folha (fios de 1px), deslocadas `--folha-topo` (-0.375rem) para o texto assentar nelas. Formulários e avisos usam a **folha lisa**: só a linha de margem, sem pautas, porque campos precisam de caixa própria para serem reconhecíveis.
+As pautas e a linha de margem são desenhadas com `linear-gradient` no fundo da folha (fios de 1px), deslocadas `--folha-topo` (-0.375rem) para o texto assentar nelas. Formulários e avisos usam a **folha lisa**: só a linha de margem, sem pautas, porque campos precisam de caixa própria para serem reconhecíveis. Uma folha lisa pode conter um **trecho pautado**: só os fios de pauta, com o mesmo deslocamento `--folha-topo`, para listas que assentam em pautas (o rol de convidados). O **papel solto** dos menus é papel liso, sem margem, com o canto de 3px das folhas.
 
 ## Components
 
@@ -243,6 +301,7 @@ Grafite e discretos; a ação primária é tinta invertida, o resto é texto.
 - **Hover / Focus:** foco com borda `pauta-forte` e anel de 3px em `pauta-forte` a 50%.
 - **Outline:** fundo papel, borda `borda`, 36px; hover em `superficie`. Usado em "Editar" e "Cancelar" do diálogo.
 - **Ghost destrutivo:** só texto `destrutivo` com ícone Trash; abre a confirmação. A confirmação final é o único botão de fundo `destrutivo`.
+- **Ações de linha:** ghost em `tinta-suave` (ícone + rótulo a partir de `sm`, só ícone com `aria-label` abaixo), que passam a tinta quando a linha está sob o cursor ou tem foco dentro; 44px abaixo de `sm`, 36px a partir de `sm`. "Copiar link" vira "Copiado" com ícone de check por 2s e anuncia por `aria-live`.
 - **Links de texto:** voltar, cancelar e sair são texto `tinta-suave` com ícone de 16px, que escurece para tinta no hover; "Cancelar" ganha sublinhado com offset de 4px.
 
 ### Cards / Containers (Folha)
@@ -258,13 +317,14 @@ Grafite e discretos; a ação primária é tinta invertida, o resto é texto.
 - **Style:** contorno 1px `borda-campo`, fundo papel explícito, 6px de canto, 40px de altura, 10px laterais; 1rem no celular, 0.875rem a partir de `md`. Data e horário em Geist Mono.
 - **Focus:** borda `pauta-forte` + anel de 3px `pauta-forte` a 50%.
 - **Error / Disabled:** borda `destrutivo`; mensagem em `destrutivo` 0.875rem logo abaixo, ligada por `aria-describedby`. Desabilitado a 50% de opacidade.
-- **Labels:** 0.875rem, peso 500, acima do campo com 8px de espaço; "(opcional)" em tinta suave peso 400. Campos empilhados com 20px entre si.
+- **Labels:** 0.875rem, peso 500, sempre visíveis acima do campo; "(opcional)" em tinta suave peso 400. Campos empilhados com 20px entre si nos formulários de página; 12px no formulário em linha do rol.
+- **Busca:** 36px de altura, fundo papel, lupa de 16px em tinta suave dentro do campo, à esquerda.
 
 ### Navigation
 
 - **Lateral (computador):** índice pautado: lista entre fios `pauta`, itens de 44px com ícone de 16px, rótulo 0.9375rem e contagem mono 0.8125rem à direita. Inativo em `tinta-suave`; hover escurece para tinta e varre o grifo; ativo em semibold com o grifo fixo (`aria-current="page"`). Foco: contorno 2px `pauta-forte` para dentro.
 - **Barra inferior (celular):** três colunas iguais de 64px, ícone de 20px sobre rótulo curto de 0.75rem; ativo em semibold com grifo.
-- **Topo:** data de hoje em tinta suave à esquerda; logo em texto à direita ("Elisangela" title semibold + "Eventos" em tinta suave), que leva às pendentes.
+- **Topo:** logo em texto à esquerda, alinhada ao índice lateral; data de hoje em tinta suave à direita. Logo: ("Elisangela" title semibold + "Eventos" em tinta suave), que leva às pendentes.
 
 ### Folha de Festa (assinatura)
 
@@ -276,9 +336,17 @@ A **folha em branco "Nova festa"** é a primeira da pilha: mesma folha pautada, 
 
 O marca-texto atrás do texto: `grifo` com cantos irregulares, girado -0.8°. Fixo (seção ativa, urgência) ele varre da esquerda para a direita ao aparecer; no hover de um `.group` varre o rótulo que está para ser escolhido. 200ms, `cubic-bezier(0.16, 1, 0.3, 1)`, desligado com `prefers-reduced-motion`.
 
+### Rol de convidados (assinatura)
+
+A lista de chamada da festa, escrita na prancheta: um trecho pautado dentro da folha lisa da seção, cada convidado em duas pautas. O status fala em palavras com um ícone de 14px: **Confirmou** (check, tinta peso 500), **Não vai** (x, tinta suave), **Aguardando** (círculo tracejado, tinta suave), **Chegou HH:MM** (grifado, semibold, hora em mono). Acima do rol, o contador em tinta suave com números em semibold tinta; cada item termina no seu "·" e não quebra por dentro, então a linha só quebra entre itens. Sem convidados, um aviso em tinta suave com ícone de 16px explica o link próprio de cada pessoa. Editar troca a linha pelo formulário em linha, em papel.
+
+### Menu de papel solto
+
+O menu ⋯ da linha: papel solto de 11rem alinhado à direita do gatilho, cantos de 3px, sem anel; itens de 0.875rem com ícone de 16px ("Editar"; "Remover" em destrutivo). Abre com fade + zoom de 100ms.
+
 ### Diálogo de confirmação
 
-Folha lisa centralizada (até 28rem) sobre o véu grafite; título 1.125rem semibold, descrição em tinta suave, ações "Cancelar" (outline) e "Excluir festa" (destrutivo) alinhadas à direita. Abre com fade + zoom de 100ms.
+Um só diálogo para toda exclusão (festa, convidado): folha lisa centralizada (até 28rem, padding 1.5rem e recuo de margem) sobre o véu grafite; título Title Large, descrição em tinta suave dizendo o que se perde, ações "Cancelar" (outline em papel) e a confirmação nomeada ("Excluir festa", "Remover convidado") em fundo destrutivo, alinhadas à direita. Enquanto envia, o botão diz "Excluindo…"/"Removendo…". Abre com fade + zoom de 100ms.
 
 ### Estados vazios e carregamento
 
@@ -290,11 +358,13 @@ Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + ex
 
 - **Do** colocar todo conteúdo novo numa folha (`.folha`, ou `.folha .folha-lisa` quando houver campos) sobre a mesa, com `padding-left: calc(var(--margem) + 0.875rem)`.
 - **Do** usar `line-height: var(--linha)` (1.75rem) ou múltiplos dela para todo texto dentro de folha pautada.
-- **Do** reservar o grifo para a seção atual, festas a até 7 dias e o hover do que está para ser escolhido.
-- **Do** escrever dia, horário e contagens em Geist Mono tabular; todo o resto em Geist.
+- **Do** reservar o grifo para a seção atual, festas a até 7 dias, o "Chegou" do check-in e o hover do que está para ser escolhido.
+- **Do** escrever dia, horário, telefone e contagens do índice em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.
 - **Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.
 - **Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.
 - **Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.
+- **Do** dar 44px de alvo às ações abaixo de `sm` (36px a partir de `sm`) e manter os rótulos de campo visíveis.
+- **Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva, com o botão nomeado pelo que apaga.
 
 ### Don't:
 
@@ -302,6 +372,6 @@ Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + ex
 - **Don't** usar gradientes decorativos; os únicos gradientes do sistema são os fios da pauta e a linha de margem desenhados no fundo da folha.
 - **Don't** usar vidro (backdrop-blur), cantos acima de 6px em contêineres, ou rosa e tipografia cursiva de "casamento romântico".
 - **Don't** montar grades de cards brancos idênticos com sombra e ícone no topo; a festa é uma folha com o dia como âncora.
-- **Don't** dar sombra a controles; só folhas têm sombra.
+- **Don't** dar sombra a controles; só papel (folhas, diálogos, papel solto) tem sombra.
 - **Don't** pôr texto ou controles sobre a linha de margem.
-- **Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo.
+- **Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo. Botão só-ícone apenas em ações compactas, sempre com `aria-label`.

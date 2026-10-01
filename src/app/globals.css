@@ -133,6 +133,25 @@ input::-webkit-calendar-picker-indicator {
     0 6px 16px -8px oklch(0.2 0.01 250 / 22%);
 }
 
+/* Papel solto (menus flutuantes): papel liso, sombra um pouco mais alta que a das folhas. */
+.papel-solto {
+  background-color: var(--papel);
+  border-radius: 3px;
+  box-shadow:
+    0 1px 1px oklch(0.2 0.01 250 / 8%),
+    0 10px 24px -10px oklch(0.2 0.01 250 / 30%);
+}
+
+/* Área pautada dentro de uma folha lisa (ex.: rol de convidados). */
+.pautado {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--linha) - 1px),
+    var(--pauta) calc(var(--linha) - 1px) var(--linha)
+  );
+  background-position: 0 var(--folha-topo, 0px);
+}
+
 /* Folha sem pautas (formulários): só a linha de margem. */
 .folha-lisa {
   background-image: linear-gradient(

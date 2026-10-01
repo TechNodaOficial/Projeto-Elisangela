@@ -34,7 +34,7 @@ Sucesso: ela organiza uma festa inteira sem planilhas e faz o check-in na porta 
 
 - Painel com login de usuária única (sem cadastro).
 - Festas: pendentes ou concluídas, conforme a data (`dataHora`).
-- Navegação do painel definida pela dona do projeto: logo no canto superior direito; à esquerda,
+- Navegação do painel definida pela dona do projeto: logo no canto superior esquerdo (corrigido pela dona; antes estava à direita); à esquerda,
   "Festas pendentes", "Festas concluídas" e "Leitor QR Code"; ao centro, cards clicáveis das festas
   com os detalhes e um botão para adicionar nova festa.
 - Interface toda em português do Brasil; datas no fuso de São Paulo.

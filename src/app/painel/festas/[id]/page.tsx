@@ -1,13 +1,25 @@
 import type { Metadata } from "next";
-import { ArrowLeft, Pencil, Users } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
 import { diasAte, festaConcluida, partesData, rotuloProximidade } from "@/lib/datas";
 import { buscarFesta } from "@/lib/festas/consultas";
 
+import { SecaoConvidados } from "./convidados/secao-convidados";
 import { ExcluirFesta } from "./excluir-festa";
+
+// Endereço público do site (para montar os links dos convites), igual ao do request.
+async function origemDoSite() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  const protocolo =
+    h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
+  return `${protocolo}://${host}`;
+}
 
 export async function generateMetadata(props: PageProps<"/painel/festas/[id]">): Promise<Metadata> {
   const { id } = await props.params;
@@ -20,6 +32,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   const festa = await buscarFesta(id);
   if (!festa) notFound();
 
+  const [convidados, origem] = await Promise.all([listarConvidados(festa.id), origemDoSite()]);
   const data = partesData(festa.dataHora);
   const concluida = festaConcluida(festa.dataHora);
   const dias = diasAte(festa.dataHora);
@@ -99,20 +112,13 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </dl>
       </article>
 
-      <section
-        aria-labelledby="titulo-convidados"
-        className="folha folha-lisa mt-6 flex items-start gap-3 py-6 pr-5 pl-[calc(var(--margem)+0.875rem)]"
-      >
-        <Users aria-hidden className="mt-0.5 size-5 shrink-0" strokeWidth={1.75} />
-        <div className="flex flex-col gap-1">
-          <h2 id="titulo-convidados" className="font-semibold">
-            Convidados
-          </h2>
-          <p className="text-tinta-suave text-sm">
-            Em breve: a lista de convidados desta festa, com o link de confirmação de cada um.
-          </p>
-        </div>
-      </section>
+      <SecaoConvidados
+        festaId={festa.id}
+        festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
+        convidados={convidados}
+        contagem={contarPorStatus(convidados)}
+        origem={origem}
+      />
     </div>
   );
 }

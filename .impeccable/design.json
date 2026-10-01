@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-01T19:31:49+00:00",
+  "generatedAt": "2026-10-01T22:00:00+00:00",
   "title": "Design System: Painel de Festas · Elisangela Eventos",
   "extensions": {
     "colorMeta": {
@@ -192,7 +192,15 @@
       },
       "headline": {
         "displayName": "Título de seção",
-        "purpose": "h1 de seção, formulário e login; 1.75rem no detalhe a partir de sm."
+        "purpose": "h1 de seção, formulário e login."
+      },
+      "headline-detalhe": {
+        "displayName": "Título do detalhe",
+        "purpose": "Nome da festa no h1 da folha de detalhe a partir de sm; no mínimo duas pautas."
+      },
+      "title-lg": {
+        "displayName": "Título de bloco",
+        "purpose": "Título dentro de folha lisa (Convidados) e do diálogo de confirmação."
       },
       "title": {
         "displayName": "Título de folha",
@@ -204,7 +212,11 @@
       },
       "body-sm": {
         "displayName": "Texto de apoio",
-        "purpose": "Descrições, local, contagens, rótulos de campo."
+        "purpose": "Descrições, local, rótulos de campo, status e contador do rol; números em frase em semibold tinta."
+      },
+      "nav": {
+        "displayName": "Rótulo do índice",
+        "purpose": "Itens do índice lateral; 600 quando ativo."
       },
       "label": {
         "displayName": "Mês e semana",
@@ -212,7 +224,7 @@
       },
       "dado": {
         "displayName": "Dado mono",
-        "purpose": "Horário, contagens da navegação, campos de data e hora."
+        "purpose": "Horário, contagens da navegação, campos de data e hora; telefone em mono no tamanho do texto ao redor."
       }
     },
     "shadows": [
@@ -225,6 +237,11 @@
         "name": "folha-levantada",
         "value": "0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%)",
         "purpose": "Hover das folhas clicáveis, com translateY(-2px)."
+      },
+      {
+        "name": "papel-solto",
+        "value": "0 1px 1px oklch(0.2 0.01 250 / 8%), 0 10px 24px -10px oklch(0.2 0.01 250 / 30%)",
+        "purpose": "Menus flutuantes (menu ⋯ da linha do convidado): papel um pouco mais alto que a folha."
       },
       {
         "name": "veu-dialogo",
@@ -247,6 +264,11 @@
         "name": "dialogo",
         "value": "100ms",
         "purpose": "Fade + zoom-95 de entrada e saída do diálogo."
+      },
+      {
+        "name": "acao-linha",
+        "value": "150ms",
+        "purpose": "Cor das ações da linha do rol de tinta suave para tinta no hover/foco dentro."
       }
     ],
     "breakpoints": [
@@ -268,7 +290,9 @@
         "inset": "0.1em -0.3em 0.05em",
         "borderRadius": "0.25em 0.55em 0.3em 0.5em",
         "rotate": "-0.8deg"
-      }
+      },
+      "pautado": "Trecho pautado dentro de folha lisa: só os fios de pauta, deslocados --folha-topo.",
+      "linhaConvidado": "2 × --linha (3.5rem), grade fixa de duas faixas."
     }
   },
   "components": [
@@ -335,23 +359,47 @@
       "description": "Folha sem pautas, só a linha de margem: formulários, avisos e estados vazios.",
       "html": "<div class=\"ds-folha-lisa\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"5\" x=\"2\" y=\"3\" rx=\"1\"/><path d=\"M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8\"/><path d=\"M10 12h4\"/></svg><div><p class=\"ds-lisa-t\">Nenhuma festa concluída ainda.</p><p class=\"ds-lisa-s\">Cada festa passa para cá automaticamente no dia seguinte à data dela.</p></div></div>",
       "css": ".ds-folha-lisa { display:flex; align-items:flex-start; gap:12px; max-width:36rem; background-color:var(--papel, oklch(1 0 0)); background-image:linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); padding:1.5rem 1.5rem 1.5rem 3.625rem; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-folha-lisa svg { margin-top:2px; flex-shrink:0; } .ds-lisa-t { margin:0 0 4px; font-weight:600; } .ds-lisa-s { margin:0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); }"
+    },
+    {
+      "name": "Rol de convidados",
+      "kind": "custom",
+      "refersTo": "linha-convidado",
+      "description": "Assinatura: trecho pautado dentro da folha lisa; cada convidado em duas pautas, status em palavras, ações em tinta suave que escurecem na linha ativa.",
+      "html": "<div class=\"ds-rol-folha\"><h2 class=\"ds-rol-t\">Convidados</h2><p class=\"ds-rol-cont\"><span><b>3</b> convidados ·</span> <span><b>1</b> confirmaram ·</span> <span><b>1</b> não vão ·</span> <span><b>1</b> aguardando</span></p><ul class=\"ds-rol\"><li class=\"ds-linha\"><span class=\"ds-l1\"><b class=\"ds-nome\">Ana Souza</b><span class=\"ds-st ds-st-ok\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Confirmou</span></span><span class=\"ds-tel ds-mono\">(19) 99876-5432</span><span class=\"ds-acoes\"><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>Copiar link</button><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>WhatsApp</button><button class=\"ds-acao ds-acao-icone\" aria-label=\"Mais ações\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/></svg></button></span></li><li class=\"ds-linha\"><span class=\"ds-l1\"><b class=\"ds-nome\">João Lima</b><span class=\"ds-st\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10.1 2.182a10 10 0 0 1 3.8 0\"/><path d=\"M13.9 21.818a10 10 0 0 1-3.8 0\"/><path d=\"M17.609 3.721a10 10 0 0 1 2.69 2.7\"/><path d=\"M2.182 13.9a10 10 0 0 1 0-3.8\"/><path d=\"M20.279 17.609a10 10 0 0 1-2.7 2.69\"/><path d=\"M21.818 10.1a10 10 0 0 1 0 3.8\"/><path d=\"M3.721 6.391a10 10 0 0 1 2.7-2.69\"/><path d=\"M6.391 20.279a10 10 0 0 1-2.69-2.7\"/></svg>Aguardando</span></span><span class=\"ds-tel\">Sem WhatsApp</span><span class=\"ds-acoes\"><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>Copiar link</button><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>WhatsApp</button><button class=\"ds-acao ds-acao-icone\" aria-label=\"Mais ações\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/></svg></button></span></li><li class=\"ds-linha\"><span class=\"ds-l1\"><b class=\"ds-nome\">Marta Reis</b><span class=\"ds-grifo ds-chegou\">Chegou <span class=\"ds-mono\">19:42</span></span></span><span class=\"ds-tel ds-mono\">(19) 98123-4567</span><span class=\"ds-acoes\"><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/><path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/></svg>Copiar link</button><button class=\"ds-acao\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\"/></svg>WhatsApp</button><button class=\"ds-acao ds-acao-icone\" aria-label=\"Mais ações\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"19\" cy=\"12\" r=\"1\"/><circle cx=\"5\" cy=\"12\" r=\"1\"/></svg></button></span></li></ul></div>",
+      "css": ".ds-rol-folha { width:560px; background-color:var(--papel, oklch(1 0 0)); background-image:linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); padding:1.75rem 2rem 1.75rem 3.625rem; line-height:1.75rem; font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-rol-t { margin:0; font-size:1.125rem; font-weight:600; line-height:1.75rem; } .ds-rol-cont { margin:0; font-size:0.875rem; line-height:1.75rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-rol-cont span { white-space:nowrap; } .ds-rol-cont b { color:var(--tinta, oklch(0.255 0.004 250)); font-weight:600; } .ds-rol { list-style:none; margin:1.75rem 0 0; padding:0; background-image:repeating-linear-gradient(to bottom, transparent 0 calc(1.75rem - 1px), var(--pauta, oklch(0.86 0.045 255)) calc(1.75rem - 1px) 1.75rem); background-position:0 -0.375rem; } .ds-linha { display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:1.75rem 1.75rem; height:3.5rem; column-gap:12px; } .ds-l1 { grid-column:1 / span 2; display:flex; align-items:baseline; gap:12px; min-width:0; } .ds-nome { font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-st { display:flex; align-items:center; gap:4px; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-st-ok { color:var(--tinta, oklch(0.255 0.004 250)); font-weight:500; } .ds-chegou { font-size:0.875rem; font-weight:600; } .ds-mono { font-family:'Geist Mono', ui-monospace, monospace; font-variant-numeric:tabular-nums; } .ds-tel { grid-row:2; grid-column:1; font-size:0.875rem; line-height:1.75rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-acoes { grid-row:2; grid-column:2; align-self:center; display:flex; gap:2px; color:var(--tinta-suave, oklch(0.47 0.008 250)); transition:color 150ms; } .ds-linha:hover .ds-acoes, .ds-linha:focus-within .ds-acoes { color:var(--tinta, oklch(0.255 0.004 250)); } .ds-acao { display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 10px; font:500 0.875rem Geist, ui-sans-serif, system-ui, sans-serif; color:inherit; background:transparent; border:1px solid transparent; border-radius:0.375rem; cursor:pointer; } .ds-acao-icone { width:36px; padding:0; justify-content:center; } .ds-acao:hover { background:var(--secondary, oklch(0.965 0.003 250)); } .ds-acao:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); } .ds-grifo { position:relative; isolation:isolate; } .ds-grifo::before { content:''; position:absolute; inset:0.1em -0.3em 0.05em; z-index:-1; background:var(--grifo, oklch(0.92 0.15 103)); border-radius:0.25em 0.55em 0.3em 0.5em; transform:rotate(-0.8deg); }"
+    },
+    {
+      "name": "Menu de papel solto",
+      "kind": "custom",
+      "refersTo": "papel-solto",
+      "description": "Menu ⋯ da linha do convidado: papel liso de 11rem com sombra de papel solto.",
+      "html": "<div class=\"ds-papel-solto\" role=\"menu\"><div class=\"ds-menu-item\" role=\"menuitem\" tabindex=\"0\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/><path d=\"m15 5 4 4\"/></svg>Editar</div><div class=\"ds-menu-item ds-menu-destr\" role=\"menuitem\" tabindex=\"0\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 6h18\"/><path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\"/><path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\"/><line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\"/><line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\"/></svg>Remover</div></div>",
+      "css": ".ds-papel-solto { width:11rem; padding:4px; background:var(--papel, oklch(1 0 0)); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 8%), 0 10px 24px -10px oklch(0.2 0.01 250 / 30%); font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-menu-item { display:flex; align-items:center; gap:6px; padding:4px 6px; font-size:0.875rem; border-radius:0.3rem; cursor:default; outline:none; } .ds-menu-item:hover, .ds-menu-item:focus-visible { background:var(--accent, oklch(0.965 0.003 250)); } .ds-menu-destr { color:var(--destructive, oklch(0.52 0.19 27)); } .ds-menu-destr:hover, .ds-menu-destr:focus-visible { background:oklch(0.52 0.19 27 / 10%); }"
+    },
+    {
+      "name": "Diálogo de confirmação",
+      "kind": "card",
+      "refersTo": "dialogo-confirmacao",
+      "description": "Diálogo único de exclusão (festa, convidado): folha lisa com a confirmação nomeada em destrutivo.",
+      "html": "<div class=\"ds-dialogo\" role=\"alertdialog\"><p class=\"ds-dlg-t\">Remover este convidado?</p><p class=\"ds-dlg-d\">Ana Souza sai da lista e o link dele para de funcionar. Isso não pode ser desfeito.</p><div class=\"ds-dlg-acoes\"><button class=\"ds-dlg-cancel\">Cancelar</button><button class=\"ds-dlg-ok\">Remover convidado</button></div></div>",
+      "css": ".ds-dialogo { width:28rem; box-sizing:border-box; display:flex; flex-direction:column; gap:1.25rem; padding:1.5rem 1.5rem 1.5rem 3.625rem; background-color:var(--papel, oklch(1 0 0)); background-image:linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-dlg-t { margin:0; font-size:1.125rem; font-weight:600; } .ds-dlg-d { margin:-0.75rem 0 0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-dlg-acoes { display:flex; justify-content:flex-end; gap:8px; } .ds-dlg-cancel, .ds-dlg-ok { height:32px; padding:0 10px; font:500 0.875rem Geist, ui-sans-serif, system-ui, sans-serif; border-radius:0.375rem; cursor:pointer; } .ds-dlg-cancel { background:var(--papel, oklch(1 0 0)); color:var(--tinta, oklch(0.255 0.004 250)); border:1px solid var(--border, oklch(0.875 0.006 250)); } .ds-dlg-cancel:hover { background:var(--muted, oklch(0.965 0.003 250)); } .ds-dlg-ok { background:var(--destructive, oklch(0.52 0.19 27)); color:var(--papel, oklch(1 0 0)); border:1px solid transparent; } .ds-dlg-ok:hover { background:oklch(0.52 0.19 27 / 90%); } .ds-dlg-cancel:focus-visible, .ds-dlg-ok:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); }"
     }
   ],
   "narrative": {
     "northStar": "A Prancheta da Cerimonialista",
-    "overview": "O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.\n\nA densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, contagens), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o \"casamento romântico\" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.\n\nA interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.",
+    "overview": "O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.\n\nA densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, telefone, contagens do índice), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o \"casamento romântico\" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.\n\nA interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.",
     "keyCharacteristics": [
       "Folhas pautadas com linha de margem sobre mesa cinza fria.",
       "Tinta grafite como cor de ação; marca-texto amarelo reservado para seleção e urgência.",
       "Texto assentado em pautas de 1.75rem; recuo do texto depois da margem.",
       "Geist para tudo, Geist Mono só para dados, sempre tabulares.",
-      "Cantos discretos (3px nas folhas, 6px nos controles), sombra de papel sobre mesa.",
-      "Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração."
+      "Cantos discretos (3px nas folhas e no papel solto, 6px nos controles), sombra de papel sobre mesa.",
+      "Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração; só-ícone apenas em ações compactas com `aria-label`."
     ],
     "rules": [
       {
         "name": "The Marca-texto Rule",
-        "body": "O amarelo só existe como grifo atrás de texto grafite e só marca uma de três coisas: onde ela está, o que está chegando (≤ 7 dias) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo.",
+        "body": "O amarelo só existe como grifo atrás de texto grafite e só marca uma de quatro coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo.",
         "section": "colors"
       },
       {
@@ -366,7 +414,7 @@
       },
       {
         "name": "The Mono-Só-Para-Dados Rule",
-        "body": "Geist Mono aparece apenas em dia, horário, contagens e campos de data/hora. Nunca em títulos ou rótulos de texto.",
+        "body": "Geist Mono aparece apenas em dia, horário, telefone, contagens do índice lateral e campos de data/hora/telefone. Nunca em títulos ou rótulos de texto. Números lidos dentro de uma frase ficam em Geist semibold tinta, tabulares pelo `tabular-nums` global.",
         "section": "typography"
       },
       {
@@ -381,27 +429,29 @@
       },
       {
         "name": "The Papel-Sobre-Mesa Rule",
-        "body": "Só folhas têm sombra. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.",
+        "body": "Só papel tem sombra: folhas, diálogos e o papel solto dos menus. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.",
         "section": "elevation"
       }
     ],
     "dos": [
       "**Do** colocar todo conteúdo novo numa folha (`.folha`, ou `.folha .folha-lisa` quando houver campos) sobre a mesa, com `padding-left: calc(var(--margem) + 0.875rem)`.",
       "**Do** usar `line-height: var(--linha)` (1.75rem) ou múltiplos dela para todo texto dentro de folha pautada.",
-      "**Do** reservar o grifo para a seção atual, festas a até 7 dias e o hover do que está para ser escolhido.",
-      "**Do** escrever dia, horário e contagens em Geist Mono tabular; todo o resto em Geist.",
+      "**Do** reservar o grifo para a seção atual, festas a até 7 dias, o \"Chegou\" do check-in e o hover do que está para ser escolhido.",
+      "**Do** escrever dia, horário, telefone e contagens do índice em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.",
       "**Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.",
       "**Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.",
-      "**Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha."
+      "**Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.",
+      "**Do** dar 44px de alvo às ações abaixo de `sm` (36px a partir de `sm`) e manter os rótulos de campo visíveis.",
+      "**Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva, com o botão nomeado pelo que apaga."
     ],
     "donts": [
       "**Don't** usar o amarelo `grifo` como cor de texto, borda, fundo de botão ou fundo de superfície.",
       "**Don't** usar gradientes decorativos; os únicos gradientes do sistema são os fios da pauta e a linha de margem desenhados no fundo da folha.",
       "**Don't** usar vidro (backdrop-blur), cantos acima de 6px em contêineres, ou rosa e tipografia cursiva de \"casamento romântico\".",
       "**Don't** montar grades de cards brancos idênticos com sombra e ícone no topo; a festa é uma folha com o dia como âncora.",
-      "**Don't** dar sombra a controles; só folhas têm sombra.",
+      "**Don't** dar sombra a controles; só papel (folhas, diálogos, papel solto) tem sombra.",
       "**Don't** pôr texto ou controles sobre a linha de margem.",
-      "**Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo."
+      "**Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo. Botão só-ícone apenas em ações compactas, sempre com `aria-label`."
     ]
   }
 }
