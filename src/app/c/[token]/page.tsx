@@ -1,5 +1,6 @@
 import { Download } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { buscarConvite } from "@/lib/convites/consultas";
@@ -9,7 +10,7 @@ import { qrSvg } from "@/lib/convites/qr";
 import { FUSO, partesData } from "@/lib/datas";
 import { obterIp } from "@/lib/ip";
 
-import { Aviso, Moldura } from "./moldura";
+import { Aviso, Moldura } from "@/components/moldura-publica";
 import { Resposta } from "./resposta";
 
 // Link pessoal: não indexar e não vazar o token para outros sites pelo Referer.
@@ -136,6 +137,14 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
           <Resposta token={token} estado={estado} />
         )}
       </article>
+      <p className="mt-4 px-1 text-sm">
+        <Link
+          href="/privacidade"
+          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring inline-flex min-h-11 items-center rounded-sm underline underline-offset-4 focus-visible:outline-2"
+        >
+          Como seus dados são usados
+        </Link>
+      </p>
     </Moldura>
   );
 }

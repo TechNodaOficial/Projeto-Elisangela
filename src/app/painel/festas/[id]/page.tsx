@@ -6,8 +6,9 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
-import { diasAte, festaConcluida, partesData, rotuloProximidade } from "@/lib/datas";
+import { diasAte, festaConcluida, FUSO, partesData, rotuloProximidade } from "@/lib/datas";
 import { buscarFesta, listarColunas } from "@/lib/festas/consultas";
+import { apagamentoPrevisto } from "@/lib/retencao/prazo";
 import { versaoPlanta } from "@/lib/planta/blob";
 
 import { ColunaCronograma } from "./colunas/coluna-cronograma";
@@ -25,6 +26,10 @@ async function origemDoSite() {
     h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
   return `${protocolo}://${host}`;
 }
+
+// "2 de janeiro de 2027", no fuso de São Paulo.
+const dataCurta = (d: Date) =>
+  new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, dateStyle: "long" }).format(d);
 
 export async function generateMetadata(props: PageProps<"/painel/festas/[id]">): Promise<Metadata> {
   const { id } = await props.params;
@@ -154,13 +159,43 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
             </ul>
           </nav>
 
-          <SecaoConvidados
-            festaId={festa.id}
-            festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
-            convidados={convidados}
-            contagem={contarPorStatus(convidados)}
-            origem={origem}
-          />
+          {festa.convidadosApagadosEm ? (
+            // LGPD: 90 dias depois da festa os convidados foram apagados; ficam os números.
+            <section
+              id="convidados"
+              aria-labelledby="titulo-convidados"
+              className="folha folha-lisa pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
+            >
+              <h2 id="titulo-convidados" className="text-lg font-semibold">
+                Convidados
+              </h2>
+              <p className="text-tinta-suave text-sm leading-(--linha)">
+                <strong className="text-foreground font-semibold">{festa.resumoConvidados}</strong>{" "}
+                convidados ·{" "}
+                <strong className="text-foreground font-semibold">{festa.resumoConfirmados}</strong>{" "}
+                confirmaram ·{" "}
+                <strong className="text-foreground font-semibold">{festa.resumoPresentes}</strong>{" "}
+                chegaram
+              </p>
+              <p className="text-tinta-suave text-sm leading-(--linha)">
+                Nomes e telefones apagados em {dataCurta(festa.convidadosApagadosEm)}, 90 dias
+                depois da festa, como manda a LGPD.
+              </p>
+            </section>
+          ) : (
+            <SecaoConvidados
+              festaId={festa.id}
+              festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
+              convidados={convidados}
+              contagem={contarPorStatus(convidados)}
+              origem={origem}
+              aviso={
+                concluida && convidados.length > 0
+                  ? `Nomes e telefones serão apagados em ${dataCurta(apagamentoPrevisto(festa.dataHora))}, 90 dias depois da festa (LGPD).`
+                  : undefined
+              }
+            />
+          )}
         </div>
         {/* Em telas médias, as três colunas empilham à direita; em telas largas viram colunas. */}
         <div className="flex min-w-0 flex-col gap-6 xl:contents">

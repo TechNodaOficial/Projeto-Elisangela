@@ -43,25 +43,31 @@ model TentativaLogin {
 }
 
 model Festa {
-  id            String           @id @default(cuid())
-  titulo        String
+  id                   String           @id @default(cuid())
+  titulo               String
   // Data e horário juntos, como instante (timestamptz). A exibição converte para o fuso de São Paulo.
-  dataHora      DateTime         @db.Timestamptz(3)
-  localNome     String
-  endereco      String
-  traje         String?
-  observacoes   String?
+  dataHora             DateTime         @db.Timestamptz(3)
+  localNome            String
+  endereco             String
+  traje                String?
+  observacoes          String?
   // Planta do salão vista de cima, num Blob store privado: só o painel (logado) mostra a imagem.
   // As dimensões evitam que a página pule enquanto a imagem carrega e servem para o PDF.
-  plantaUrl     String?
-  plantaLargura Int?
-  plantaAltura  Int?
-  criadoEm      DateTime         @default(now()) @db.Timestamptz(3)
-  atualizadoEm  DateTime         @updatedAt @db.Timestamptz(3)
-  convidados    Convidado[]
-  fornecedores  Fornecedor[]
-  mesas         Mesa[]
-  cronograma    ItemCronograma[]
+  plantaUrl            String?
+  plantaLargura        Int?
+  plantaAltura         Int?
+  // LGPD: 90 dias depois da festa os convidados são apagados (src/lib/retencao.ts).
+  // As contagens ficam guardadas aqui para a festa concluída continuar com os números.
+  convidadosApagadosEm DateTime?        @db.Timestamptz(3)
+  resumoConvidados     Int?
+  resumoConfirmados    Int?
+  resumoPresentes      Int?
+  criadoEm             DateTime         @default(now()) @db.Timestamptz(3)
+  atualizadoEm         DateTime         @updatedAt @db.Timestamptz(3)
+  convidados           Convidado[]
+  fornecedores         Fornecedor[]
+  mesas                Mesa[]
+  cronograma           ItemCronograma[]
 
   @@index([dataHora])
   @@map("festas")

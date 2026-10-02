@@ -52,12 +52,15 @@ export function SecaoConvidados({
   convidados,
   contagem,
   origem,
+  aviso,
 }: {
   festaId: string;
   festa: DadosFesta;
   convidados: ConvidadoResumo[];
   contagem: Contagem;
   origem: string;
+  // Ex.: quando os dados serão apagados (LGPD), em festas concluídas.
+  aviso?: string;
 }) {
   const [busca, setBusca] = useState("");
   const termo = semAcento(useDeferredValue(busca).trim());
@@ -75,6 +78,7 @@ export function SecaoConvidados({
         Convidados
       </h2>
       <ResumoContagem c={contagem} />
+      {aviso && <p className="text-tinta-suave text-sm leading-(--linha)">{aviso}</p>}
 
       <FormConvidado
         acao={adicionarConvidado.bind(null, festaId)}

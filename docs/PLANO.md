@@ -15,7 +15,8 @@ confirmação de presença por link e check-in por QR Code no dia da festa.
 | Link do convite   | Um link por convidado                                                      | Só convidados confirmam; QR ligado à pessoa                                                                                                                      |
 | Status da festa   | Calculado pela data                                                        | Ela não precisa marcar como concluída                                                                                                                            |
 | Internet no local | Assume-se que haverá internet                                              | Modo offline fica fora do MVP                                                                                                                                    |
-| PDF               | Convite (só dados da festa) e roteiro completo                             | —                                                                                                                                                                |
+| PDF               | Convite (só dados da festa) e roteiro completo                             |
+| Retenção (LGPD)   | Convidados apagados 90 dias depois da festa; ficam só as contagens         | —                                                                                                                                                                |
 
 ## Entidades
 
@@ -69,7 +70,7 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 - [x] **5. Convite + QR:** `/c/[token]` no visual da prancheta, confirmar/recusar (pode mudar até o dia da festa; trava depois da entrada registrada), QR com o `codigoCheckin` impresso num canhoto na folha e imagem para baixar (`/c/[token]/qr`, PNG com festa e nome), rate limit só para links inválidos (20 por IP em 15 min, na tabela `tentativas_login`), `noindex` e `no-referrer`. Observações da festa não aparecem
 - [x] **6. Check-in:** `/painel/checkin` escolhe a festa (vai direto se só houver uma hoje; festas desde 20h atrás, para a madrugada), câmera traseira lendo QR com `barcode-detector` (ZXing em WebAssembly servido pelo próprio site, `scripts/copiar-zxing.mjs`), veredito em tela cheia colorida (verde "Pode entrar", vermelho já entrou / outra festa / QR desconhecido, âmbar "Não confirmou" com "Deixar entrar"), som e vibração, "Desfazer", registro atômico (dois celulares na porta não registram duas vezes), busca manual pelo nome, regras em `src/lib/checkin/avaliar.ts` com testes Vitest. **Falta:** teste num celular real (iPhone e Android) antes da primeira festa
 - [ ] **7. PDF:** incorporada à etapa 4c
-- [ ] **8. Produção:** domínio, Vercel Pro, backups, revisão de segurança, aviso LGPD, ensaio completo
+- [ ] **8. Produção:** código pronto (CSP com nonce e cabeçalhos de segurança, revisão de segurança, `/privacidade` com o aviso LGPD, convidados apagados 90 dias depois da festa por cron diário, backup diário criptografado pelo GitHub Actions). **Falta (fora do código):** Vercel Pro, região gru1, variáveis, domínio, segredos do backup e o ensaio completo, ver [docs/PRODUCAO.md](PRODUCAO.md)
 
 ## Segurança (vale para todas as etapas)
 

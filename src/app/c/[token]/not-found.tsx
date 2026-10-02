@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Aviso } from "./moldura";
+import { Aviso } from "@/components/moldura-publica";
 
 export const metadata: Metadata = {
   title: "Convite não encontrado",

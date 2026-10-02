@@ -1,0 +1,44 @@
+# Backup diário do banco de produção (Neon), criptografado.
+# O plano grátis do Neon só volta o banco 6 horas no tempo; isto guarda 30 dias.
+# O repositório é público: o arquivo sai criptografado (AES-256) com BACKUP_SENHA,
+# senão qualquer pessoa logada no GitHub poderia baixá-lo. Ver docs/BACKUP.md.
+name: Backup do banco
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 04:00 em São Paulo
+  workflow_dispatch: # botão "Run workflow" para rodar na hora
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    # pg_dump mais novo consegue copiar servidores de versões anteriores.
+    container: postgres:18
+    steps:
+      - name: Copiar e criptografar o banco
+        env:
+          DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          SENHA: ${{ secrets.BACKUP_SENHA }}
+        run: |
+          set -eu
+          if [ -z "$DATABASE_URL" ] || [ -z "$SENHA" ]; then
+            echo "Faltam os segredos BACKUP_DATABASE_URL e BACKUP_SENHA (ver docs/BACKUP.md)."
+            exit 1
+          fi
+          apt-get update -qq && apt-get install -y -qq gnupg > /dev/null
+          pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL" -f banco.dump
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$SENHA" \
+            --symmetric --cipher-algo AES256 -o "backup-$(date -u +%Y-%m-%d).dump.gpg" banco.dump
+          rm banco.dump
+          ls -la *.gpg
+
+      - name: Guardar por 30 dias
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-${{ github.run_number }}
+          path: "*.dump.gpg"
+          retention-days: 30
+          if-no-files-found: error

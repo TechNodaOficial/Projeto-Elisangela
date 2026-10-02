@@ -30,7 +30,15 @@ export async function GET(_request: Request, ctx: RouteContext<"/painel/festas/[
     pdf = await gerarPdfRoteiro({
       festa,
       colunas,
-      contagem: contarPorStatus(convidados),
+      // Festa antiga sem convidados (LGPD): valem os números guardados na festa.
+      contagem: festa.convidadosApagadosEm
+        ? {
+            total: festa.resumoConvidados ?? 0,
+            confirmados: festa.resumoConfirmados ?? 0,
+            recusados: 0,
+            aguardando: 0,
+          }
+        : contarPorStatus(convidados),
       semMesa: convidados.filter((c) => !c.mesaId).length,
       planta: bytesPlanta && info ? { bytes: bytesPlanta, info } : null,
     });

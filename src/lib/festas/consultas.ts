@@ -21,6 +21,10 @@ export async function listarFestas(status: StatusLista) {
       titulo: true,
       dataHora: true,
       localNome: true,
+      convidadosApagadosEm: true,
+      resumoConvidados: true,
+      resumoConfirmados: true,
+      resumoPresentes: true,
       _count: { select: { convidados: true } },
     },
   });
@@ -43,12 +47,30 @@ export async function listarFestas(status: StatusLista) {
   const confirmadosPorFesta = porFesta(confirmados);
   const presentesPorFesta = porFesta(presentes);
 
-  return festas.map(({ _count, ...festa }) => ({
-    ...festa,
-    totalConvidados: _count.convidados,
-    confirmados: confirmadosPorFesta.get(festa.id) ?? 0,
-    presentes: presentesPorFesta.get(festa.id) ?? 0,
-  }));
+  // Festas antigas já não têm convidados (LGPD): valem as contagens guardadas na festa.
+  return festas.map(
+    ({
+      _count,
+      convidadosApagadosEm,
+      resumoConvidados,
+      resumoConfirmados,
+      resumoPresentes,
+      ...festa
+    }) =>
+      convidadosApagadosEm
+        ? {
+            ...festa,
+            totalConvidados: resumoConvidados ?? 0,
+            confirmados: resumoConfirmados ?? 0,
+            presentes: resumoPresentes ?? 0,
+          }
+        : {
+            ...festa,
+            totalConvidados: _count.convidados,
+            confirmados: confirmadosPorFesta.get(festa.id) ?? 0,
+            presentes: presentesPorFesta.get(festa.id) ?? 0,
+          },
+  );
 }
 
 export type FestaResumo = Awaited<ReturnType<typeof listarFestas>>[number];
