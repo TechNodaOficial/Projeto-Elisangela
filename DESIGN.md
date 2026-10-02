@@ -193,6 +193,32 @@ components:
     padding: "0 8px"
   nav-item-ativo:
     textColor: "{colors.tinta}"
+  botao-resposta:
+    backgroundColor: "{colors.tinta}"
+    textColor: "{colors.papel}"
+    rounded: "{rounded.lg}"
+    padding: "0 20px"
+    height: "48px"
+  botao-resposta-outline:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.lg}"
+    height: "48px"
+  botao-resposta-destrutivo:
+    backgroundColor: "{colors.destrutivo}"
+    textColor: "{colors.papel}"
+    rounded: "{rounded.lg}"
+    height: "48px"
+  folha-convite:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.folha}"
+    padding: "1.75rem 1.25rem 1.75rem 3.625rem"
+    width: "28rem"
+  canhoto:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    padding: "calc(1.75rem - 2px) 1.25rem calc(1.75rem - 2px) 3.625rem"
 ---
 
 # Design System: Painel de Festas · Elisangela Eventos
@@ -226,12 +252,12 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 
 ### Secondary
 
-- **Marca-texto** (`grifo`): exclusivamente o fundo irregular do grifo atrás de texto em tinta, e o `::selection` do navegador. Marca a seção ativa da navegação, o rótulo de proximidade de festas a até 7 dias ("Hoje", "Amanhã", "Em 3 dias"), o status "Chegou HH:MM" de um convidado que já fez check-in e o hover dos itens grifáveis (índices, "+ Adicionar…"). Nunca é cor de texto, de borda ou de fundo de superfície, e nunca marca estado de pagamento.
+- **Marca-texto** (`grifo`): exclusivamente o fundo irregular do grifo atrás de texto em tinta, e o `::selection` do navegador. Marca a seção ativa da navegação, o rótulo de proximidade de festas a até 7 dias ("Hoje", "Amanhã", "Em 3 dias"), o status "Chegou HH:MM" de um convidado que já fez check-in, a linha da resposta registrada no convite do convidado ("Presença confirmada", "Você avisou que não vai", "Entrada registrada às HH:MM") e o hover dos itens grifáveis (índices, "+ Adicionar…"). Nunca é cor de texto, de borda ou de fundo de superfície, e nunca marca estado de pagamento.
 
 ### Tertiary
 
 - **Pauta** (`pauta`): os fios horizontais de 1px das folhas, do trecho pautado do rol de convidados e os divisores do índice lateral de navegação.
-- **Pauta Forte** (`pauta-forte`): a linha vertical de margem das folhas e o anel de foco (`ring`) de todo o sistema. Foco e margem são a mesma tinta azul de caderno. Provisório: o contorno tracejado (a 60%) do lugar reservado à planta do salão.
+- **Pauta Forte** (`pauta-forte`): a linha vertical de margem das folhas e o anel de foco (`ring`) de todo o sistema. Foco e margem são a mesma tinta azul de caderno. Também o contorno tracejado (a 60%) da área de envio da planta do salão e o picote tracejado (2px, a 70%) do canhoto do convite.
 
 ### Neutral
 
@@ -245,7 +271,7 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 
 ### Named Rules
 
-**The Marca-texto Rule.** O amarelo só existe como grifo atrás de texto grafite e só marca uma de quatro coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo. Pago/Pendente é estado de dado, não de atenção: fala por peso e tinta, nunca pelo amarelo.
+**The Marca-texto Rule.** O amarelo só existe como grifo atrás de texto grafite e só marca uma de cinco coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado), o que está prestes a escolher ou a resposta que o convidado registrou no próprio convite ("Presença confirmada", "Você avisou que não vai", "Entrada registrada às HH:MM"; a varredura repete a cada mudança de resposta). Se não responde a uma dessas, não é grifo. "Esta festa já aconteceu" não é resposta: fica em tinta suave, sem grifo. Pago/Pendente é estado de dado, não de atenção: fala por peso e tinta, nunca pelo amarelo.
 
 **The Tinta Rule.** Ação primária é grafite sobre papel. Não há cor de marca para botões; a hierarquia vem do contraste tinta/papel.
 
@@ -298,6 +324,8 @@ Linhas das listas, todas em pautas inteiras:
 - **Fornecedor:** serviço (semibold) · nome (tinta suave) em largura toda; telefone mono sem quebra + WhatsApp + ⋯; valor mono + estado do pagamento.
 - **Mesa:** nome (quebra) + ocupação "n/n" + ⋯; um convidado sentado por pauta, recuado 0.75rem, com um X para tirá-lo; por último a pauta "+ Sentar convidado…", que some quando a mesa está cheia ou não há quem sentar. Uma pauta vazia entre mesas.
 - **Cronograma:** horário mono (coluna de 3.25rem) + atividade; na pauta de baixo, ⋯ sob o horário e o responsável ao lado. Horários depois da meia-noite vão para o fim.
+
+**Páginas públicas do convite** (`/c/[token]`): sem topo nem navegação. Uma moldura centrada de até 28rem (`max-w-md`) com gutter de 1rem, 1.25rem acima (3rem a partir de `sm`) e 2.5rem abaixo; a marca em texto ("Elisangela" semibold + "Eventos" em tinta suave 0.875rem) fica 1rem acima de uma única folha. Link inválido e excesso de tentativas usam a mesma moldura com um aviso em folha lisa (título Title Large + explicação em tinta suave).
 
 **The Recuo de Margem Rule.** Todo conteúdo de folha, pautada ou lisa, começa depois da linha de margem: `padding-left: calc(var(--margem) + 0.875rem)`. Nada cruza a margem. Para estreitar uma folha, move-se a margem (`--margem`), nunca o recuo à mão.
 
@@ -375,6 +403,27 @@ O marca-texto atrás do texto: `grifo` com cantos irregulares, girado -0.8°. Fi
 
 A lista de chamada da festa, escrita na prancheta: um trecho pautado dentro da folha lisa da seção, cada convidado em duas pautas ou mais (ver Layout). O status fala em palavras com um ícone de 14px: **Confirmou** (check, tinta peso 500), **Não vai** (x, tinta suave), **Aguardando** (círculo tracejado, tinta suave), **Chegou HH:MM** (grifado, semibold, hora em mono). Acima do rol, o contador em tinta suave com números em semibold tinta; cada item termina no seu "·" e não quebra por dentro, então a linha só quebra entre itens. Sem convidados, um aviso em tinta suave com ícone de 16px explica o link próprio de cada pessoa. Editar troca a linha pelo formulário em linha, em papel.
 
+### Convite do convidado (página pública)
+
+A folha do convidado, tirada da prancheta: folha pautada única na moldura pública (ver Layout), lida de cima para baixo. Na primeira pauta, "Olá, **Nome**" (1.125rem, primeiro nome semibold). Respondido, a pauta seguinte traz o status em 1.125rem semibold, grifado (ver The Marca-texto Rule); confirmado, o canhoto vem logo abaixo. Depois, a data como na folha de detalhe (dia em Display Detalhe ocupando 3 pautas, ao lado mês e ano semibold em maiúsculas, dia da semana em tinta suave e horário em mono, um por pauta), o título da festa em Headline 1.5rem semibold com altura de pauta e sem padding extra, para que títulos de várias linhas sigam nas pautas, e Local, Endereço e Traje em duas colunas (rótulo de 5.5rem em tinta suave 0.875rem + valor).
+
+- **Resposta em aberto:** "Você vai?" (Title Large) e dois botões lado a lado em grade de 2 colunas com 12px entre eles: "Vou" sólido em tinta e "Não poderei ir" em contorno sobre papel. Botões de resposta têm 48px de altura, texto 0.9375rem e 4px de margem acima e abaixo: ocupam exatamente duas pautas. Enviando, "Enviando resposta…" em tinta suave.
+- **Recusado:** "Mudou de ideia? Dá para confirmar até o dia da festa." em tinta suave 0.875rem e "Vou à festa" sólido em largura toda.
+- **Confirmado:** abaixo dos dados, o link de texto "Não vai mais poder ir? Avise aqui." (tinta suave, sublinhado com offset de 4px, alvo estendido na vertical).
+- **Presente ou encerrado:** sem ações.
+
+### Canhoto (assinatura)
+
+O QR de entrada impresso na própria folha como um canhoto destacável. Picote tracejado de 2px em `pauta-forte` a 70% em cima e embaixo, de borda a borda da folha, cobrindo também a linha de margem. Por trás do QR, papel liso sem pautas (zona de silêncio do código); o conteúdo segue no recuo de margem. A altura do canhoto é sempre um múltiplo inteiro de `--linha` (padding de uma pauta menos os 2px do picote), para a folha voltar às pautas depois dele. Conteúdo, uma pauta de distância entre cada item: "Apresente este código na entrada." em tinta suave 0.875rem; o QR em tinta, quadrado de 8 pautas (14rem, limitado à largura da folha); o nome completo do convidado em semibold; e "Salvar imagem", botão primário de 48px com 4px de margem acima e abaixo (2 pautas) e ícone Download de Lucide (16px, traço 1.75), que baixa a imagem do convite.
+
+### Confirmação de recusa em linha
+
+A única exceção ao diálogo de confirmação compartilhado, do lado do convidado: a página é de tarefa única, então desistir não abre modal. Ao tocar o link de recusa, a própria folha mostra a consequência em tinta 0.875rem ("Seu QR Code de entrada deixa de valer. Confirma que não vai?") e dois botões de resposta (48px) lado a lado: "Voltar" em contorno sobre papel e "Não vou" em fundo destrutivo com texto papel. Enviando, o botão diz "Enviando…".
+
+### Imagem do convite (PNG para a galeria)
+
+O canhoto para guardar no celular: PNG de 1080×1512 desenhado a 2× da tela (pauta de 56px, 27 pautas). Fundo branco com pautas e linha de margem atravessando a folha toda, texto a partir do recuo. De cima para baixo: a marca ("Elisangela" semibold + "Eventos" em tinta suave), a data como no cabeçalho da página (dia em mono ocupando 3 pautas, mês e ano semibold em maiúsculas, dia da semana em tinta suave, horário em mono), o título e o local assentados nas pautas, e então o canhoto entre dois picotes de borda a borda (traços na cor da margem a 70%), com o QR de 560px (10 pautas) centralizado e, centralizados abaixo dele, o nome completo em semibold e "Apresente este código na entrada." em tinta suave. Como os PDFs, a imagem reproduz as cores do sistema em valores fixos de raster.
+
 ### Colunas da festa (assinatura)
 
 Fornecedores, Mesas e Cronograma são a mesma peça: folha lisa com título Title Large, uma pauta de resumo em tinta suave com números em semibold tinta (só quando há itens), "+ Adicionar …" e a lista em trecho pautado. Cada linha tem um ⋯ com Editar (troca a linha pelo formulário, em papel) e Remover (diálogo de confirmação). Sem itens, a coluna diz numa frase em tinta suave 0.875rem o que entra ali, sem ícone. A ocupação da mesa fica em tinta suave e vira destrutivo semibold quando passa da capacidade.
@@ -395,7 +444,7 @@ O menu ⋯ da linha: papel solto alinhado à direita do gatilho, cantos de 3px, 
 
 ### Diálogo de confirmação
 
-Um só diálogo para toda exclusão (festa, convidado, fornecedor, mesa, item do cronograma): folha lisa centralizada (até 28rem, padding 1.5rem e recuo de margem) sobre o véu grafite; título Title Large, descrição em tinta suave dizendo o que se perde, ações "Cancelar" (outline em papel) e a confirmação nomeada ("Excluir festa", "Remover convidado", "Remover mesa") em fundo destrutivo, alinhadas à direita. Enquanto envia, o botão diz "Excluindo…"/"Removendo…". Abre com fade + zoom de 100ms.
+Um só diálogo para toda exclusão no painel (festa, convidado, fornecedor, mesa, item do cronograma; no convite público, ver Confirmação de recusa em linha): folha lisa centralizada (até 28rem, padding 1.5rem e recuo de margem) sobre o véu grafite; título Title Large, descrição em tinta suave dizendo o que se perde, ações "Cancelar" (outline em papel) e a confirmação nomeada ("Excluir festa", "Remover convidado", "Remover mesa") em fundo destrutivo, alinhadas à direita. Enquanto envia, o botão diz "Excluindo…"/"Removendo…". Abre com fade + zoom de 100ms.
 
 ### Estados vazios e carregamento
 
@@ -407,14 +456,15 @@ Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + ex
 
 - **Do** colocar todo conteúdo novo numa folha (`.folha`, ou `.folha .folha-lisa` quando houver campos) sobre a mesa, com `padding-left: calc(var(--margem) + 0.875rem)`.
 - **Do** usar `line-height: var(--linha)` (1.75rem) ou múltiplos dela para todo texto dentro de folha pautada.
-- **Do** reservar o grifo para a seção atual, festas a até 7 dias, o "Chegou" do check-in e o hover do que está para ser escolhido; pagamento fala por peso e tinta.
+- **Do** reservar o grifo para a seção atual, festas a até 7 dias, o "Chegou" do check-in, a resposta registrada no convite do convidado e o hover do que está para ser escolhido; pagamento fala por peso e tinta.
 - **Do** escrever dia, horário, telefone, valor em reais e contagens em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.
 - **Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.
 - **Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.
 - **Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.
 - **Do** dar 44px de alvo às ações abaixo de `sm` (a partir de `sm`, 36px no rol e 28px nas colunas) e manter os rótulos de campo visíveis.
 - **Do** montar linhas de lista em pautas inteiras, com texto centrado na pauta e ações numa faixa de uma pauta que transborda sem empurrar.
-- **Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva, com o botão nomeado pelo que apaga.
+- **Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva do painel, com o botão nomeado pelo que apaga; no convite público, a confirmação acontece na própria folha.
+- **Do** dar 48px aos botões do convite público, com 4px de margem acima e abaixo, para ocuparem duas pautas inteiras.
 
 ### Don't:
 

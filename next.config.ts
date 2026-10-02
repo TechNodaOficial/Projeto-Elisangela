@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   // As fontes do PDF são lidas do disco; sem isso elas não vão junto para a função na Vercel.
   outputFileTracingIncludes: {
     "/painel/festas/\\[id\\]/pdf/\\[tipo\\]": ["./src/lib/pdf/fontes/*.ttf"],
+    // A imagem do QR do convidado usa as mesmas fontes.
+    "/c/\\[token\\]/qr": ["./src/lib/pdf/fontes/*.ttf"],
   },
 };
 

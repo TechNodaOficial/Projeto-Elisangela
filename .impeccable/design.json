@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-01T23:30:00+00:00",
+  "generatedAt": "2026-10-02T12:00:00+00:00",
   "title": "Design System: Painel de Festas · Elisangela Eventos",
   "extensions": {
     "colorMeta": {
@@ -398,6 +398,22 @@
       "description": "Diálogo único de exclusão (festa, convidado, fornecedor, mesa, item do cronograma): folha lisa com a confirmação nomeada em destrutivo.",
       "html": "<div class=\"ds-dialogo\" role=\"alertdialog\"><p class=\"ds-dlg-t\">Remover este convidado?</p><p class=\"ds-dlg-d\">Ana Souza sai da lista e o link dele para de funcionar. Isso não pode ser desfeito.</p><div class=\"ds-dlg-acoes\"><button class=\"ds-dlg-cancel\">Cancelar</button><button class=\"ds-dlg-ok\">Remover convidado</button></div></div>",
       "css": ".ds-dialogo { width:28rem; box-sizing:border-box; display:flex; flex-direction:column; gap:1.25rem; padding:1.5rem 1.5rem 1.5rem 3.625rem; background-color:var(--papel, oklch(1 0 0)); background-image:linear-gradient(to right, transparent calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) calc(2.75rem - 1px), var(--pauta-forte, oklch(0.7 0.09 258)) 2.75rem, transparent 2.75rem); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); } .ds-dlg-t { margin:0; font-size:1.125rem; font-weight:600; } .ds-dlg-d { margin:-0.75rem 0 0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-dlg-acoes { display:flex; justify-content:flex-end; gap:8px; } .ds-dlg-cancel, .ds-dlg-ok { height:32px; padding:0 10px; font:500 0.875rem Geist, ui-sans-serif, system-ui, sans-serif; border-radius:0.375rem; cursor:pointer; } .ds-dlg-cancel { background:var(--papel, oklch(1 0 0)); color:var(--tinta, oklch(0.255 0.004 250)); border:1px solid var(--border, oklch(0.875 0.006 250)); } .ds-dlg-cancel:hover { background:var(--muted, oklch(0.965 0.003 250)); } .ds-dlg-ok { background:var(--destructive, oklch(0.52 0.19 27)); color:var(--papel, oklch(1 0 0)); border:1px solid transparent; } .ds-dlg-ok:hover { background:oklch(0.52 0.19 27 / 90%); } .ds-dlg-cancel:focus-visible, .ds-dlg-ok:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); }"
+    },
+    {
+      "name": "Botões de resposta do convite",
+      "kind": "button",
+      "refersTo": "botao-resposta",
+      "description": "Resposta do convidado: \"Vou\" sólido em tinta e \"Não poderei ir\" em contorno sobre papel, lado a lado, 48px + 4px de margem = duas pautas.",
+      "html": "<div class=\"ds-resp\"><button class=\"ds-resp-vou\">Vou</button><button class=\"ds-resp-nao\">Não poderei ir</button></div>",
+      "css": ".ds-resp { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:22rem; } .ds-resp-vou { font-family:Geist, ui-sans-serif, system-ui, sans-serif; font-size:0.9375rem; font-weight:500; height:48px; margin:4px 0; padding:0 20px; border-radius:0.375rem; cursor:pointer; transition:background 150ms, transform 150ms; background:var(--tinta, oklch(0.255 0.004 250)); color:var(--papel, oklch(1 0 0)); border:1px solid transparent; } .ds-resp-vou:hover { background:oklch(0.255 0.004 250 / 80%); } .ds-resp-nao { font-family:Geist, ui-sans-serif, system-ui, sans-serif; font-size:0.9375rem; font-weight:500; height:48px; margin:4px 0; padding:0 20px; border-radius:0.375rem; cursor:pointer; transition:background 150ms, transform 150ms; background:var(--papel, oklch(1 0 0)); color:var(--tinta, oklch(0.255 0.004 250)); border:1px solid var(--borda, oklch(0.875 0.006 250)); } .ds-resp-nao:hover { background:var(--superficie, oklch(0.965 0.003 250)); } .ds-resp-vou:focus-visible, .ds-resp-nao:focus-visible { outline:none; border-color:var(--pauta-forte, oklch(0.7 0.09 258)); box-shadow:0 0 0 3px oklch(0.7 0.09 258 / 50%); } .ds-resp-vou:active, .ds-resp-nao:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Canhoto do convite",
+      "kind": "custom",
+      "refersTo": "canhoto",
+      "description": "QR de entrada como canhoto destacável: picote tracejado 2px pauta-forte a 70% em cima e embaixo, papel liso atrás do QR, altura em pautas inteiras.",
+      "html": "<section class=\"ds-canhoto\"><p class=\"ds-can-inst\">Apresente este código na entrada.</p><div class=\"ds-can-qr\" role=\"img\" aria-label=\"QR Code de entrada\"></div><p class=\"ds-can-nome\">Ana Souza Lima</p><a class=\"ds-can-btn\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 15V3\"/><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/></svg>Salvar imagem</a></section>",
+      "css": ".ds-canhoto { font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); background:var(--papel, oklch(1 0 0)); border-top:2px dashed oklch(0.7 0.09 258 / 70%); border-bottom:2px dashed oklch(0.7 0.09 258 / 70%); padding:calc(1.75rem - 2px) 1.25rem calc(1.75rem - 2px) 3.625rem; line-height:1.75rem; max-width:28rem; } .ds-can-inst { margin:0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-can-qr { margin-top:1.75rem; width:14rem; height:14rem; max-width:100%; background:repeating-conic-gradient(var(--tinta, oklch(0.255 0.004 250)) 0 25%, transparent 0 50%) 0 0 / 1.75rem 1.75rem; } .ds-can-nome { margin:1.75rem 0 0; font-weight:600; } .ds-can-btn { display:inline-flex; align-items:center; gap:8px; margin:calc(1.75rem + 4px) 0 4px; height:48px; padding:0 20px; border-radius:0.375rem; background:var(--tinta, oklch(0.255 0.004 250)); color:var(--papel, oklch(1 0 0)); font-size:0.875rem; font-weight:500; text-decoration:none; } .ds-can-btn:hover { background:oklch(0.255 0.004 250 / 85%); } .ds-can-btn:focus-visible { outline:2px solid var(--pauta-forte, oklch(0.7 0.09 258)); outline-offset:2px; }"
     }
   ],
   "narrative": {
@@ -414,7 +430,7 @@
     "rules": [
       {
         "name": "The Marca-texto Rule",
-        "body": "O amarelo só existe como grifo atrás de texto grafite e só marca uma de quatro coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado) ou o que está prestes a escolher. Se não responde a uma dessas, não é grifo. Pago/Pendente é estado de dado, não de atenção: fala por peso e tinta, nunca pelo amarelo.",
+        "body": "O amarelo só existe como grifo atrás de texto grafite e só marca uma de cinco coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado), o que está prestes a escolher ou a resposta que o convidado registrou no próprio convite (\"Presença confirmada\", \"Você avisou que não vai\", \"Entrada registrada às HH:MM\"; a varredura repete a cada mudança de resposta). Se não responde a uma dessas, não é grifo. \"Esta festa já aconteceu\" não é resposta: fica em tinta suave, sem grifo. Pago/Pendente é estado de dado, não de atenção: fala por peso e tinta, nunca pelo amarelo.",
         "section": "colors"
       },
       {
@@ -451,14 +467,15 @@
     "dos": [
       "**Do** colocar todo conteúdo novo numa folha (`.folha`, ou `.folha .folha-lisa` quando houver campos) sobre a mesa, com `padding-left: calc(var(--margem) + 0.875rem)`.",
       "**Do** usar `line-height: var(--linha)` (1.75rem) ou múltiplos dela para todo texto dentro de folha pautada.",
-      "**Do** reservar o grifo para a seção atual, festas a até 7 dias, o \"Chegou\" do check-in e o hover do que está para ser escolhido; pagamento fala por peso e tinta.",
+      "**Do** reservar o grifo para a seção atual, festas a até 7 dias, o \"Chegou\" do check-in, a resposta registrada no convite do convidado e o hover do que está para ser escolhido; pagamento fala por peso e tinta.",
       "**Do** escrever dia, horário, telefone, valor em reais e contagens em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.",
       "**Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.",
       "**Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.",
       "**Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.",
       "**Do** dar 44px de alvo às ações abaixo de `sm` (a partir de `sm`, 36px no rol e 28px nas colunas) e manter os rótulos de campo visíveis.",
       "**Do** montar linhas de lista em pautas inteiras, com texto centrado na pauta e ações numa faixa de uma pauta que transborda sem empurrar.",
-      "**Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva, com o botão nomeado pelo que apaga."
+      "**Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva do painel, com o botão nomeado pelo que apaga; no convite público, a confirmação acontece na própria folha.",
+      "**Do** dar 48px aos botões do convite público, com 4px de margem acima e abaixo, para ocuparem duas pautas inteiras."
     ],
     "donts": [
       "**Don't** usar o amarelo `grifo` como cor de texto, borda, fundo de botão ou fundo de superfície.",

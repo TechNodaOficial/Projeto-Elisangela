@@ -1,12 +1,13 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { autenticar } from "@/lib/auth/autenticar";
 import { NOME_COOKIE_SESSAO } from "@/lib/auth/constantes";
 import { destinoSeguro } from "@/lib/auth/destino";
+import { obterIp } from "@/lib/ip";
 
 export type EstadoLogin = { erro?: string; email?: string };
 
@@ -14,12 +15,6 @@ const SchemaLogin = z.object({
   email: z.email().max(254),
   senha: z.string().min(1).max(200),
 });
-
-async function obterIp() {
-  // Na Vercel, o primeiro item do x-forwarded-for é o IP real do cliente.
-  const lista = (await headers()).get("x-forwarded-for");
-  return lista?.split(",")[0]?.trim() || "desconhecido";
-}
 
 export async function entrar(_estado: EstadoLogin, formData: FormData): Promise<EstadoLogin> {
   const email = String(formData.get("email") ?? "");
