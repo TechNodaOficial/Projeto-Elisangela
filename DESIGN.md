@@ -381,7 +381,13 @@ Fornecedores, Mesas e Cronograma são a mesma peça: folha lisa com título Titl
 
 ### Índice da festa (celular)
 
-Só abaixo de `md`: folha lisa logo abaixo da folha da festa, com trecho pautado e uma âncora por seção (Convidados · Fornecedores · Mesas · Cronograma · Planta e PDFs). Cada item tem duas pautas de altura com o texto assentado na segunda; contagem mono 0.8125rem em tinta suave à direita; o rótulo varre o grifo ao passar.
+Só abaixo de `md`: folha lisa logo abaixo da folha da festa, com trecho pautado e uma âncora por seção (Convidados · Fornecedores · Mesas · Cronograma · Planta do salão · PDFs). Cada item tem duas pautas de altura com o texto assentado na segunda; contagem mono 0.8125rem em tinta suave à direita; o rótulo varre o grifo ao passar.
+
+### Planta do salão e PDFs
+
+Duas folhas lisas de largura total abaixo das colunas. **Planta:** sem imagem, uma área tracejada (`pauta-forte` a 60%, 12rem de altura, até 48rem) com ícone de 24px, "Enviar a imagem da planta" e a dica em tinta suave; aceita clique ou arrastar, e ao arrastar ganha fundo `superficie`. Com imagem, ela aparece inteira (até 80vh, borda `borda`, cantos de 3px); ao passar o mouse surge "Abrir em tamanho real" num papel no canto. Abaixo, "Trocar imagem" (outline em papel) e "Remover" (ghost destrutivo, com o diálogo de confirmação). Enquanto prepara e envia, o texto de status diz "Preparando a imagem…"/"Enviando…". **PDFs:** trecho pautado, cada PDF em duas pautas: título (peso 500) com "Abrir PDF" à direita (ícone de 16px, texto 0.875rem que varre o grifo ao passar, abre em outra aba) e a descrição em tinta suave.
+
+Os PDFs repetem a prancheta em papel: fundo branco, linha de margem `pauta-forte` à esquerda, fios `pauta` entre as linhas, Geist e Geist Mono (dia em 46–64pt, horários e valores em mono), rótulos em caixa alta 7.5pt. O grifo aparece só no horário do convite e na mesa que passou da capacidade. Convite em A5; roteiro em A4 com rodapé "Roteiro · título" e "n de N", e a planta numa página própria, deitada quando a imagem é larga.
 
 ### Menu de papel solto
 

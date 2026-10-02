@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, FileText, Pencil } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
 import { diasAte, festaConcluida, partesData, rotuloProximidade } from "@/lib/datas";
 import { buscarFesta, listarColunas } from "@/lib/festas/consultas";
+import { versaoPlanta } from "@/lib/planta/blob";
 
 import { ColunaCronograma } from "./colunas/coluna-cronograma";
 import { ColunaFornecedores } from "./colunas/coluna-fornecedores";
 import { ColunaMesas } from "./colunas/coluna-mesas";
 import { SecaoConvidados } from "./convidados/secao-convidados";
 import { ExcluirFesta } from "./excluir-festa";
+import { CampoPlanta } from "./planta/campo-planta";
 
 // Endereço público do site (para montar os links dos convites), igual ao do request.
 async function origemDoSite() {
@@ -136,7 +138,8 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
                 ["#fornecedores", "Fornecedores", `${colunas.fornecedores.length}`],
                 ["#mesas", "Mesas", `${colunas.mesas.length}`],
                 ["#cronograma", "Cronograma", `${colunas.cronograma.length}`],
-                ["#planta", "Planta e PDFs", ""],
+                ["#planta", "Planta do salão", festa.plantaUrl ? "1" : ""],
+                ["#pdfs", "PDFs", "2"],
               ].map(([href, rotulo, n]) => (
                 <li key={href}>
                   <a
@@ -175,7 +178,6 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </div>
       </div>
 
-      {/* Etapa 4c: planta do salão e PDFs (por enquanto, o lugar reservado). */}
       <section
         id="planta"
         aria-labelledby="titulo-planta"
@@ -185,23 +187,63 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           Planta do salão
         </h2>
         <p className="text-tinta-suave text-sm leading-(--linha)">
-          Em breve: a imagem do salão visto de cima, feita por você.
+          O salão visto de cima. Também sai no roteiro em PDF.
         </p>
-        <div
-          aria-hidden
-          className="border-pauta-forte/60 mt-(--linha) aspect-video w-full max-w-3xl rounded-[3px] border border-dashed"
+        <CampoPlanta
+          festaId={festa.id}
+          planta={
+            festa.plantaUrl && festa.plantaLargura && festa.plantaAltura
+              ? {
+                  src: `/painel/festas/${festa.id}/planta?v=${versaoPlanta(festa.plantaUrl)}`,
+                  largura: festa.plantaLargura,
+                  altura: festa.plantaAltura,
+                }
+              : null
+          }
         />
+      </section>
 
-        <h2 className="mt-(--linha) pt-(--linha) text-lg font-semibold">PDFs</h2>
-        <ul className="pautado">
-          <li className="flex items-center justify-between gap-3">
-            <span>Convite para os convidados</span>
-            <span className="text-tinta-suave text-sm leading-(--linha)">em breve</span>
-          </li>
-          <li className="flex items-center justify-between gap-3">
-            <span>Roteiro completo da festa</span>
-            <span className="text-tinta-suave text-sm leading-(--linha)">em breve</span>
-          </li>
+      <section
+        id="pdfs"
+        aria-labelledby="titulo-pdfs"
+        className="folha folha-lisa mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
+      >
+        <h2 id="titulo-pdfs" className="text-lg font-semibold">
+          PDFs
+        </h2>
+        <ul className="pautado mt-(--linha) max-w-3xl">
+          {[
+            {
+              tipo: "convite",
+              titulo: "Convite",
+              detalhe:
+                "Para os convidados: data, horário, local e traje (sem as observações). Dá para imprimir ou mandar no WhatsApp.",
+            },
+            {
+              tipo: "roteiro",
+              titulo: "Roteiro completo",
+              detalhe:
+                "Dados, fornecedores com valores, mesas, cronograma e planta. Para você e a equipe.",
+            },
+          ].map((pdf) => (
+            // Tudo na altura da pauta: título e ação numa linha, descrição embaixo.
+            <li key={pdf.tipo}>
+              <div className="flex items-end justify-between gap-4">
+                <span className="min-w-0 truncate font-medium">{pdf.titulo}</span>
+                <a
+                  href={`/painel/festas/${festa.id}/pdf/${pdf.tipo}`}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={`Abrir PDF: ${pdf.titulo}`}
+                  className="group focus-visible:outline-ring inline-flex h-(--linha) shrink-0 items-center gap-1.5 rounded-sm text-sm font-medium focus-visible:outline-2"
+                >
+                  <FileText aria-hidden className="size-4" strokeWidth={1.75} />
+                  <span className="grifo-ao-passar">Abrir PDF</span>
+                </a>
+              </div>
+              <p className="text-tinta-suave text-sm leading-(--linha)">{pdf.detalhe}</p>
+            </li>
+          ))}
         </ul>
       </section>
     </div>

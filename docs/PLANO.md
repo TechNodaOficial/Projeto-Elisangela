@@ -15,7 +15,7 @@ confirmação de presença por link e check-in por QR Code no dia da festa.
 | Link do convite   | Um link por convidado                                                      | Só convidados confirmam; QR ligado à pessoa                                                                                                                      |
 | Status da festa   | Calculado pela data                                                        | Ela não precisa marcar como concluída                                                                                                                            |
 | Internet no local | Assume-se que haverá internet                                              | Modo offline fica fora do MVP                                                                                                                                    |
-| PDF               | Só dados da festa (convite)                                                | —                                                                                                                                                                |
+| PDF               | Convite (só dados da festa) e roteiro completo                             | —                                                                                                                                                                |
 
 ## Entidades
 
@@ -65,7 +65,7 @@ Os tokens são separados para que uma foto do QR de alguém não permita alterar
 - [x] **3. Festas:** layout do painel (visual "Prancheta da Cerimonialista", ver `PRODUCT.md` e `.impeccable/surfaces/`), listas de pendentes e concluídas, detalhe, criar/editar/excluir com Zod; datas sempre no fuso de São Paulo
 - [x] **4. Convidados:** rol de convidados na folha da festa (adicionar em sequência, editar, remover, busca), contagens, copiar link pessoal e enviar convite pelo WhatsApp com mensagem pronta. O link `/c/[token]` passa a funcionar na Etapa 5
 - [x] **4b. Página da festa em 4 colunas:** (1) dados + convidados, (2) fornecedores (nome, serviço, WhatsApp, valor contratado, pago/pendente, totais), (3) mesas (nome, lugares, convidados distribuídos; o check-in mostrará a mesa), (4) cronograma (horário, atividade, responsável: fornecedor cadastrado ou texto). Celular: uma coluna; telas médias: 2×2
-- [ ] **4c. Planta do salão e PDFs:** imagem do salão visto de cima enviada pela Elisangela (Vercel Blob), abaixo das colunas; no fim da página, dois PDFs: convite (dados da festa, para convidados) e roteiro completo (dados, fornecedores, mesas, cronograma, planta)
+- [x] **4c. Planta do salão e PDFs:** imagem do salão visto de cima (Blob store **privado**, servida por `/painel/festas/[id]/planta` com login; o navegador reduz para até 3000px e 4 MB, JPG/PNG conferidos pelos bytes no servidor), abaixo das colunas; no fim da página, dois PDFs gerados no servidor com `@react-pdf/renderer` e as fontes Geist: convite A5 (dados da festa, sem as observações, que podem ser internas) e roteiro A4 (dados, fornecedores, mesas, cronograma, planta)
 - [ ] **5. Convite + QR:** `/c/[token]`, confirmar/recusar (pode mudar até a data da festa), QR com download, rate limit
 - [ ] **6. Check-in:** leitor pela câmera, validações, busca manual, testes Vitest, teste num celular real
 - [ ] **7. PDF:** incorporada à etapa 4c

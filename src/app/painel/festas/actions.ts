@@ -12,6 +12,7 @@ import {
   type CamposFesta,
   type ErrosFesta,
 } from "@/lib/festas/schema";
+import { apagarPlanta } from "@/lib/planta/blob";
 import { prisma } from "@/lib/prisma";
 
 export type EstadoFormFesta = { erros?: ErrosFesta; valores?: CamposFesta; erroGeral?: string };
@@ -64,8 +65,10 @@ export async function atualizarFesta(
 
 export async function excluirFesta(id: string) {
   await exigirUsuario();
+  const festa = await prisma.festa.findUnique({ where: { id }, select: { plantaUrl: true } });
   // deleteMany não falha se outra aba já excluiu; os convidados saem junto (cascade).
   await prisma.festa.deleteMany({ where: { id } });
+  await apagarPlanta(festa?.plantaUrl);
   revalidatePath("/painel", "layout");
   redirect("/painel");
 }
