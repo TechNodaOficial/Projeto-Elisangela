@@ -43,6 +43,9 @@
   --color-pauta: var(--pauta);
   --color-pauta-forte: var(--pauta-forte);
   --color-grifo: var(--grifo);
+  --color-porta-ok: var(--porta-ok);
+  --color-porta-barrado: var(--porta-barrado);
+  --color-porta-atencao: var(--porta-atencao);
   --color-tinta-suave: var(--tinta-suave);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -66,6 +69,11 @@
   --pauta: oklch(0.86 0.045 255); /* fios do papel pautado */
   --pauta-forte: oklch(0.7 0.09 258); /* linha de margem e foco */
   --grifo: oklch(0.92 0.15 103); /* marca-texto */
+
+  /* Veredito do leitor de QR, em tela cheia na porta (só lá). Contraste: 7.0, 7.2 e 9.5. */
+  --porta-ok: oklch(0.45 0.12 152); /* pode entrar, texto branco */
+  --porta-barrado: oklch(0.48 0.18 27); /* já entrou, outra festa, QR estranho; texto branco */
+  --porta-atencao: oklch(0.84 0.15 80); /* não confirmou, ela decide; texto em tinta */
 
   --background: var(--mesa);
   --foreground: var(--tinta);
@@ -101,6 +109,16 @@ html {
   caret-color: var(--tinta);
   scrollbar-color: oklch(0.78 0.008 250) transparent;
   font-variant-numeric: tabular-nums;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  background-color: var(--tinta-suave);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E")
+    center / contain no-repeat;
 }
 
 input::-webkit-calendar-picker-indicator {
@@ -202,8 +220,23 @@ input::-webkit-calendar-picker-indicator {
     clip-path: inset(0 0 0 0);
   }
 }
+/* Barra do leitor de QR que esvazia enquanto "Pode entrar" fecha sozinho. */
+.esvaziar {
+  animation: esvaziar linear forwards;
+}
+@keyframes esvaziar {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .grifo::before {
+    animation: none;
+  }
+  .esvaziar {
     animation: none;
   }
   .grifo-ao-passar::before {

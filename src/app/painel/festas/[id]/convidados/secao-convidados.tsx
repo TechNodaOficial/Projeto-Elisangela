@@ -5,6 +5,7 @@ import { Fragment, useDeferredValue, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
+import { semAcento } from "@/lib/texto";
 
 import { adicionarConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
@@ -12,12 +13,6 @@ import { LinhaConvidado, type DadosFesta } from "./linha-convidado";
 
 // A partir daqui vale mostrar a busca.
 const MOSTRAR_BUSCA_A_PARTIR_DE = 8;
-
-const semAcento = (texto: string) =>
-  texto
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
 
 type Contagem = {
   total: number;

@@ -33,3 +33,11 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - Formulários usam folha lisa (sem pautas): campos precisam de caixa própria para serem reconhecíveis e acessíveis. A seção de convidados também é folha lisa por conter o formulário de adicionar, mas o rol em si é pautado (cada convidado ocupa duas pautas).
 - Página da festa em 4 colunas (pedido da dona): dados + convidados · fornecedores · mesas · cronograma. Telas médias: coluna 1 à esquerda, as outras três empilhadas à direita; celular: uma coluna com um índice pautado logo abaixo da folha da festa. Nas colunas estreitas (xl) a linha de margem fica a 1.75rem para sobrar largura. Abaixo das colunas, uma folha com a planta do salão e os PDFs.
 - No rol de convidados, o WhatsApp fica à mão e "Copiar link do convite" foi para o menu ⋯, para o telefone caber inteiro na coluna estreita.
+
+## Leitor de QR (check-in, Etapa 6)
+
+Decisões da dona (perguntas da Etapa 6): resultado em **tela cheia colorida** (verde "Pode entrar", vermelho para barrado, âmbar para atenção), cores novas que existem só no leitor; convidado que não confirmou gera tela de atenção com "Deixar entrar" (ela decide); o celular vibra e apita a cada leitura.
+
+THESIS do leitor: na porta, a prancheta sai de cena e o veredito toma a tela inteira, legível de longe com pouca luz; a folha só volta para a busca pelo nome. Recusa o toast pequeno no canto e o modal branco com ícone.
+
+FIRST VIEWPORT (390px): nome da festa e "x de y chegaram" no topo; câmera quadrada em largura cheia com moldura de mira; "Abrir câmera" em tinta enquanto fechada; abaixo, a busca pelo nome numa folha pautada. Resultado: campo de cor de borda a borda (cobre a navegação), veredito em 2.5rem+, nome do convidado em destaque, mesa, e as ações grandes no pé (Próximo / Desfazer / Deixar entrar).

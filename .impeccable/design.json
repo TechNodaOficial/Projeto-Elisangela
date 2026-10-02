@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-02T12:00:00+00:00",
+  "generatedAt": "2026-10-02T13:28:38.349Z",
   "title": "Design System: Painel de Festas · Elisangela Eventos",
   "extensions": {
     "colorMeta": {
@@ -179,6 +179,57 @@
           "oklch(0.8 0.19 27)",
           "oklch(0.95 0.19 27)"
         ]
+      },
+      "porta-ok": {
+        "role": "status",
+        "displayName": "Verde de Porta",
+        "canonical": "oklch(0.45 0.12 152)",
+        "cssVar": "--porta-ok",
+        "tonalRamp": [
+          "oklch(0.15 0.12 152)",
+          "oklch(0.25 0.12 152)",
+          "oklch(0.35 0.12 152)",
+          "oklch(0.45 0.12 152)",
+          "oklch(0.55 0.12 152)",
+          "oklch(0.65 0.12 152)",
+          "oklch(0.8 0.12 152)",
+          "oklch(0.95 0.12 152)"
+        ],
+        "usage": "Só no veredito \"Pode entrar\" do leitor de QR; texto papel (7.0:1)."
+      },
+      "porta-barrado": {
+        "role": "status",
+        "displayName": "Vermelho de Porta",
+        "canonical": "oklch(0.48 0.18 27)",
+        "cssVar": "--porta-barrado",
+        "tonalRamp": [
+          "oklch(0.15 0.18 27)",
+          "oklch(0.25 0.18 27)",
+          "oklch(0.35 0.18 27)",
+          "oklch(0.45 0.18 27)",
+          "oklch(0.55 0.18 27)",
+          "oklch(0.65 0.18 27)",
+          "oklch(0.8 0.18 27)",
+          "oklch(0.95 0.18 27)"
+        ],
+        "usage": "Só nos vereditos que barram (já entrou, outra festa, QR não reconhecido); texto papel (7.2:1)."
+      },
+      "porta-atencao": {
+        "role": "status",
+        "displayName": "Âmbar de Porta",
+        "canonical": "oklch(0.84 0.15 80)",
+        "cssVar": "--porta-atencao",
+        "tonalRamp": [
+          "oklch(0.15 0.15 80)",
+          "oklch(0.25 0.15 80)",
+          "oklch(0.35 0.15 80)",
+          "oklch(0.45 0.15 80)",
+          "oklch(0.55 0.15 80)",
+          "oklch(0.65 0.15 80)",
+          "oklch(0.8 0.15 80)",
+          "oklch(0.95 0.15 80)"
+        ],
+        "usage": "Só no veredito \"Não confirmou presença\"; texto tinta (9.5:1)."
       }
     },
     "typographyMeta": {
@@ -225,6 +276,18 @@
       "dado": {
         "displayName": "Dado mono",
         "purpose": "Horário da festa, contagens dos índices, ocupação n/n da mesa, campos de data e hora; telefone e valor em reais em mono no tamanho do texto ao redor; horário do cronograma em mono 500 1rem."
+      },
+      "veredito": {
+        "displayName": "Veredito",
+        "purpose": "Frase do veredito em tela cheia do leitor de QR (Pode entrar, Já entrou, Não confirmou presença)."
+      },
+      "veredito-nome": {
+        "displayName": "Nome no veredito",
+        "purpose": "Nome do convidado logo abaixo do veredito."
+      },
+      "contador-porta": {
+        "displayName": "Contador da porta",
+        "purpose": "O N de \"N de M confirmados chegaram\" no topo do leitor; Geist (não Mono) para evitar o zero cortado."
       }
     },
     "shadows": [
@@ -269,6 +332,16 @@
         "name": "acao-linha",
         "value": "150ms",
         "purpose": "Cor das ações da linha de tinta suave para tinta no hover/foco (no rol, a linha inteira; nas colunas, cada botão)."
+      },
+      {
+        "name": "veredito-entra",
+        "value": "150ms",
+        "purpose": "Fade de entrada do veredito em tela cheia."
+      },
+      {
+        "name": "esvaziar",
+        "value": "3000ms linear",
+        "purpose": "Barra de 6px que esvazia (scaleX 1→0) enquanto \"Pode entrar\" fecha sozinho; parada com prefers-reduced-motion."
       }
     ],
     "breakpoints": [
@@ -300,6 +373,36 @@
       "linhaConvidado": "Pautas inteiras: no mínimo 2 × --linha; nome/status quebram, telefone e mesa dividem a segunda pauta.",
       "margemColuna": "1.75rem",
       "linhaLista": "Toda linha de lista é feita de pautas inteiras; texto centrado na pauta; faixa de ações com altura de uma pauta, botões transbordam."
+    },
+    "porta": {
+      "fechaSozinhoMs": 3000,
+      "sinais": {
+        "ok": {
+          "bipes": [[1046, 140]],
+          "vibracao": [70]
+        },
+        "barrado": {
+          "bipes": [
+            [220, 170],
+            [220, 170]
+          ],
+          "vibracao": [90, 70, 90, 70, 90]
+        },
+        "atencao": {
+          "bipes": [
+            [660, 130],
+            [523, 180]
+          ],
+          "vibracao": [200]
+        },
+        "falha": {
+          "bipes": [[392, 260]],
+          "vibracao": [40, 60, 40]
+        }
+      },
+      "sinaisNota": "Bipes [Hz, ms] senoidais via WebAudio, ataque de 10ms, 60ms entre bipes; áudio destravado no toque em Abrir câmera; vibração ausente no iPhone.",
+      "buscaAberta": "Ao focar a busca, a folha rola para o topo (scroll-margin 4rem) e ganha min-height calc(100dvh - 4rem).",
+      "escolherFesta": "Vai direto ao leitor quando exatamente uma festa está a até 20h de agora."
     }
   },
   "components": [
@@ -414,18 +517,35 @@
       "description": "QR de entrada como canhoto destacável: picote tracejado 2px pauta-forte a 70% em cima e embaixo, papel liso atrás do QR, altura em pautas inteiras.",
       "html": "<section class=\"ds-canhoto\"><p class=\"ds-can-inst\">Apresente este código na entrada.</p><div class=\"ds-can-qr\" role=\"img\" aria-label=\"QR Code de entrada\"></div><p class=\"ds-can-nome\">Ana Souza Lima</p><a class=\"ds-can-btn\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 15V3\"/><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/></svg>Salvar imagem</a></section>",
       "css": ".ds-canhoto { font-family:Geist, ui-sans-serif, system-ui, sans-serif; color:var(--tinta, oklch(0.255 0.004 250)); background:var(--papel, oklch(1 0 0)); border-top:2px dashed oklch(0.7 0.09 258 / 70%); border-bottom:2px dashed oklch(0.7 0.09 258 / 70%); padding:calc(1.75rem - 2px) 1.25rem calc(1.75rem - 2px) 3.625rem; line-height:1.75rem; max-width:28rem; } .ds-can-inst { margin:0; font-size:0.875rem; color:var(--tinta-suave, oklch(0.47 0.008 250)); } .ds-can-qr { margin-top:1.75rem; width:14rem; height:14rem; max-width:100%; background:repeating-conic-gradient(var(--tinta, oklch(0.255 0.004 250)) 0 25%, transparent 0 50%) 0 0 / 1.75rem 1.75rem; } .ds-can-nome { margin:1.75rem 0 0; font-weight:600; } .ds-can-btn { display:inline-flex; align-items:center; gap:8px; margin:calc(1.75rem + 4px) 0 4px; height:48px; padding:0 20px; border-radius:0.375rem; background:var(--tinta, oklch(0.255 0.004 250)); color:var(--papel, oklch(1 0 0)); font-size:0.875rem; font-weight:500; text-decoration:none; } .ds-can-btn:hover { background:oklch(0.255 0.004 250 / 85%); } .ds-can-btn:focus-visible { outline:2px solid var(--pauta-forte, oklch(0.7 0.09 258)); outline-offset:2px; }"
+    },
+    {
+      "name": "Veredito da porta (Pode entrar)",
+      "kind": "custom",
+      "refersTo": "veredito-ok",
+      "description": "Assinatura do leitor: campo de cor de borda a borda com ícone de 64px, veredito, nome, detalhe e ações de 56px no pé; Pode entrar fecha sozinho em 3s com a barra que esvazia. Mostrado aqui num quadro; na tela real é fixed inset 0.",
+      "html": "<div class=\"ds-veredito\" role=\"alertdialog\" aria-labelledby=\"ds-v-t\"><div class=\"ds-v-barra\" aria-hidden=\"true\"></div><div class=\"ds-v-corpo\"><svg width=\"64\" height=\"64\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg><p id=\"ds-v-t\" class=\"ds-v-t\">Pode entrar</p><p class=\"ds-v-nome\">Ana Clara Ribeiro</p><p class=\"ds-v-det\">Mesa dos noivos</p></div><div class=\"ds-v-acoes\"><button class=\"ds-v-sec\">Desfazer</button><button class=\"ds-v-pri\">Próximo</button></div></div>",
+      "css": ".ds-veredito { position:relative; display:flex; flex-direction:column; width:360px; height:640px; box-sizing:border-box; padding:2rem 1.5rem 1.5rem; overflow:hidden; background:var(--porta-ok, oklch(0.45 0.12 152)); color:#fff; font-family:Geist, ui-sans-serif, system-ui, sans-serif; animation:ds-v-in 150ms ease-out; } .ds-v-barra { position:absolute; inset:0 0 auto 0; height:6px; background:rgb(255 255 255 / 75%); transform-origin:left; animation:ds-v-esvaziar 3000ms linear forwards; } .ds-v-corpo { flex:1; display:flex; flex-direction:column; justify-content:center; gap:12px; } .ds-v-corpo p { margin:0; } .ds-v-t { font-size:clamp(2.75rem, 12vw, 4rem); line-height:1.02; font-weight:600; letter-spacing:-0.035em; text-wrap:balance; } .ds-v-nome { margin-top:8px !important; font-size:clamp(1.75rem, 7.5vw, 2.25rem); line-height:1.25; font-weight:600; letter-spacing:-0.015em; } .ds-v-det { font-size:1.125rem; color:rgb(255 255 255 / 90%); } .ds-v-acoes { display:grid; grid-template-columns:1fr 1fr; gap:12px; } .ds-v-pri, .ds-v-sec { height:56px; padding:0 20px; border-radius:0.375rem; font:600 1rem Geist, ui-sans-serif, system-ui, sans-serif; cursor:pointer; } .ds-v-pri { background:#fff; color:var(--tinta, oklch(0.255 0.004 250)); border:0; } .ds-v-sec { background:transparent; color:#fff; border:2px solid rgb(255 255 255 / 70%); } .ds-v-pri:focus-visible, .ds-v-sec:focus-visible { outline:3px solid #fff; outline-offset:2px; } .ds-v-pri:active, .ds-v-sec:active { transform:translateY(1px); } @keyframes ds-v-in { from { opacity:0; } } @keyframes ds-v-esvaziar { from { transform:scaleX(1); } to { transform:scaleX(0); } } @media (prefers-reduced-motion: reduce) { .ds-v-barra { animation:none; } }"
+    },
+    {
+      "name": "Visor da câmera (fechado)",
+      "kind": "custom",
+      "refersTo": "visor-camera",
+      "description": "Visor quadrado grafite com cantos de 3px e sombra de folha; fechado, ícone de câmera e \"Abrir câmera\" em papel; aberto, mira de quatro cantos brancos de 3px.",
+      "html": "<div class=\"ds-visor\"><div class=\"ds-mira\" aria-hidden=\"true\"><span class=\"ds-c ds-c1\"></span><span class=\"ds-c ds-c2\"></span><span class=\"ds-c ds-c3\"></span><span class=\"ds-c ds-c4\"></span></div><div class=\"ds-visor-fechado\"><svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/></svg><button class=\"ds-abrir\">Abrir câmera</button></div></div>",
+      "css": ".ds-visor { position:relative; width:320px; aspect-ratio:1; overflow:hidden; background:var(--tinta, oklch(0.255 0.004 250)); border-radius:3px; box-shadow:0 1px 1px oklch(0.2 0.01 250 / 6%), 0 6px 16px -8px oklch(0.2 0.01 250 / 22%); font-family:Geist, ui-sans-serif, system-ui, sans-serif; } .ds-mira { position:absolute; left:19%; top:19%; width:62%; height:62%; opacity:0.35; } .ds-c { position:absolute; width:40px; height:40px; border:0 solid #fff; } .ds-c1 { top:0; left:0; border-top-width:3px; border-left-width:3px; border-top-left-radius:0.3rem; } .ds-c2 { top:0; right:0; border-top-width:3px; border-right-width:3px; border-top-right-radius:0.3rem; } .ds-c3 { bottom:0; left:0; border-bottom-width:3px; border-left-width:3px; border-bottom-left-radius:0.3rem; } .ds-c4 { bottom:0; right:0; border-bottom-width:3px; border-right-width:3px; border-bottom-right-radius:0.3rem; } .ds-visor-fechado { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:rgb(255 255 255 / 80%); } .ds-abrir { height:48px; padding:0 24px; border:0; border-radius:0.375rem; background:#fff; color:var(--tinta, oklch(0.255 0.004 250)); font:500 0.9375rem Geist, ui-sans-serif, system-ui, sans-serif; cursor:pointer; } .ds-abrir:hover { background:oklch(0.965 0.003 250); } .ds-abrir:focus-visible { outline:2px solid #fff; outline-offset:2px; }"
     }
   ],
   "narrative": {
     "northStar": "A Prancheta da Cerimonialista",
-    "overview": "O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.\n\nA densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, telefone, valores em reais, contagens), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o \"casamento romântico\" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.\n\nA interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.",
+    "overview": "O painel é o roteiro que a cerimonialista já carrega na prancheta, só que vivo. Cada festa é uma folha de papel branco pautado, com fios azul-claros de 1px e uma linha de margem azul mais forte, apoiada sobre uma mesa cinza fria. O texto é escrito a tinta grafite e assenta nas pautas: a altura de linha das folhas é exatamente a altura de uma pauta. O único gesto de cor é o marca-texto amarelo, que grifa o que importa agora: a seção atual, a festa que está chegando, o que o cursor está para escolher.\n\nA densidade é de caderno de trabalho, não de dashboard: uma família sans (Geist) para tudo, Geist Mono para dados (dia, horário, telefone, valores em reais, contagens), números tabulares em todo o documento. O mundo recusa os dois clichês do segmento: o admin SaaS de cards brancos idênticos com sombra e ícone, e o \"casamento romântico\" rosa com tipografia cursiva. Tema claro apenas; o painel é usado de dia, na mesa ou no celular.\n\nA interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.\n\nNa porta, a prancheta sai de cena. O leitor de QR Code é o único lugar fora do papel: o veredito de cada leitura toma a tela inteira num campo de cor (verde, vermelho, âmbar ou grafite), legível de longe e com pouca luz, e a folha só volta para a busca pelo nome.",
     "keyCharacteristics": [
       "Folhas pautadas com linha de margem sobre mesa cinza fria.",
       "Tinta grafite como cor de ação; marca-texto amarelo reservado para seleção e urgência.",
       "Texto assentado em pautas de 1.75rem; recuo do texto depois da margem.",
       "Geist para tudo, Geist Mono só para dados, sempre tabulares.",
       "Cantos discretos (3px nas folhas e no papel solto, 6px nos controles), sombra de papel sobre mesa.",
-      "Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração; só-ícone apenas em ações compactas com `aria-label`."
+      "Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração; só-ícone apenas em ações compactas com `aria-label`.",
+      "Cores de porta (verde, vermelho, âmbar) só no veredito em tela cheia do leitor de QR, nunca no papel."
     ],
     "rules": [
       {
@@ -441,6 +561,11 @@
       {
         "name": "The Mesa e Papel Rule",
         "body": "Conteúdo vive em papel (`papel`); o fundo é sempre mesa (`mesa`). Campos sobre folha também recebem fundo papel explícito para não herdar transparência.",
+        "section": "colors"
+      },
+      {
+        "name": "The Porta Rule",
+        "body": "Verde, vermelho e âmbar de porta existem só no veredito em tela cheia do leitor de QR; nunca em texto, borda, selo ou fundo de outra tela, nem no rol de convidados. Vermelho significa só \"barrado\"; falha de rede é grafite. O veredito é a única tela do painel fora da folha, e nele a hierarquia continua sendo de contraste: a ação principal é papel sobre o campo (tinta sobre o âmbar), nunca outra cor.",
         "section": "colors"
       },
       {
@@ -460,7 +585,7 @@
       },
       {
         "name": "The Papel-Sobre-Mesa Rule",
-        "body": "Só papel tem sombra: folhas, diálogos e o papel solto dos menus. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.",
+        "body": "Só papel tem sombra: folhas, diálogos e o papel solto dos menus (e o visor da câmera, que fica na mesa como uma folha). Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.",
         "section": "elevation"
       }
     ],
@@ -470,12 +595,13 @@
       "**Do** reservar o grifo para a seção atual, festas a até 7 dias, o \"Chegou\" do check-in, a resposta registrada no convite do convidado e o hover do que está para ser escolhido; pagamento fala por peso e tinta.",
       "**Do** escrever dia, horário, telefone, valor em reais e contagens em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.",
       "**Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.",
-      "**Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.",
+      "**Do** desligar varredura do grifo, levantamento das folhas e a barra que esvazia no veredito com `prefers-reduced-motion`.",
       "**Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.",
       "**Do** dar 44px de alvo às ações abaixo de `sm` (a partir de `sm`, 36px no rol e 28px nas colunas) e manter os rótulos de campo visíveis.",
       "**Do** montar linhas de lista em pautas inteiras, com texto centrado na pauta e ações numa faixa de uma pauta que transborda sem empurrar.",
       "**Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva do painel, com o botão nomeado pelo que apaga; no convite público, a confirmação acontece na própria folha.",
-      "**Do** dar 48px aos botões do convite público, com 4px de margem acima e abaixo, para ocuparem duas pautas inteiras."
+      "**Do** dar 48px aos botões do convite público, com 4px de margem acima e abaixo, para ocuparem duas pautas inteiras.",
+      "**Do** reservar `porta-ok`, `porta-barrado` e `porta-atencao` para o veredito em tela cheia do leitor de QR, cada um com seu som e sua vibração."
     ],
     "donts": [
       "**Don't** usar o amarelo `grifo` como cor de texto, borda, fundo de botão ou fundo de superfície.",
@@ -484,7 +610,8 @@
       "**Don't** montar grades de cards brancos idênticos com sombra e ícone no topo; a festa é uma folha com o dia como âncora.",
       "**Don't** dar sombra a controles; só papel (folhas, diálogos, papel solto) tem sombra.",
       "**Don't** pôr texto ou controles sobre a linha de margem.",
-      "**Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo. Botão só-ícone apenas em ações compactas, sempre com `aria-label`."
+      "**Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo. Botão só-ícone apenas em ações compactas, sempre com `aria-label`.",
+      "**Don't** usar as cores de porta fora do veredito do leitor, nem vermelho para falha de rede: vermelho é só \"barrado\"."
     ]
   }
 }

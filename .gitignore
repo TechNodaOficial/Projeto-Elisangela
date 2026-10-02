@@ -53,3 +53,6 @@ next-env.d.ts
 /.impeccable/questions/
 /.impeccable/build/
 /.impeccable/config.local.json
+
+# WebAssembly do leitor de QR, copiado no postinstall (scripts/copiar-zxing.mjs)
+/public/zxing/

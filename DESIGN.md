@@ -13,6 +13,9 @@ colors:
   borda: "oklch(0.875 0.006 250)"
   borda-campo: "oklch(0.83 0.008 250)"
   destrutivo: "oklch(0.52 0.19 27)"
+  porta-ok: "oklch(0.45 0.12 152)"
+  porta-barrado: "oklch(0.48 0.18 27)"
+  porta-atencao: "oklch(0.84 0.15 80)"
 typography:
   display:
     fontFamily: "Geist Mono, ui-monospace, monospace"
@@ -74,6 +77,25 @@ typography:
     fontFamily: "Geist Mono, ui-monospace, monospace"
     fontSize: "0.8125rem"
     fontWeight: 400
+    fontFeature: '"tnum"'
+  veredito:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(2.75rem, 12vw, 4rem)"
+    fontWeight: 600
+    lineHeight: 1.02
+    letterSpacing: "-0.035em"
+  veredito-nome:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "clamp(1.75rem, 7.5vw, 2.25rem)"
+    fontWeight: 600
+    lineHeight: 1.25
+    letterSpacing: "-0.015em"
+  contador-porta:
+    fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "-0.02em"
     fontFeature: '"tnum"'
 rounded:
   folha: "3px"
@@ -219,6 +241,57 @@ components:
     backgroundColor: "{colors.papel}"
     textColor: "{colors.tinta}"
     padding: "calc(1.75rem - 2px) 1.25rem calc(1.75rem - 2px) 3.625rem"
+  veredito-ok:
+    backgroundColor: "{colors.porta-ok}"
+    textColor: "{colors.papel}"
+    typography: "{typography.veredito}"
+    padding: "max(2rem, env(safe-area-inset-top)) 1.5rem max(1.5rem, env(safe-area-inset-bottom))"
+    width: "100vw"
+  veredito-barrado:
+    backgroundColor: "{colors.porta-barrado}"
+    textColor: "{colors.papel}"
+    typography: "{typography.veredito}"
+  veredito-atencao:
+    backgroundColor: "{colors.porta-atencao}"
+    textColor: "{colors.tinta}"
+    typography: "{typography.veredito}"
+  veredito-falha:
+    backgroundColor: "{colors.tinta}"
+    textColor: "{colors.papel}"
+    typography: "{typography.veredito}"
+  botao-veredito:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.lg}"
+    padding: "0 20px"
+    height: "56px"
+  botao-veredito-atencao:
+    backgroundColor: "{colors.tinta}"
+    textColor: "{colors.papel}"
+    rounded: "{rounded.lg}"
+    height: "56px"
+  botao-veredito-secundario:
+    textColor: "{colors.papel}"
+    rounded: "{rounded.lg}"
+    padding: "0 20px"
+    height: "56px"
+  visor-camera:
+    backgroundColor: "{colors.tinta}"
+    textColor: "{colors.papel}"
+    rounded: "{rounded.folha}"
+    width: "100%"
+  botao-camera:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.lg}"
+    padding: "0 24px"
+    height: "48px"
+  busca-porta:
+    backgroundColor: "{colors.papel}"
+    textColor: "{colors.tinta}"
+    rounded: "{rounded.lg}"
+    padding: "4px 10px 4px 36px"
+    height: "44px"
 ---
 
 # Design System: Painel de Festas · Elisangela Eventos
@@ -233,6 +306,8 @@ A densidade é de caderno de trabalho, não de dashboard: uma família sans (Gei
 
 A interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o rótulo da esquerda para a direita em 200ms; ao passar o mouse, varre o rótulo que está para ser escolhido.
 
+Na porta, a prancheta sai de cena. O leitor de QR Code é o único lugar fora do papel: o veredito de cada leitura toma a tela inteira num campo de cor (verde, vermelho, âmbar ou grafite), legível de longe e com pouca luz, e a folha só volta para a busca pelo nome.
+
 **Key Characteristics:**
 
 - Folhas pautadas com linha de margem sobre mesa cinza fria.
@@ -241,6 +316,7 @@ A interação assinatura é o grifo: ao trocar de seção, o marca-texto varre o
 - Geist para tudo, Geist Mono só para dados, sempre tabulares.
 - Cantos discretos (3px nas folhas e no papel solto, 6px nos controles), sombra de papel sobre mesa.
 - Ícones de traço fino (Lucide, stroke 1.75) acompanhando texto, nunca sozinhos como decoração; só-ícone apenas em ações compactas com `aria-label`.
+- Cores de porta (verde, vermelho, âmbar) só no veredito em tela cheia do leitor de QR, nunca no papel.
 
 ## Colors
 
@@ -269,6 +345,13 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 - **Borda de Campo** (`borda-campo`): contorno dos inputs e textareas, um passo mais escuro que a borda geral para o campo ser reconhecível.
 - **Destrutivo** (`destrutivo`): mensagens de erro de formulário, borda de campo inválido, ações "Excluir" e "Remover" (no menu: texto destrutivo, foco em `destrutivo` a 10%) e a ocupação de mesa acima da capacidade (semibold).
 
+### Porta (só no leitor de QR)
+
+- **Verde de Porta** (`porta-ok`): fundo do veredito "Pode entrar", com texto papel (contraste 7.0:1).
+- **Vermelho de Porta** (`porta-barrado`): fundo dos vereditos que barram ("Já entrou", "Convite de outra festa", "QR não reconhecido"), com texto papel (7.2:1). É um vermelho próprio, um passo mais escuro que `destrutivo`, e não o substitui no painel.
+- **Âmbar de Porta** (`porta-atencao`): fundo do veredito "Não confirmou presença", em que ela decide, com texto em tinta (9.5:1).
+- A falha de rede ("Não deu para conferir") usa `tinta` com texto papel: não é recusa e não pode parecer vermelho de longe.
+
 ### Named Rules
 
 **The Marca-texto Rule.** O amarelo só existe como grifo atrás de texto grafite e só marca uma de cinco coisas: onde ela está, o que está chegando (≤ 7 dias), quem já chegou (check-in do convidado), o que está prestes a escolher ou a resposta que o convidado registrou no próprio convite ("Presença confirmada", "Você avisou que não vai", "Entrada registrada às HH:MM"; a varredura repete a cada mudança de resposta). Se não responde a uma dessas, não é grifo. "Esta festa já aconteceu" não é resposta: fica em tinta suave, sem grifo. Pago/Pendente é estado de dado, não de atenção: fala por peso e tinta, nunca pelo amarelo.
@@ -276,6 +359,8 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 **The Tinta Rule.** Ação primária é grafite sobre papel. Não há cor de marca para botões; a hierarquia vem do contraste tinta/papel.
 
 **The Mesa e Papel Rule.** Conteúdo vive em papel (`papel`); o fundo é sempre mesa (`mesa`). Campos sobre folha também recebem fundo papel explícito para não herdar transparência.
+
+**The Porta Rule.** Verde, vermelho e âmbar de porta existem só no veredito em tela cheia do leitor de QR; nunca em texto, borda, selo ou fundo de outra tela, nem no rol de convidados. Vermelho significa só "barrado"; falha de rede é grafite. O veredito é a única tela do painel fora da folha, e nele a hierarquia continua sendo de contraste: a ação principal é papel sobre o campo (tinta sobre o âmbar), nunca outra cor.
 
 ## Typography
 
@@ -297,6 +382,8 @@ Uma paleta de material de escritório: cinza-frio de mesa, papel branco, grafite
 - **Nav** (400, 0.9375rem; 600 quando ativo): rótulo dos itens do índice lateral.
 - **Dado** (Geist Mono 400, 0.8125rem, tabular): horário da festa, contagens dos índices, ocupação "n/n" da mesa, campos de data e hora. Telefone, valor em reais e os campos de WhatsApp, valor e lugares usam Geist Mono no tamanho do texto ao redor (0.875rem). O horário de cada item do cronograma é Geist Mono 500 em 1rem, numa coluna de 3.25rem.
 - **Número em frase** (Geist 600 em tinta, tabular): contagens lidas dentro de uma frase em tinta suave, como "**31** de **48** confirmados" na folha, o contador do rol ("**12** convidados · **8** confirmaram · …") e o resumo de cada coluna ("Total **R$ 12.500,00** · falta pagar **R$ 4.000,00**", "**3** mesas · **24** lugares · **18** de **40** com mesa", "**9** momentos, das **17:00** às **02:00**"). Cada item do resumo é inquebrável por dentro.
+- **Veredito** (600, clamp(2.75rem, 12vw, 4rem), altura 1.02, -0.035em, `text-balance`): a frase do veredito do leitor ("Pode entrar", "Já entrou", "Não confirmou presença"). **Nome no veredito** (600, clamp(1.75rem, 7.5vw, 2.25rem), -0.015em): o nome do convidado logo abaixo. O detalhe (hora · mesa) em 1.125rem, papel a 90% (tinta a 85% sobre o âmbar). Fora de folha, sem pauta.
+- **Contador da porta** (Geist 600, 1.75rem, altura 1, -0.02em, tabular): o N de "N de M confirmados chegaram" no topo do leitor; " de M" em 1.125rem tinta suave, o resto da frase em 0.875rem tinta suave, e "**+K** sem confirmação" quando ela deixou entrar quem não confirmou. É número em frase, por isso Geist e não Mono: no tamanho grande, o zero cortado do Geist Mono atrapalha a leitura.
 
 ### Named Rules
 
@@ -327,6 +414,8 @@ Linhas das listas, todas em pautas inteiras:
 
 **Páginas públicas do convite** (`/c/[token]`): sem topo nem navegação. Uma moldura centrada de até 28rem (`max-w-md`) com gutter de 1rem, 1.25rem acima (3rem a partir de `sm`) e 2.5rem abaixo; a marca em texto ("Elisangela" semibold + "Eventos" em tinta suave 0.875rem) fica 1rem acima de uma única folha. Link inválido e excesso de tentativas usam a mesma moldura com um aviso em folha lisa (título Title Large + explicação em tinta suave).
 
+**Leitor de QR** (`/painel/checkin`): uma coluna centrada de até 36rem (`max-w-xl`), dentro do painel com topo e navegação. Sem festa escolhida, a página mostra a lista de festas (ver Components); com exatamente uma festa a até 20h de agora, vai direto ao leitor. No leitor, de cima para baixo: "Trocar festa" (link de texto com seta, só quando há mais de uma festa), o título da festa em Headline e o contador; o visor quadrado em largura toda, em qualquer largura de tela; e a folha lisa "Buscar pelo nome" 1.5rem abaixo. Ao focar a busca, a folha sobe para logo abaixo do topo (4rem de respiro) e passa a ter no mínimo `100dvh - 4rem` de altura, para os resultados não ficarem embaixo do teclado nem a página encolher ao filtrar. O veredito é fixo de borda a borda por cima de tudo, inclusive do topo e da barra inferior, com 1.5rem de padding lateral e respeitando as áreas seguras; o conteúdo fica numa coluna de até 36rem, centrado na vertical, com as ações no pé.
+
 **The Recuo de Margem Rule.** Todo conteúdo de folha, pautada ou lisa, começa depois da linha de margem: `padding-left: calc(var(--margem) + 0.875rem)`. Nada cruza a margem. Para estreitar uma folha, move-se a margem (`--margem`), nunca o recuo à mão.
 
 ## Elevation & Depth
@@ -339,16 +428,20 @@ Profundidade de papel sobre mesa: uma sombra curta de contato mais uma sombra di
 - **Folha levantada** (`box-shadow: 0 1px 1px oklch(0.2 0.01 250 / 6%), 0 14px 28px -12px oklch(0.2 0.01 250 / 30%)` + `translateY(-2px)`, 200ms ease-out): hover das folhas clicáveis; desligado com `prefers-reduced-motion`.
 - **Papel solto** (`box-shadow: 0 1px 1px oklch(0.2 0.01 250 / 8%), 0 10px 24px -10px oklch(0.2 0.01 250 / 30%)`): menus flutuantes (o menu ⋯ da linha do convidado); um pedaço de papel um pouco mais alto que a folha.
 - **Véu do diálogo** (`background: oklch(0.2 0.01 250 / 35%)`): overlay atrás do diálogo de confirmação.
+- **Visor da câmera**: a mesma sombra da folha em repouso; o visor grafite fica apoiado na mesa como uma folha.
+- **Veredito**: sem sombra; é um campo de cor que cobre a tela, não um papel.
 
 ### Named Rules
 
-**The Papel-Sobre-Mesa Rule.** Só papel tem sombra: folhas, diálogos e o papel solto dos menus. Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.
+**The Papel-Sobre-Mesa Rule.** Só papel tem sombra: folhas, diálogos e o papel solto dos menus (e o visor da câmera, que fica na mesa como uma folha). Controles (botões, campos, navegação) são planos; a profundidade pertence ao papel.
 
 ## Shapes
 
 Forma de material de papelaria: folhas com cantos quase retos (3px), controles com canto discreto de 6px (`--radius: 0.375rem`), links de texto e anéis de foco com 3.6px. O único círculo do sistema é o disco de contorno 1px com o "+" na folha "Nova festa". O grifo do marca-texto é a única forma irregular: cantos assimétricos (`rounded.grifo`), girado -0.8°, transbordando 0.3em para os lados do texto — como um traço de caneta, não um retângulo.
 
 As pautas e a linha de margem são desenhadas com `linear-gradient` no fundo da folha (fios de 1px), deslocadas `--folha-topo` (-0.375rem) para o texto assentar nelas. Formulários e avisos usam a **folha lisa**: só a linha de margem, sem pautas, porque campos precisam de caixa própria para serem reconhecíveis. Uma folha lisa pode conter um **trecho pautado**: só os fios de pauta, com o mesmo deslocamento `--folha-topo`, para listas que assentam em pautas (o rol de convidados, as listas das colunas, o índice da festa). O **papel solto** dos menus é papel liso, sem margem, com o canto de 3px das folhas.
+
+No leitor, o visor da câmera tem o canto de 3px das folhas; a mira são quatro cantos brancos de traço 3px e 40px de lado (canto de 0.3rem), num quadrado de 62% do visor (até 20rem). O veredito não tem forma: vai de borda a borda, sem cantos; só os botões dele têm o canto de 6px.
 
 ## Components
 
@@ -381,7 +474,7 @@ Grafite e discretos; a ação primária é tinta invertida, o resto é texto.
 - **Error / Disabled:** borda `destrutivo`; mensagem em `destrutivo` 0.875rem logo abaixo, ligada por `aria-describedby`. Desabilitado a 50% de opacidade.
 - **Labels:** 0.875rem, peso 500, sempre visíveis acima do campo; "(opcional)" em tinta suave peso 400. Campos empilhados com 20px entre si nos formulários de página; 12px nos formulários das colunas e do rol (adicionar e editar no lugar, sobre papel), com "Adicionar"/"Salvar" primário de 40px e "Fechar"/"Cancelar" ghost ao lado.
 - **Select:** vestido como o campo (40px, contorno `borda-campo`, fundo papel, mesmo foco). Exceção: o "Sentar convidado…" da mesa é um select nativo sem caixa, texto 0.875rem em tinta suave que escurece no hover, e escolher já envia.
-- **Busca:** 36px de altura, fundo papel, lupa de 16px em tinta suave dentro do campo, à esquerda.
+- **Busca:** 36px de altura, fundo papel, lupa de 16px em tinta suave dentro do campo, à esquerda. No leitor, 44px. O X de limpar de todo campo `type=search` é desenhado pelo sistema: um X de traço 2 em tinta suave, 1rem.
 
 ### Navigation
 
@@ -450,6 +543,30 @@ Um só diálogo para toda exclusão no painel (festa, convidado, fornecedor, mes
 
 Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + explicação em tinta suave), até 36rem de largura. O carregamento mostra folhas pautadas vazias pulsando a 70% de opacidade e barras `borda` no lugar do cabeçalho.
 
+### Leitor de QR (porta)
+
+A ferramenta da porta: o visor lê, o veredito responde, a folha só aparece para a busca pelo nome.
+
+- **Visor:** quadrado em largura toda, fundo tinta, cantos de 3px. Fechado, um ícone de câmera de 32px em papel a 80% e o botão "Abrir câmera" em papel com texto tinta (48px, 24px laterais, 0.9375rem peso 500, foco com contorno de 2px em papel); com a câmera negada, o ícone vira câmera cortada, a explicação aparece em papel a 90% 0.875rem e o botão diz "Tentar de novo". Aberto, o vídeo cobre o visor, a mira fica no centro e "Aponte para o QR Code do convidado" em papel a 85% 0.875rem no pé. Conferindo, um véu tinta a 70% com "Conferindo…" em papel 1.125rem.
+- **Busca pelo nome:** folha lisa com título Title Large, uma pauta de explicação em tinta suave, o campo de busca e a lista em trecho pautado. Cada convidado é um botão de duas pautas com o texto assentado: nome (peso 500) e, na pauta de baixo, o estado em tinta suave 0.875rem ("Confirmou", "Não respondeu", "Recusou" ou "Chegou HH:MM" grifado) · mesa (ou "sem mesa"). Tocar registra a entrada e abre o veredito.
+- **Escolher a festa:** folha lisa com trecho pautado; cada festa ocupa a pauta da data (Geist Mono 0.8125rem em tinta suave: dia da semana, dia e mês · horário, com "Hoje" grifado em semibold ao lado) e o título inteiro na pauta seguinte (peso 500, quebra para as pautas de baixo, nunca cortado), que varre o grifo ao passar.
+
+### Veredito da porta (assinatura)
+
+O resultado de cada leitura em tela cheia, de borda a borda (cobre topo e navegação), com entrada em fade de 150ms e foco na ação principal; Esc fecha. Centrado na vertical: ícone Lucide de 64px (traço 1.75; CircleCheck em "Pode entrar", CircleX nos barrados, CircleAlert na atenção, WifiOff na falha), o veredito, o nome do convidado e o detalhe (hora de entrada · mesa, ou "Sem mesa definida"). No pé, ações de 56px numa grade de duas colunas com 12px entre elas, texto 1rem semibold, canto de 6px:
+
+- **Principal:** papel com texto tinta sobre verde, vermelho e grafite; tinta com texto papel sobre o âmbar. Foco: contorno de 3px na cor do texto, afastado 2px (o anel `pauta-forte` não aparece sobre o campo colorido).
+- **Secundária:** contorno de 2px em papel a 70% (tinta a 60% sobre o âmbar), sem fundo.
+- **Pode entrar** (`porta-ok`): fecha sozinho em 3s; uma barra de 6px em papel a 75% no topo esvazia nesse tempo (parada com `prefers-reduced-motion`). "Desfazer" e "Próximo".
+- **Já entrou** (`porta-barrado`): "Apagar entrada das HH:MM" (secundária, largura toda) acima de "Próximo" (principal, largura toda); o botão diz exatamente o que apaga.
+- **Convite de outra festa / QR não reconhecido** (`porta-barrado`): só "Próximo", em largura toda.
+- **Não confirmou presença** (`porta-atencao`): "Não deixar" (secundária) e "Deixar entrar" (principal); registrando, "Registrando…".
+- **Não deu para conferir** (`tinta`): só "Próximo".
+
+### Sinais da porta
+
+Cada veredito também soa e vibra, para ela saber o resultado sem olhar: bipes senoidais curtos (WebAudio, ataque de 10ms) e um padrão de vibração por veredito. **Pode entrar:** um bipe agudo (1046 Hz, 140ms) e vibração de 70ms. **Barrado:** dois bipes graves (220 Hz, 170ms cada) e vibração 90-70-90-70-90ms. **Atenção:** dois bipes descendentes (660 e 523 Hz) e uma vibração longa de 200ms. **Falha:** um tom médio (392 Hz, 260ms) e vibração 40-60-40ms. O som é destravado no toque em "Abrir câmera"; no iPhone, só o som.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -459,12 +576,13 @@ Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + ex
 - **Do** reservar o grifo para a seção atual, festas a até 7 dias, o "Chegou" do check-in, a resposta registrada no convite do convidado e o hover do que está para ser escolhido; pagamento fala por peso e tinta.
 - **Do** escrever dia, horário, telefone, valor em reais e contagens em Geist Mono tabular; números dentro de frase em Geist semibold tinta; todo o resto em Geist.
 - **Do** usar `pauta-forte` como cor de foco: contorno de 2px nos links e anel de 3px a 50% nos controles.
-- **Do** desligar varredura do grifo e levantamento das folhas com `prefers-reduced-motion`.
+- **Do** desligar varredura do grifo, levantamento das folhas e a barra que esvazia no veredito com `prefers-reduced-motion`.
 - **Do** dar fundo papel explícito a campos e botões outline que ficam sobre folha.
 - **Do** dar 44px de alvo às ações abaixo de `sm` (a partir de `sm`, 36px no rol e 28px nas colunas) e manter os rótulos de campo visíveis.
 - **Do** montar linhas de lista em pautas inteiras, com texto centrado na pauta e ações numa faixa de uma pauta que transborda sem empurrar.
 - **Do** usar o diálogo de confirmação compartilhado para toda ação destrutiva do painel, com o botão nomeado pelo que apaga; no convite público, a confirmação acontece na própria folha.
 - **Do** dar 48px aos botões do convite público, com 4px de margem acima e abaixo, para ocuparem duas pautas inteiras.
+- **Do** reservar `porta-ok`, `porta-barrado` e `porta-atencao` para o veredito em tela cheia do leitor de QR, cada um com seu som e sua vibração.
 
 ### Don't:
 
@@ -475,3 +593,4 @@ Avisos são folhas lisas com ícone de 20px e duas linhas (título semibold + ex
 - **Don't** dar sombra a controles; só papel (folhas, diálogos, papel solto) tem sombra.
 - **Don't** pôr texto ou controles sobre a linha de margem.
 - **Don't** usar ícones sozinhos como decoração; ícones de traço 1.75 acompanham um rótulo. Botão só-ícone apenas em ações compactas, sempre com `aria-label`.
+- **Don't** usar as cores de porta fora do veredito do leitor, nem vermelho para falha de rede: vermelho é só "barrado".
