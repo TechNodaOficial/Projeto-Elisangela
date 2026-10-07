@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function NaoEncontrada() {
   return (
-    <div className="folha folha-lisa flex w-full max-w-xl items-start gap-3 py-6 pr-6 pl-[calc(var(--margem)+0.875rem)]">
+    <div className="folha folha-lisa flex w-full max-w-xl items-start gap-3 px-6 py-6">
       <FileQuestion aria-hidden className="mt-0.5 size-5 shrink-0" strokeWidth={1.75} />
       <div className="flex flex-col gap-1">
         <h1 className="font-semibold">Festa não encontrada</h1>

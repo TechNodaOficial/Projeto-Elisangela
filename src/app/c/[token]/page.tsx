@@ -1,10 +1,14 @@
-import { Download } from "lucide-react";
+import { Download, MapPin, PartyPopper } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { IconeInstagram, IconeWhatsApp } from "@/components/icones-marca";
+import { contatoElisangela } from "@/lib/contato";
+import { linkWhatsApp } from "@/lib/convidados/telefone";
 import { buscarConvite } from "@/lib/convites/consultas";
 import { estadoConvite } from "@/lib/convites/estado";
+import { faseDoConvite, prazoDoConvite } from "@/lib/convites/prazo";
 import { conviteBloqueado, registrarErroConvite } from "@/lib/convites/limite";
 import { qrSvg } from "@/lib/convites/qr";
 import { FUSO, partesData } from "@/lib/datas";
@@ -36,10 +40,18 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
   }
 
   const { festa } = convite;
+  const contato = contatoElisangela();
+  // Abre o app de mapas no celular (ou o Google Maps no computador) já no endereço da festa.
+  const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    `${festa.localNome}, ${festa.endereco}`,
+  )}`;
   const estado = estadoConvite({ ...convite, dataHora: festa.dataHora });
   const data = partesData(festa.dataHora);
   const semana = data.extenso.split(",")[0];
-  const primeiroNome = convite.nome.trim().split(/\s+/)[0];
+  const familia = convite.pessoas > 1;
+  // "Olá, Ana" para uma pessoa; "Olá, Família Silva" para um grupo.
+  const saudacao = familia ? convite.nome.trim() : convite.nome.trim().split(/\s+/)[0];
+  const confirmadas = Math.min(convite.confirmadas ?? convite.pessoas, convite.pessoas);
   const comQr = estado === "confirmado";
   const svg = comQr ? await qrSvg(convite.codigoCheckin) : null;
   const horaEntrada =
@@ -50,7 +62,12 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
 
   const status = {
     aberto: null,
-    confirmado: "Presença confirmada",
+    confirmado:
+      convite.entraram > 0
+        ? `${convite.entraram} de ${confirmadas} já entraram`
+        : familia
+          ? `${confirmadas} ${confirmadas === 1 ? "pessoa confirmada" : "pessoas confirmadas"}`
+          : "Presença confirmada",
     recusado: "Você avisou que não vai",
     presente: `Entrada registrada às ${horaEntrada}`,
     encerrado: "Esta festa já aconteceu",
@@ -60,11 +77,23 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
     <Moldura>
       <article
         aria-labelledby="titulo-festa"
-        className="folha pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
+        className="folha overflow-hidden pt-0 pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
       >
+        {/* Faixa de festa no topo da folha: tons pastel com confete. Só enfeite. */}
+        <div
+          aria-hidden
+          className="convite-faixa relative -mr-5 mb-(--linha) -ml-[calc(var(--margem)+0.875rem)] flex h-24 items-center justify-center"
+        >
+          <PartyPopper className="text-foreground/80 size-9" strokeWidth={1.5} />
+        </div>
         <p className="text-lg">
-          Olá, <span className="font-semibold">{primeiroNome}</span>
+          Olá, <span className="font-semibold">{saudacao}</span>
         </p>
+        {familia && (
+          <p className="text-tinta-suave text-sm leading-(--linha)">
+            Convite para {convite.pessoas} pessoas
+          </p>
+        )}
         {status && (
           <p role="status" className="text-lg font-semibold">
             <span key={estado} className={estado === "encerrado" ? "text-tinta-suave" : "grifo"}>
@@ -74,13 +103,15 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
         )}
 
         {svg && (
-          // Canhoto destacável: picote em cima e embaixo, papel liso por trás do QR.
+          // Canhoto destacável: picote em cima e embaixo, papel liso por trás do QR, tudo centralizado.
           <section
             aria-label="QR Code de entrada"
-            className="bg-card border-pauta-forte/70 relative mt-(--linha) -mr-5 -ml-[calc(var(--margem)+0.875rem)] border-y-2 border-dashed py-[calc(var(--linha)-2px)] pr-5 pl-[calc(var(--margem)+0.875rem)]"
+            className="bg-card border-pauta-forte/70 relative mt-(--linha) -mr-5 -ml-[calc(var(--margem)+0.875rem)] flex flex-col items-center border-y-2 border-dashed px-5 py-[calc(var(--linha)-2px)] text-center"
           >
-            <p className="text-tinta-suave text-sm leading-(--linha)">
-              Apresente este código na entrada.
+            <p className="text-tinta-suave max-w-xs text-sm leading-(--linha) text-balance">
+              {familia
+                ? `Um código só para as ${confirmadas} pessoas. Quem chegar depois mostra o mesmo código.`
+                : "Apresente este código na entrada."}
             </p>
             <div
               className="mt-(--linha) size-[calc(var(--linha)*8)] max-w-full [&>svg]:size-full"
@@ -133,10 +164,64 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
           ))}
         </dl>
 
+        <a
+          href={mapa}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-pastel-menta focus-visible:outline-ring mt-(--linha) flex h-12 items-center justify-center gap-2 rounded-lg text-[0.9375rem] font-semibold transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          <MapPin aria-hidden className="size-5" strokeWidth={1.75} />
+          Como chegar
+        </a>
+
         {estado !== "presente" && estado !== "encerrado" && (
-          <Resposta token={token} estado={estado} />
+          <Resposta
+            token={token}
+            estado={estado}
+            pessoas={convite.pessoas}
+            confirmadas={confirmadas}
+            fase={faseDoConvite(festa.dataHora)}
+            prazo={prazoDoConvite(festa.dataHora)}
+          />
         )}
       </article>
+
+      {(contato.instagram || contato.whatsapp) && (
+        <section aria-labelledby="titulo-organizacao" className="folha mt-4 px-5 py-4 text-center">
+          <p className="text-tinta-suave text-sm">Organização</p>
+          <h2 id="titulo-organizacao" className="text-lg font-semibold">
+            Elisangela Schubert
+          </h2>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            {contato.instagram && (
+              <a
+                href={`https://www.instagram.com/${contato.instagram}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-pastel-rosa focus-visible:outline-ring inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                <IconeInstagram className="size-5" />
+                Instagram
+              </a>
+            )}
+            {contato.whatsapp && (
+              <a
+                href={linkWhatsApp(
+                  contato.whatsapp,
+                  `Olá, Elisangela! Sou ${convite.nome}, convidado(a) de ${festa.titulo}.`,
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-pastel-menta focus-visible:outline-ring inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                <IconeWhatsApp className="size-5" />
+                WhatsApp
+              </a>
+            )}
+          </div>
+        </section>
+      )}
+
       <p className="mt-4 px-1 text-sm">
         <Link
           href="/privacidade"

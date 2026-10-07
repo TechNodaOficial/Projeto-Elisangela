@@ -11,7 +11,7 @@ export function qrSvg(codigo: string) {
   return QRCode.toString(codigo, {
     ...OPCOES,
     type: "svg",
-    color: { dark: "#212325", light: "#ffffff" },
+    color: { dark: "#212325", light: "#ffede1" },
   });
 }
 
@@ -19,6 +19,6 @@ export function qrPngDataUrl(codigo: string, largura: number) {
   return QRCode.toDataURL(codigo, {
     ...OPCOES,
     width: largura,
-    color: { dark: "#212325", light: "#ffffff" },
+    color: { dark: "#212325", light: "#ffede1" },
   });
 }

@@ -1,8 +1,12 @@
+import { lerAno, lerMes } from "@/lib/calendario";
 import { listarFestas } from "@/lib/festas/consultas";
 
+import { Calendario } from "./calendario";
 import { CabecalhoSecao, FolhaFesta, FolhaNovaFesta, GradeFolhas } from "./folhas";
 
-export default async function PaginaPendentes() {
+export default async function PaginaPendentes(props: PageProps<"/painel">) {
+  const { mes, vista, ano } = await props.searchParams;
+  const texto = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
   const festas = await listarFestas("pendentes");
 
   const descricao =
@@ -13,6 +17,11 @@ export default async function PaginaPendentes() {
   return (
     <>
       <CabecalhoSecao titulo="Festas pendentes" descricao={descricao} />
+      <Calendario
+        vista={vista === "ano" ? "ano" : "mes"}
+        mes={lerMes(texto(mes))}
+        ano={lerAno(texto(ano))}
+      />
       <GradeFolhas>
         <FolhaNovaFesta />
         {festas.map((festa) => (

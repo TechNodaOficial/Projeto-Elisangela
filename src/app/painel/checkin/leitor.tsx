@@ -5,11 +5,13 @@ import { useCallback, useDeferredValue, useRef, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import type { DadosCheckin } from "@/lib/checkin/consultas";
+import { vagasDasMesas } from "@/lib/checkin/mesas";
+import { confirmadasDe } from "@/lib/convidados/contagem";
 import { FUSO } from "@/lib/datas";
 import { semAcento } from "@/lib/texto";
 import { cn } from "@/lib/utils";
 
-import { desfazerEntrada, lerQr, registrarConvidado } from "./actions";
+import { ajustarEntrada, lerQr, registrarConvidado, sentarNaPorta } from "./actions";
 import { Camera } from "./camera";
 import { Resultado, sinalDe, type ResultadoTela } from "./resultado";
 import { sinalizar } from "./sinais";
@@ -22,16 +24,20 @@ const hora = (d: Date) =>
 
 export function Leitor({ festa }: { festa: DadosCheckin }) {
   const [resultado, setResultado] = useState<ResultadoTela | null>(null);
+  // Cada leitura é uma tela nova (zera a escolha de "quantos entram").
+  const [leitura, setLeitura] = useState(0);
   const [ocupado, setOcupado] = useState(false);
   const [busca, setBusca] = useState("");
   const [buscaEmFoco, setBuscaEmFoco] = useState(false);
   const ultimo = useRef({ codigo: "", ate: 0 });
 
-  // O contador compara confirmados com confirmados; quem entrou sem confirmar
-  // ("Deixar entrar") aparece à parte, para a conta nunca passar de 100%.
-  const confirmados = festa.convidados.filter((c) => c.rsvp === "CONFIRMADO");
-  const chegaram = confirmados.filter((c) => c.presenteEm).length;
-  const extras = festa.convidados.filter((c) => c.presenteEm && c.rsvp !== "CONFIRMADO").length;
+  // Em pessoas. O contador compara confirmados com confirmados; quem entrou além do
+  // confirmado ("Deixar entrar") aparece à parte, para a conta nunca passar de 100%.
+  const soma = (f: (c: (typeof festa.convidados)[number]) => number) =>
+    festa.convidados.reduce((s, c) => s + f(c), 0);
+  const confirmados = soma(confirmadasDe);
+  const chegaram = soma((c) => Math.min(c.entraram, confirmadasDe(c)));
+  const extras = soma((c) => c.entraram) - chegaram;
   const buscaRef = useRef<HTMLElement>(null);
 
   // No celular, a câmera ocupa a primeira tela: ao buscar, a folha da busca sobe
@@ -50,6 +56,7 @@ export function Leitor({ festa }: { festa: DadosCheckin }) {
     }
     setOcupado(false);
     setResultado(r);
+    setLeitura((n) => n + 1);
     sinalizar(sinalDe(r));
   }
 
@@ -66,15 +73,32 @@ export function Leitor({ festa }: { festa: DadosCheckin }) {
     ultimo.current = { ...ultimo.current, ate: Date.now() + IGNORAR_REPETIDO_MS };
   }, []);
 
-  async function desfazer(id: string) {
+  async function ajustar(id: string, entraram: number, fecharDepois: boolean) {
     setOcupado(true);
     try {
-      await desfazerEntrada(festa.id, id);
+      await ajustarEntrada(festa.id, id, entraram);
     } finally {
       setOcupado(false);
-      fechar();
+      if (fecharDepois) fechar();
     }
   }
+
+  async function escolherMesa(id: string, mesaId: string) {
+    setOcupado(true);
+    try {
+      await sentarNaPorta(festa.id, id, mesaId);
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  const mesasDoResultado =
+    resultado?.tipo === "liberado"
+      ? vagasDasMesas(festa.mesas, festa.convidados, {
+          sentando: resultado.id,
+          precisa: resultado.limite,
+        })
+      : [];
 
   const termo = semAcento(useDeferredValue(busca).trim());
   const visiveis = termo
@@ -91,9 +115,9 @@ export function Leitor({ festa }: { festa: DadosCheckin }) {
         >
           <span className="text-foreground text-[1.75rem] leading-none font-semibold tracking-[-0.02em] tabular-nums">
             {chegaram}
-            <span className="text-tinta-suave text-lg"> de {confirmados.length}</span>
+            <span className="text-tinta-suave text-lg"> de {confirmados}</span>
           </span>
-          <span className="text-sm">confirmados chegaram</span>
+          <span className="text-sm">pessoas confirmadas chegaram</span>
           {extras > 0 && (
             <span className="text-sm">
               <strong className="text-foreground font-semibold">+{extras}</strong> sem confirmação
@@ -162,12 +186,20 @@ export function Leitor({ festa }: { festa: DadosCheckin }) {
                 onClick={() => executar(() => registrarConvidado(festa.id, c.id, false))}
                 className="group focus-visible:outline-ring flex w-full flex-col items-start rounded-sm text-left focus-visible:outline-2"
               >
-                <span className="w-full leading-(--linha) font-medium">{c.nome}</span>
+                <span className="w-full leading-(--linha) font-medium">
+                  {c.nome}
+                  {c.pessoas > 1 && (
+                    <span className="text-tinta-suave font-normal"> · {c.pessoas} pessoas</span>
+                  )}
+                </span>
                 <span className="text-tinta-suave w-full text-sm leading-(--linha)">
-                  {c.presenteEm ? (
+                  {c.presenteEm && c.entraram > 0 ? (
                     <span className="grifo text-foreground font-semibold">
-                      Chegou <span className="font-mono">{hora(c.presenteEm)}</span>
+                      {c.pessoas === 1 ? "Chegou" : `Chegaram ${c.entraram} de ${c.pessoas}`}{" "}
+                      <span className="font-mono">{hora(c.presenteEm)}</span>
                     </span>
+                  ) : c.rsvp === "CONFIRMADO" && c.pessoas > 1 ? (
+                    `Confirmou ${confirmadasDe(c)} de ${c.pessoas}`
                   ) : (
                     { CONFIRMADO: "Confirmou", PENDENTE: "Não respondeu", RECUSADO: "Recusou" }[
                       c.rsvp
@@ -193,11 +225,14 @@ export function Leitor({ festa }: { festa: DadosCheckin }) {
 
       {resultado && (
         <Resultado
+          key={leitura}
           resultado={resultado}
           ocupado={ocupado}
           aoFechar={fechar}
           aoDeixarEntrar={(id) => executar(() => registrarConvidado(festa.id, id, true))}
-          aoDesfazer={desfazer}
+          aoAjustar={ajustar}
+          mesas={mesasDoResultado}
+          aoEscolherMesa={escolherMesa}
         />
       )}
     </div>

@@ -5,14 +5,16 @@ import { useState } from "react";
 
 import { Label } from "@/components/ui/label";
 import type { Colunas } from "@/lib/festas/consultas";
+import { lugaresDe } from "@/lib/convidados/contagem";
 import { compararNomes } from "@/lib/festas/formatos";
+import { BANDEJA, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
 import { cn } from "@/lib/utils";
 
 import { criarMesa, definirMesa, editarMesa, removerMesa, sentarConvidado } from "./actions";
 import { Adicionar, Coluna, FormCampos, MenuLinha, N, Vazio, type Campo } from "./pecas";
 
 type Mesa = Colunas["mesas"][number];
-type ConvidadoSemMesa = { id: string; nome: string };
+type ConvidadoSemMesa = { id: string; nome: string; lugares: number };
 
 const CAMPOS: Campo[] = [
   { nome: "nome", rotulo: "Nome da mesa", placeholder: "Ex.: Mesa 1, Mesa dos noivos", max: 60 },
@@ -21,12 +23,13 @@ const CAMPOS: Campo[] = [
 
 function BlocoMesa({ mesa, semMesa }: { mesa: Mesa; semMesa: ConvidadoSemMesa[] }) {
   const [editando, setEditando] = useState(false);
-  const ocupados = mesa.convidados.length;
+  // Em pessoas: a Família Silva confirmada com 4 ocupa 4 lugares.
+  const ocupados = mesa.convidados.reduce((s, c) => s + lugaresDe(c), 0);
   const lotada = ocupados >= mesa.lugares;
 
   if (editando) {
     return (
-      <li className="bg-card">
+      <li className="bg-card my-1 rounded-lg px-3">
         <FormCampos
           acao={editarMesa.bind(null, mesa.id)}
           campos={CAMPOS}
@@ -44,7 +47,7 @@ function BlocoMesa({ mesa, semMesa }: { mesa: Mesa; semMesa: ConvidadoSemMesa[] 
   const idSelect = `sentar-${mesa.id}`;
 
   return (
-    <li>
+    <li className={cn(LINHA_ALTERNADA, "px-2 py-1")}>
       {/* Cabeçalho da mesa: uma pauta. */}
       <div className="flex items-start gap-2">
         <span className="min-w-0 flex-1 font-semibold break-words hyphens-auto">{mesa.nome}</span>
@@ -75,7 +78,10 @@ function BlocoMesa({ mesa, semMesa }: { mesa: Mesa; semMesa: ConvidadoSemMesa[] 
       <ul aria-label={`Convidados da ${mesa.nome}`}>
         {mesa.convidados.map((c) => (
           <li key={c.id} className="group/c flex h-(--linha) items-center gap-1 pl-3 text-sm">
-            <span className="min-w-0 flex-1 truncate">{c.nome}</span>
+            <span className="min-w-0 flex-1 truncate">
+              {c.nome}
+              {lugaresDe(c) > 1 && <span className="text-tinta-suave"> ({lugaresDe(c)})</span>}
+            </span>
             <form action={definirMesa.bind(null, c.id, null)}>
               <button
                 type="submit"
@@ -111,7 +117,7 @@ function BlocoMesa({ mesa, semMesa }: { mesa: Mesa; semMesa: ConvidadoSemMesa[] 
             </option>
             {semMesa.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.nome}
+                {c.lugares > 1 ? `${c.nome} (${c.lugares})` : c.nome}
               </option>
             ))}
           </select>
@@ -128,16 +134,18 @@ export function ColunaMesas({
 }: {
   festaId: string;
   mesas: Mesa[];
-  convidados: { id: string; nome: string; mesaId: string | null }[];
+  convidados: { id: string; nome: string; mesaId: string | null; lugares: number }[];
 }) {
   const semMesa = convidados.filter((c) => !c.mesaId).sort((a, b) => compararNomes(a.nome, b.nome));
   const lugares = mesas.reduce((s, m) => s + m.lugares, 0);
-  const sentados = convidados.length - semMesa.length;
+  // Em pessoas, não em convites.
+  const pessoas = convidados.reduce((s, c) => s + c.lugares, 0);
+  const sentados = pessoas - semMesa.reduce((s, c) => s + c.lugares, 0);
 
   return (
     <Coluna
       id="mesas"
-      titulo="Mesas"
+      titulo="Layout das mesas"
       resumo={
         mesas.length > 0 && (
           <>
@@ -146,7 +154,7 @@ export function ColunaMesas({
               lugares ·
             </span>{" "}
             <span className="whitespace-nowrap">
-              <N>{sentados}</N> de <N>{convidados.length}</N> com mesa
+              <N>{sentados}</N> de <N>{pessoas}</N> pessoas com mesa
             </span>
           </>
         )
@@ -173,7 +181,7 @@ export function ColunaMesas({
           Crie as mesas e distribua os convidados. No check-in, o leitor mostra a mesa de cada um.
         </Vazio>
       ) : (
-        <ul className="pautado flex flex-col gap-(--linha)" aria-label="Lista de mesas">
+        <ul className={cn(BANDEJA, COR_RAIA.recepcao, "mt-2")} aria-label="Lista de mesas">
           {mesas.map((m) => (
             <BlocoMesa key={m.id} mesa={m} semMesa={semMesa} />
           ))}

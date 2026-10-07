@@ -1,25 +1,35 @@
 import "server-only";
 
-import { Document, Page, renderToBuffer, Text, View } from "@react-pdf/renderer";
+import { Document, Image, Page, renderToBuffer, Text, View } from "@react-pdf/renderer";
 
-import { dataDaFesta, LinhaDado, LinhaDeMargem, linhasDaFesta, type DadosFesta } from "./comum";
-import { base, cor } from "./tema";
+import { dataDaFesta, LinhaDado, linhasDaFesta, type DadosFesta } from "./comum";
+import { base, cor, LOGO, PROPORCAO_LOGO } from "./tema";
 
 // Convite para os convidados: só os dados da festa, em A5 (meia folha A4),
 // bom para imprimir ou mandar pelo WhatsApp. Nada de fornecedores, valores ou mesas.
 function Convite({ festa }: { festa: DadosFesta }) {
   const data = dataDaFesta(festa.dataHora);
   return (
-    <Document title={`Convite · ${festa.titulo}`} author="Elisangela Eventos" language="pt-BR">
+    <Document title={`Convite · ${festa.titulo}`} author="Elisangela Schubert" language="pt-BR">
       <Page
         size="A5"
         style={[
           base.pagina,
-          { paddingTop: 48, paddingRight: 36, paddingBottom: 48, paddingLeft: 64 },
+          { paddingTop: 48, paddingRight: 36, paddingBottom: 48, paddingLeft: 36 },
         ]}
       >
-        <LinhaDeMargem x={44} />
         <View style={base.conteudo}>
+          {/* Image do PDF, não um <img>: não existe alt aqui. */}
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          <Image
+            src={LOGO}
+            style={{
+              width: 150,
+              height: 150 * PROPORCAO_LOGO,
+              alignSelf: "center",
+              marginBottom: 18,
+            }}
+          />
           <Text style={base.rotulo}>Convite</Text>
 
           <View style={{ flexDirection: "row", alignItems: "flex-start", marginTop: 18 }}>
@@ -85,10 +95,10 @@ function Convite({ festa }: { festa: DadosFesta }) {
           fixed
           style={[
             base.suave,
-            { position: "absolute", left: 64, right: 36, bottom: 26, fontSize: 8 },
+            { position: "absolute", left: 36, right: 36, bottom: 26, fontSize: 8 },
           ]}
         >
-          Elisangela Eventos
+          Elisangela Schubert
         </Text>
       </Page>
     </Document>

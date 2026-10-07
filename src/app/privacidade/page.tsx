@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { Moldura } from "@/components/moldura-publica";
-import { DIAS_RETENCAO } from "@/lib/retencao/prazo";
+import { DIAS_ARQUIVO, DIAS_RETENCAO } from "@/lib/retencao/prazo";
 
 export const metadata: Metadata = {
   title: "Privacidade dos convidados",
@@ -49,7 +49,7 @@ export default function PaginaPrivacidade() {
     },
     {
       titulo: "Por quanto tempo",
-      texto: `Até ${DIAS_RETENCAO} dias depois da festa. Depois disso, seu nome, telefone e resposta são apagados automaticamente; fica só a contagem total de convidados, sem identificar ninguém.`,
+      texto: `Até ${DIAS_RETENCAO} dias depois da festa (normalmente ${DIAS_ARQUIVO}). Depois disso, seu nome, telefone e resposta são apagados do sistema automaticamente; fica só a contagem total de convidados, sem identificar ninguém. A organizadora guarda um arquivo da festa em PDF, que inclui a lista de convidados.`,
     },
     {
       titulo: "Onde ficam",

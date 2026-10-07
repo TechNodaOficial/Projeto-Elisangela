@@ -13,8 +13,11 @@ export async function listarConvidados(festaId: string) {
       nome: true,
       telefone: true,
       tokenConvite: true,
+      pessoas: true,
       rsvp: true,
+      confirmadas: true,
       respondidoEm: true,
+      entraram: true,
       presenteEm: true,
       mesaId: true,
       mesa: { select: { nome: true } },
@@ -26,12 +29,4 @@ export async function listarConvidados(festaId: string) {
 
 export type ConvidadoResumo = Awaited<ReturnType<typeof listarConvidados>>[number];
 
-export function contarPorStatus(convidados: ConvidadoResumo[]) {
-  return {
-    total: convidados.length,
-    confirmados: convidados.filter((c) => c.rsvp === "CONFIRMADO").length,
-    recusados: convidados.filter((c) => c.rsvp === "RECUSADO").length,
-    aguardando: convidados.filter((c) => c.rsvp === "PENDENTE").length,
-    presentes: convidados.filter((c) => c.presenteEm).length,
-  };
-}
+export { contarPorStatus } from "./contagem";

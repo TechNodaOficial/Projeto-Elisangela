@@ -43,10 +43,10 @@ model TentativaLogin {
 }
 
 model Festa {
-  id                   String           @id @default(cuid())
+  id                   String             @id @default(cuid())
   titulo               String
   // Data e horário juntos, como instante (timestamptz). A exibição converte para o fuso de São Paulo.
-  dataHora             DateTime         @db.Timestamptz(3)
+  dataHora             DateTime           @db.Timestamptz(3)
   localNome            String
   endereco             String
   traje                String?
@@ -56,18 +56,31 @@ model Festa {
   plantaUrl            String?
   plantaLargura        Int?
   plantaAltura         Int?
-  // LGPD: 90 dias depois da festa os convidados são apagados (src/lib/retencao.ts).
-  // As contagens ficam guardadas aqui para a festa concluída continuar com os números.
-  convidadosApagadosEm DateTime?        @db.Timestamptz(3)
+  // Foto da festa (noivos, aniversariante) no fundo da página da festa. Mesmo Blob privado.
+  fotoUrl              String?
+  // Arquivo e LGPD (src/lib/retencao): depois da festa, ela baixa o PDF completo
+  // (pdfCompletoEm) e a limpeza apaga todos os dados da festa (30 dias com o PDF, 90 sem).
+  // convidadosApagadosEm marca esse apagamento; as contagens ficam guardadas aqui.
+  pdfCompletoEm        DateTime?          @db.Timestamptz(3)
+  // Portaria: link que ela manda para os ajudantes da entrada (/portaria/[token]) e o PIN
+  // que fala pessoalmente. Só abre o leitor desta festa, perto do horário (lib/portaria).
+  portariaToken        String?            @unique
+  portariaPin          String?
+  convidadosApagadosEm DateTime?          @db.Timestamptz(3)
   resumoConvidados     Int?
   resumoConfirmados    Int?
   resumoPresentes      Int?
-  criadoEm             DateTime         @default(now()) @db.Timestamptz(3)
-  atualizadoEm         DateTime         @updatedAt @db.Timestamptz(3)
+  criadoEm             DateTime           @default(now()) @db.Timestamptz(3)
+  atualizadoEm         DateTime           @updatedAt @db.Timestamptz(3)
   convidados           Convidado[]
-  fornecedores         Fornecedor[]
+  contratacoes         Contratacao[]
   mesas                Mesa[]
   cronograma           ItemCronograma[]
+  menu                 ItemMenu[]
+  entradas             EntradaCerimonia[]
+  padrinhos            Padrinho[]
+  observacoesGerais    Observacao[]
+  sessoesPortaria      SessaoPortaria[]
 
   @@index([dataHora])
   @@map("festas")
@@ -90,8 +103,15 @@ model Convidado {
   // Vai dentro do QR Code. Separado do token do convite para que uma foto do QR
   // não permita alterar a resposta do convidado.
   codigoCheckin String      @unique
+  // Um convite pode ser de uma família ou grupo ("Família Silva", 4 pessoas), com um QR só.
+  pessoas       Int         @default(1)
   rsvp          StatusRsvp  @default(PENDENTE)
+  // Quantas pessoas vão, informado ao confirmar (1 a `pessoas`). Vazio se não confirmou.
+  confirmadas   Int?
   respondidoEm  DateTime?   @db.Timestamptz(3)
+  // Quantas já entraram: a família pode chegar em partes (3 agora, 1 depois).
+  entraram      Int         @default(0)
+  // Hora da última entrada registrada; vazio enquanto ninguém entrou.
   presenteEm    DateTime?   @db.Timestamptz(3)
   // Reservado para acompanhantes (fora do MVP): o acompanhante aponta para o titular.
   titularId     String?
@@ -109,22 +129,89 @@ model Convidado {
   @@map("convidados")
 }
 
+// Tipo de serviço de festa (Buffet, DJ, Decoração...). A Elisangela mantém a lista.
+// Cada serviço tem um modelo de checklist, copiado para a festa quando o serviço é contratado.
+model Servico {
+  id           String        @id @default(cuid())
+  nome         String        @unique
+  itensModelo  ItemModelo[]
+  fornecedores Fornecedor[]
+  contratacoes Contratacao[]
+  criadoEm     DateTime      @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@map("servicos")
+}
+
+// Item do modelo de checklist de um serviço (ex.: Buffet → "Talheres").
+model ItemModelo {
+  id        String   @id @default(cuid())
+  servicoId String
+  servico   Servico  @relation(fields: [servicoId], references: [id], onDelete: Cascade)
+  texto     String
+  ordem     Int
+  criadoEm  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([servicoId])
+  @@map("itens_modelo")
+}
+
+// Base geral de fornecedores, independente das festas.
 model Fornecedor {
+  id           String        @id @default(cuid())
+  nome         String
+  servicoId    String
+  // Restrict: um serviço com fornecedores não pode ser apagado.
+  servico      Servico       @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+  telefone     String?
+  contratacoes Contratacao[]
+  criadoEm     DateTime      @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime      @updatedAt @db.Timestamptz(3)
+
+  @@index([servicoId])
+  @@map("fornecedores")
+}
+
+// Um serviço dentro de uma festa: quem foi escolhido, quanto custa, se já pagou e o checklist.
+model Contratacao {
   id            String           @id @default(cuid())
   festaId       String
   festa         Festa            @relation(fields: [festaId], references: [id], onDelete: Cascade)
-  nome          String
-  servico       String
-  telefone      String?
+  servicoId     String
+  servico       Servico          @relation(fields: [servicoId], references: [id], onDelete: Restrict)
+  // Vazio = ainda não escolheu. Restrict: fornecedor usado em festa não some do roteiro.
+  fornecedorId  String?
+  fornecedor    Fornecedor?      @relation(fields: [fornecedorId], references: [id], onDelete: Restrict)
   // Em centavos, para não ter erro de arredondamento. Vazio = valor ainda não definido.
   valorCentavos Int?
-  pago          Boolean          @default(false)
+  // Valor dividido em `parcelas` vezes; `parcelasPagas` conta as já pagas (à vista = 1 parcela).
+  parcelas      Int              @default(1)
+  parcelasPagas Int              @default(0)
+  // Contrato assinado (PDF ou foto) no Blob store privado; o painel serve com login.
+  contratoUrl   String?
+  contratoNome  String?
+  checklist     ItemChecklist[]
   cronograma    ItemCronograma[]
   criadoEm      DateTime         @default(now()) @db.Timestamptz(3)
   atualizadoEm  DateTime         @updatedAt @db.Timestamptz(3)
 
   @@index([festaId])
-  @@map("fornecedores")
+  @@index([fornecedorId])
+  @@map("contratacoes")
+}
+
+// Item do checklist de uma contratação, marcado quando resolvido.
+model ItemChecklist {
+  id            String      @id @default(cuid())
+  contratacaoId String
+  contratacao   Contratacao @relation(fields: [contratacaoId], references: [id], onDelete: Cascade)
+  texto         String
+  feito         Boolean     @default(false)
+  ordem         Int
+  criadoEm      DateTime    @default(now()) @db.Timestamptz(3)
+
+  @@index([contratacaoId])
+  @@map("itens_checklist")
 }
 
 model Mesa {
@@ -141,20 +228,114 @@ model Mesa {
   @@map("mesas")
 }
 
+// O cronograma da festa e o roteiro da cerimônia (cerimonial) são a mesma lista de
+// horários, separada por seção.
+enum SecaoCronograma {
+  FESTA
+  CERIMONIA
+}
+
 model ItemCronograma {
-  id               String      @id @default(cuid())
+  id               String          @id @default(cuid())
   festaId          String
-  festa            Festa       @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  festa            Festa           @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  secao            SecaoCronograma @default(FESTA)
   // "HH:MM" no horário de São Paulo. Horários antes das 06:00 contam como madrugada (fim da festa).
   hora             String
   atividade        String
-  // Responsável: um fornecedor cadastrado ou um texto livre (ex.: "Cerimonialista").
-  fornecedorId     String?
-  fornecedor       Fornecedor? @relation(fields: [fornecedorId], references: [id], onDelete: SetNull)
+  // Responsável: um serviço contratado na festa ou um texto livre (ex.: "Cerimonialista").
+  contratacaoId    String?
+  contratacao      Contratacao?    @relation(fields: [contratacaoId], references: [id], onDelete: SetNull)
   responsavelTexto String?
-  criadoEm         DateTime    @default(now()) @db.Timestamptz(3)
-  atualizadoEm     DateTime    @updatedAt @db.Timestamptz(3)
+  criadoEm         DateTime        @default(now()) @db.Timestamptz(3)
+  atualizadoEm     DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([festaId])
   @@map("itens_cronograma")
+}
+
+// Cardápio da festa, por etapa ("Entrada", "Prato principal", "Sobremesa"...).
+model ItemMenu {
+  id       String   @id @default(cuid())
+  festaId  String
+  festa    Festa    @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  etapa    String
+  texto    String
+  ordem    Int
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("itens_menu")
+}
+
+// Ordem do cortejo na cerimônia: quem entra e com qual música.
+model EntradaCerimonia {
+  id       String   @id @default(cuid())
+  festaId  String
+  festa    Festa    @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  ordem    Int
+  quem     String
+  musica   String?
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("entradas_cerimonia")
+}
+
+// Padrinhos da cerimônia, cada um com o seu checklist (confirmou, traje, ensaio...).
+// Têm nome e telefone: saem junto com os convidados na limpeza da LGPD.
+model Padrinho {
+  id           String         @id @default(cuid())
+  festaId      String
+  festa        Festa          @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  nome         String
+  telefone     String?
+  ordem        Int
+  checklist    ItemPadrinho[]
+  criadoEm     DateTime       @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("padrinhos")
+}
+
+model ItemPadrinho {
+  id         String   @id @default(cuid())
+  padrinhoId String
+  padrinho   Padrinho @relation(fields: [padrinhoId], references: [id], onDelete: Cascade)
+  texto      String
+  feito      Boolean  @default(false)
+  ordem      Int
+  criadoEm   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([padrinhoId])
+  @@map("itens_padrinho")
+}
+
+// Observações gerais de uma parte da festa ("fornecedores", "convidados", "croqui"...):
+// uma folha livre, como um documento, em JSON do editor (Tiptap).
+model Observacao {
+  id           String   @id @default(cuid())
+  festaId      String
+  festa        Festa    @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  secao        String
+  conteudo     Json
+  atualizadoEm DateTime @updatedAt @db.Timestamptz(3)
+
+  @@unique([festaId, secao])
+  @@map("observacoes")
+}
+
+// Ajudante da portaria que entrou com o link e o PIN: só o leitor de QR desta festa.
+// O banco guarda o hash do token do cookie, como nas sessões da Elisangela.
+model SessaoPortaria {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  festaId   String
+  festa     Festa    @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  expiraEm  DateTime @db.Timestamptz(3)
+  criadoEm  DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([festaId])
+  @@map("sessoes_portaria")
 }

@@ -221,7 +221,8 @@ export function MenuLinha({
 }: {
   nome: string;
   aoEditar: () => void;
-  remocao: {
+  // Sem remoção (ex.: item em uso), o menu só oferece Editar.
+  remocao?: {
     titulo: string;
     descricao: React.ReactNode;
     rotulo: string;
@@ -247,22 +248,58 @@ export function MenuLinha({
             <Pencil aria-hidden strokeWidth={1.75} />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onSelect={() => setRemovendo(true)}>
-            <Trash2 aria-hidden strokeWidth={1.75} />
-            Remover
-          </DropdownMenuItem>
+          {remocao && (
+            <DropdownMenuItem variant="destructive" onSelect={() => setRemovendo(true)}>
+              <Trash2 aria-hidden strokeWidth={1.75} />
+              Remover
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
-      <ConfirmarExclusao
-        aberto={removendo}
-        aoMudar={setRemovendo}
-        titulo={remocao.titulo}
-        descricao={remocao.descricao}
-        rotuloConfirmar={remocao.rotulo}
-        rotuloEnviando="Removendo…"
-        acao={remocao.acao}
-      />
+      {remocao && (
+        <ConfirmarExclusao
+          aberto={removendo}
+          aoMudar={setRemovendo}
+          titulo={remocao.titulo}
+          descricao={remocao.descricao}
+          rotuloConfirmar={remocao.rotulo}
+          rotuloEnviando="Removendo…"
+          acao={remocao.acao}
+        />
+      )}
     </>
+  );
+}
+
+// ── Novo item (checklist) ────────────────────────────────────────────────────
+
+// Campo de uma linha para acrescentar um item a uma lista (ex.: checklist). Limpa ao salvar.
+export function NovoItem({ acao, rotulo }: { acao: Acao; rotulo: string }) {
+  const [estado, enviar, enviando] = useActionState(acao, {});
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (estado.sucesso) formRef.current?.reset();
+  }, [estado.sucesso]);
+  const erro = estado.erros?.texto ?? estado.erroGeral;
+
+  return (
+    <form ref={formRef} action={enviar} noValidate className="mt-1">
+      <div className="flex items-center gap-2">
+        <Input
+          name="texto"
+          maxLength={120}
+          autoComplete="off"
+          placeholder="Novo item"
+          aria-label={rotulo}
+          aria-invalid={erro ? true : undefined}
+          className="bg-card h-9"
+        />
+        <Button type="submit" variant="outline" disabled={enviando} className="bg-card h-9">
+          {enviando ? "…" : "Adicionar"}
+        </Button>
+      </div>
+      {erro && <p className="text-destructive mt-1 text-sm leading-5">{erro}</p>}
+    </form>
   );
 }
 

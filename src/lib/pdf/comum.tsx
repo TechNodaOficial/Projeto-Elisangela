@@ -30,23 +30,6 @@ export function dataDaFesta(dataHora: Date) {
   };
 }
 
-// Linha de margem da folha pautada, como no painel.
-export function LinhaDeMargem({ x }: { x: number }) {
-  return (
-    <View
-      fixed
-      style={{
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        left: x,
-        borderLeftWidth: 0.75,
-        borderLeftColor: cor.margem,
-      }}
-    />
-  );
-}
-
 // Rótulo à esquerda, valor à direita, com o fio da pauta embaixo.
 export function LinhaDado({
   rotulo,

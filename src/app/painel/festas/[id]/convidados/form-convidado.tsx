@@ -11,7 +11,7 @@ import type { EstadoFormConvidado } from "./actions";
 
 type Props = {
   acao: (estado: EstadoFormConvidado, formData: FormData) => Promise<EstadoFormConvidado>;
-  inicial?: { nome: string; telefone: string };
+  inicial?: { nome: string; pessoas: string; telefone: string };
   rotuloEnviar: string;
   rotuloEnviando: string;
   // Prefixo dos ids, para não repetir ids quando há vários formulários na tela.
@@ -35,7 +35,7 @@ export function FormConvidado({
   const [estado, enviar, enviando] = useActionState(acao, {});
   const nomeRef = useRef<HTMLInputElement>(null);
   const erros = estado.erros ?? {};
-  const valores = estado.valores ?? inicial ?? { nome: "", telefone: "" };
+  const valores = estado.valores ?? inicial ?? { nome: "", pessoas: "1", telefone: "" };
 
   // O React 19 limpa o formulário após uma ação bem-sucedida; aqui só devolvemos o foco.
   useEffect(() => {
@@ -60,7 +60,7 @@ export function FormConvidado({
           ref={nomeRef}
           id={id("nome")}
           name="nome"
-          placeholder="Nome do convidado"
+          placeholder="Ex.: Ana Souza, Família Silva"
           defaultValue={valores.nome}
           maxLength={120}
           autoComplete="off"
@@ -71,6 +71,31 @@ export function FormConvidado({
         {erros.nome && (
           <p id={id("erro-nome")} className="text-destructive text-sm">
             {erros.nome}
+          </p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5 @xl:w-24">
+        <Label htmlFor={id("pessoas")}>Pessoas</Label>
+        <Input
+          id={id("pessoas")}
+          name="pessoas"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={30}
+          defaultValue={valores.pessoas ?? "1"}
+          autoComplete="off"
+          aria-invalid={erros.pessoas ? true : undefined}
+          aria-describedby={erros.pessoas ? id("erro-pessoas") : id("dica-pessoas")}
+          className="bg-card h-10 font-mono"
+        />
+        <p id={id("dica-pessoas")} className="sr-only">
+          Quantas pessoas este convite inclui, por exemplo 4 para uma família.
+        </p>
+        {erros.pessoas && (
+          <p id={id("erro-pessoas")} className="text-destructive text-sm">
+            {erros.pessoas}
           </p>
         )}
       </div>

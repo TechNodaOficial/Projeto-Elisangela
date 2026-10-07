@@ -25,9 +25,12 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "4.25mb",
     },
   },
-  // As fontes do PDF são lidas do disco; sem isso elas não vão junto para a função na Vercel.
+  // As fontes e a logo do PDF são lidas do disco; sem isso não vão junto para a função na Vercel.
   outputFileTracingIncludes: {
-    "/painel/festas/\\[id\\]/pdf/\\[tipo\\]": ["./src/lib/pdf/fontes/*.ttf"],
+    "/painel/festas/\\[id\\]/pdf/\\[tipo\\]": [
+      "./src/lib/pdf/fontes/*.ttf",
+      "./src/lib/pdf/logo.png",
+    ],
     // A imagem do QR do convidado usa as mesmas fontes.
     "/c/\\[token\\]/qr": ["./src/lib/pdf/fontes/*.ttf"],
   },

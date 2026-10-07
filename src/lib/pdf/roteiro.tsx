@@ -5,10 +5,12 @@ import { Document, Image, Page, renderToBuffer, Text, View } from "@react-pdf/re
 import { formatarTelefone } from "@/lib/convidados/telefone";
 import type { Colunas } from "@/lib/festas/consultas";
 import { formatarReais } from "@/lib/festas/formatos";
+import { valorPago } from "@/lib/festas/parcelas";
+import { lugaresDe } from "@/lib/convidados/contagem";
 import type { InfoImagem } from "@/lib/planta/imagem";
 
-import { dataDaFesta, LinhaDado, LinhaDeMargem, linhasDaFesta, type DadosFesta } from "./comum";
-import { base, cor } from "./tema";
+import { dataDaFesta, LinhaDado, linhasDaFesta, type DadosFesta } from "./comum";
+import { base, cor, LOGO, PROPORCAO_LOGO } from "./tema";
 
 export type DadosRoteiro = {
   festa: DadosFesta;
@@ -18,10 +20,10 @@ export type DadosRoteiro = {
   planta: { bytes: Uint8Array; info: InfoImagem } | null;
 };
 
-// Margens da folha A4 (em pontos). A esquerda é maior por causa da linha de margem.
-const M = { topo: 44, direita: 40, base: 52, esquerda: 66 };
+// Margens da folha A4 (em pontos), iguais dos dois lados.
+export const M = { topo: 44, direita: 40, base: 52, esquerda: 40 };
 
-function Secao({
+export function Secao({
   titulo,
   resumo,
   children,
@@ -45,21 +47,37 @@ function Secao({
   );
 }
 
-function Vazio({ children }: { children: string }) {
+export function Vazio({ children }: { children: string }) {
   return <Text style={[base.suave, { paddingVertical: 5 }]}>{children}</Text>;
 }
 
-const linha = {
+export const linha = {
   flexDirection: "row" as const,
   paddingVertical: 4.5,
   borderBottomWidth: 0.5,
   borderBottomColor: cor.pauta,
 };
 
-function Fornecedores({ fornecedores }: { fornecedores: Colunas["fornecedores"] }) {
+export function Fornecedores({ contratacoes }: { contratacoes: Colunas["contratacoes"] }) {
+  const fornecedores = contratacoes.map((c) => ({
+    id: c.id,
+    servico: c.servico.nome,
+    nome: c.fornecedor?.nome ?? "A escolher",
+    telefone: c.fornecedor?.telefone ?? null,
+    valorCentavos: c.valorCentavos,
+    pago: valorPago(c.valorCentavos ?? 0, c.parcelas, c.parcelasPagas),
+    situacao:
+      c.valorCentavos === null
+        ? ""
+        : c.parcelasPagas >= c.parcelas
+          ? "Pago"
+          : c.parcelas > 1
+            ? `${c.parcelasPagas}/${c.parcelas} pagas`
+            : "A pagar",
+  }));
   const comValor = fornecedores.filter((f) => f.valorCentavos !== null);
   const total = comValor.reduce((s, f) => s + f.valorCentavos!, 0);
-  const pago = comValor.filter((f) => f.pago).reduce((s, f) => s + f.valorCentavos!, 0);
+  const pago = comValor.reduce((s, f) => s + f.pago, 0);
   const n = fornecedores.length;
 
   return (
@@ -86,9 +104,12 @@ function Fornecedores({ fornecedores }: { fornecedores: Colunas["fornecedores"] 
                 {f.valorCentavos !== null ? formatarReais(f.valorCentavos) : "—"}
               </Text>
               <Text
-                style={[{ width: 56, fontSize: 9, textAlign: "right" }, f.pago ? {} : base.suave]}
+                style={[
+                  { width: 56, fontSize: 9, textAlign: "right" },
+                  f.situacao === "Pago" ? {} : base.suave,
+                ]}
               >
-                {f.valorCentavos === null ? "" : f.pago ? "Pago" : "A pagar"}
+                {f.situacao}
               </Text>
             </View>
           ))}
@@ -115,14 +136,18 @@ function Fornecedores({ fornecedores }: { fornecedores: Colunas["fornecedores"] 
   );
 }
 
-function Mesas({ mesas, semMesa }: { mesas: Colunas["mesas"]; semMesa: number }) {
+// Em pessoas: a Família Silva confirmada com 4 ocupa 4 lugares.
+const ocupados = (m: Colunas["mesas"][number]) =>
+  m.convidados.reduce((s, c) => s + lugaresDe(c), 0);
+
+export function Mesas({ mesas, semMesa }: { mesas: Colunas["mesas"]; semMesa: number }) {
   const lugares = mesas.reduce((s, m) => s + m.lugares, 0);
-  const sentados = mesas.reduce((s, m) => s + m.convidados.length, 0);
+  const sentados = mesas.reduce((s, m) => s + ocupados(m), 0);
   const resumo =
     mesas.length === 0
       ? undefined
       : `${sentados} de ${lugares} lugares ocupados` +
-        (semMesa > 0 ? ` · ${semMesa} ${semMesa === 1 ? "convidado" : "convidados"} sem mesa` : "");
+        (semMesa > 0 ? ` · ${semMesa} ${semMesa === 1 ? "pessoa" : "pessoas"} sem mesa` : "");
 
   return (
     <Secao titulo="Mesas" resumo={resumo}>
@@ -137,17 +162,19 @@ function Mesas({ mesas, semMesa }: { mesas: Colunas["mesas"]; semMesa: number })
                 style={[
                   base.mono,
                   { fontSize: 8.5 },
-                  m.convidados.length > m.lugares
+                  ocupados(m) > m.lugares
                     ? { backgroundColor: cor.grifo, paddingHorizontal: 2 }
                     : base.suave,
                 ]}
               >
-                {m.convidados.length}/{m.lugares}
+                {ocupados(m)}/{m.lugares}
               </Text>
             </View>
             <Text style={[{ fontSize: 9 }, m.convidados.length ? {} : base.suave]}>
               {m.convidados.length
-                ? m.convidados.map((c) => c.nome).join(" · ")
+                ? m.convidados
+                    .map((c) => (lugaresDe(c) > 1 ? `${c.nome} (${lugaresDe(c)})` : c.nome))
+                    .join(" · ")
                 : "Ninguém sentado ainda."}
             </Text>
           </View>
@@ -157,15 +184,24 @@ function Mesas({ mesas, semMesa }: { mesas: Colunas["mesas"]; semMesa: number })
   );
 }
 
-function Cronograma({ itens }: { itens: Colunas["cronograma"] }) {
+export function Cronograma({
+  itens,
+  titulo = "Cronograma",
+}: {
+  itens: Colunas["cronograma"];
+  titulo?: string;
+}) {
   return (
-    <Secao titulo="Cronograma">
+    <Secao titulo={titulo}>
       {itens.length === 0 ? (
         <Vazio>Nenhum horário cadastrado.</Vazio>
       ) : (
         itens.map((item) => {
-          const responsavel = item.fornecedor
-            ? `${item.fornecedor.nome} (${item.fornecedor.servico})`
+          const c = item.contratacao;
+          const responsavel = c
+            ? c.fornecedor
+              ? `${c.fornecedor.nome} (${c.servico.nome})`
+              : c.servico.nome
             : item.responsavelTexto;
           return (
             <View key={item.id} style={linha} wrap={false}>
@@ -183,7 +219,7 @@ function Cronograma({ itens }: { itens: Colunas["cronograma"] }) {
 }
 
 // Dois textos soltos, cada um preso ao pé da página (um View absoluto com filhos sumia no render).
-function Rodape({ titulo }: { titulo: string }) {
+export function Rodape({ titulo, rotulo = "Roteiro" }: { titulo: string; rotulo?: string }) {
   const estilo = {
     position: "absolute" as const,
     bottom: 24,
@@ -193,7 +229,7 @@ function Rodape({ titulo }: { titulo: string }) {
   return (
     <>
       <Text fixed style={[estilo, { left: M.esquerda, right: M.direita + 60 }]}>
-        Roteiro · {titulo}
+        {rotulo} · {titulo}
       </Text>
       <Text
         fixed
@@ -214,19 +250,20 @@ function Roteiro({ festa, colunas, contagem, semMesa, planta }: DadosRoteiro) {
   const deitada = planta ? planta.info.largura > planta.info.altura : false;
 
   return (
-    <Document title={`Roteiro · ${festa.titulo}`} author="Elisangela Eventos" language="pt-BR">
+    <Document title={`Roteiro · ${festa.titulo}`} author="Elisangela Schubert" language="pt-BR">
       <Page size="A4" style={pagina}>
-        <LinhaDeMargem x={46} />
         <View style={base.conteudo}>
           <View
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              alignItems: "flex-start",
+              alignItems: "center",
             }}
           >
             <Text style={base.rotulo}>Roteiro da festa</Text>
-            <Text style={[base.suave, { fontSize: 8 }]}>Elisangela Eventos</Text>
+            {/* Image do PDF, não um <img>: não existe alt aqui. */}
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            <Image src={LOGO} style={{ width: 96, height: 96 * PROPORCAO_LOGO }} />
           </View>
 
           <View style={{ flexDirection: "row", alignItems: "flex-start", marginTop: 14 }}>
@@ -282,7 +319,7 @@ function Roteiro({ festa, colunas, contagem, semMesa, planta }: DadosRoteiro) {
           </View>
 
           {/* Mesma ordem das colunas da página. */}
-          <Fornecedores fornecedores={colunas.fornecedores} />
+          <Fornecedores contratacoes={colunas.contratacoes} />
           <Mesas mesas={colunas.mesas} semMesa={semMesa} />
           <Cronograma itens={colunas.cronograma} />
         </View>
@@ -291,7 +328,6 @@ function Roteiro({ festa, colunas, contagem, semMesa, planta }: DadosRoteiro) {
 
       {planta && (
         <Page size="A4" orientation={deitada ? "landscape" : "portrait"} style={pagina}>
-          <LinhaDeMargem x={46} />
           <View style={[base.conteudo, { flex: 1 }]}>
             <Text style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>Planta do salão</Text>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>

@@ -51,7 +51,7 @@ export function ConfirmarExclusao({
   return (
     <AlertDialog open={aberto} onOpenChange={aoMudar}>
       {gatilho && <AlertDialogTrigger asChild>{gatilho}</AlertDialogTrigger>}
-      <AlertDialogContent className="folha folha-lisa gap-5 py-6 pr-6 pl-[calc(var(--margem)+0.875rem)] ring-0 data-[size=default]:sm:max-w-md">
+      <AlertDialogContent className="folha folha-lisa gap-5 px-6 py-6 ring-0 data-[size=default]:sm:max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-semibold">{titulo}</AlertDialogTitle>
           <AlertDialogDescription>{descricao}</AlertDialogDescription>

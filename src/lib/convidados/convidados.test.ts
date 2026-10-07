@@ -53,7 +53,24 @@ describe("mensagemConvite", () => {
     expect(texto).toBe(
       "Olá, Maria!\n\n" +
         "Você está na lista de convidados de Casamento Ana e João: sábado, 3 de outubro, às 19:30, em Espaço Jardim das Flores.\n\n" +
-        "Confirme sua presença por este link: https://exemplo.com/c/abc",
+        "Confirme sua presença até 23/09 por este link: https://exemplo.com/c/abc",
+    );
+  });
+
+  it("convite de família usa o nome todo e fala no plural", () => {
+    const texto = mensagemConvite({
+      nomeConvidado: "Família Silva",
+      pessoas: 4,
+      tituloFesta: "Casamento Ana e João",
+      dataHora: paraInstante("2026-10-03", "19:30"),
+      localNome: "Espaço Jardim das Flores",
+      link: "https://exemplo.com/c/abc",
+    });
+
+    expect(texto).toBe(
+      "Olá, Família Silva!\n\n" +
+        "Vocês estão na lista de convidados de Casamento Ana e João: sábado, 3 de outubro, às 19:30, em Espaço Jardim das Flores.\n\n" +
+        "Confirme a presença até 23/09 por este link: https://exemplo.com/c/abc",
     );
   });
 });

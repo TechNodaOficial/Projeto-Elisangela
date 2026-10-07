@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, CalendarClock, LogOut, ScanLine, type LucideIcon } from "lucide-react";
+import { Archive, CalendarClock, Handshake, LogOut, ScanLine, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -34,6 +34,13 @@ function itens(contagens: { pendentes: number; concluidas: number }): Item[] {
       icone: Archive,
       contagem: contagens.concluidas,
       ativo: (c) => c.startsWith("/painel/concluidas"),
+    },
+    {
+      href: "/painel/fornecedores",
+      rotulo: "Fornecedores",
+      curto: "Fornecedores",
+      icone: Handshake,
+      ativo: (c) => c.startsWith("/painel/fornecedores"),
     },
     {
       href: "/painel/checkin",
@@ -98,7 +105,7 @@ export function NavegacaoLateral({
   );
 }
 
-// Barra inferior com as três seções (celular).
+// Barra inferior com as quatro seções (celular).
 export function NavegacaoInferior({
   contagens,
 }: {
@@ -111,7 +118,7 @@ export function NavegacaoInferior({
       aria-label="Seções"
       className="bg-card border-border fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="grid grid-cols-3">
+      <ul className="grid grid-cols-4">
         {itens(contagens).map((item) => {
           const ativo = item.ativo(caminho);
           const Icone = item.icone;

@@ -68,10 +68,22 @@ export async function editarConvidado(
   const v = validar(formData);
   if (!v.ok) return v.estado;
 
-  const convidado = await prisma.convidado.findUnique({ where: { id }, select: { festaId: true } });
+  const convidado = await prisma.convidado.findUnique({
+    where: { id },
+    select: { festaId: true, confirmadas: true, entraram: true },
+  });
   if (!convidado) return { erroGeral: "Este convidado não existe mais.", valores: v.valores };
 
-  await prisma.convidado.update({ where: { id }, data: v.dados });
+  // Grupo menor que antes: confirmadas e entradas não passam do novo tamanho.
+  const caber = (n: number | null) => (n === null ? null : Math.min(n, v.dados.pessoas));
+  await prisma.convidado.update({
+    where: { id },
+    data: {
+      ...v.dados,
+      confirmadas: caber(convidado.confirmadas),
+      entraram: caber(convidado.entraram) ?? 0,
+    },
+  });
   atualizarTelas(convidado.festaId);
   return { sucesso: Date.now() };
 }

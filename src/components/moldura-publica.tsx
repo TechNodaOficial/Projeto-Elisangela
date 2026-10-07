@@ -1,12 +1,13 @@
-// Moldura das páginas públicas do convite: a marca acima de uma folha estreita.
+// Moldura das páginas públicas do convite: a logo acima de uma folha estreita.
+
+import { MarcaLogo } from "@/components/logo";
 
 export function Moldura({ children }: { children: React.ReactNode }) {
   return (
     <main className="mx-auto w-full max-w-md px-4 pt-5 pb-10 sm:pt-12">
-      <p className="mb-4 flex items-baseline gap-1.5 px-1">
-        <span className="font-semibold tracking-[-0.02em]">Elisangela</span>
-        <span className="text-tinta-suave text-sm">Eventos</span>
-      </p>
+      <div className="mb-4 flex justify-center">
+        <MarcaLogo prioridade className="h-20 w-auto" />
+      </div>
       {children}
     </main>
   );

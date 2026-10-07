@@ -14,7 +14,10 @@ export async function buscarConvite(token: string) {
       id: true,
       festaId: true,
       nome: true,
+      pessoas: true,
       rsvp: true,
+      confirmadas: true,
+      entraram: true,
       presenteEm: true,
       codigoCheckin: true,
       festa: {

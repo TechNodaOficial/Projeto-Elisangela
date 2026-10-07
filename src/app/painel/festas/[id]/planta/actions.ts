@@ -39,7 +39,7 @@ export async function enviarPlanta(
     data: { plantaUrl: url, plantaLargura: info.largura, plantaAltura: info.altura },
   });
   await apagarPlanta(festa.plantaUrl);
-  revalidatePath(`/painel/festas/${festaId}`);
+  revalidatePath("/painel/festas/[id]", "layout");
   return { sucesso: Date.now() };
 }
 
@@ -55,5 +55,5 @@ export async function removerPlanta(festaId: string) {
     data: { plantaUrl: null, plantaLargura: null, plantaAltura: null },
   });
   await apagarPlanta(festa.plantaUrl);
-  revalidatePath(`/painel/festas/${festaId}`);
+  revalidatePath("/painel/festas/[id]", "layout");
 }

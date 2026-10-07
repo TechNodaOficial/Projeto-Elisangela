@@ -94,7 +94,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/c/[token]/qr">)
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#ffede1",
         color: cor.tinta,
         fontFamily: "Geist",
         fontSize: 32,
@@ -130,7 +130,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/c/[token]/qr">)
       >
         <Linha style={{ gap: 12 }}>
           <span style={{ fontWeight: 600 }}>Elisangela</span>
-          <span style={{ color: cor.suave }}>Eventos</span>
+          <span style={{ color: cor.suave }}>Schubert</span>
         </Linha>
 
         {/* Data como na folha: dia em mono ocupando três pautas, mês, semana e hora ao lado. */}
@@ -186,7 +186,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/c/[token]/qr">)
           display: "flex",
           flexDirection: "column",
           marginTop: P - 2,
-          backgroundColor: "#ffffff",
+          backgroundColor: "#ffede1",
         }}
       >
         <Picote />

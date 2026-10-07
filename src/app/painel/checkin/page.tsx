@@ -53,7 +53,7 @@ export default async function PaginaCheckin(props: PageProps<"/painel/checkin">)
         descricao="Escolha a festa para registrar a chegada dos convidados."
       />
       {festas.length === 0 ? (
-        <div className="folha folha-lisa flex max-w-xl items-start gap-3 py-6 pr-6 pl-[calc(var(--margem)+0.875rem)]">
+        <div className="folha folha-lisa flex max-w-xl items-start gap-3 px-6 py-6">
           <ScanLine aria-hidden className="mt-0.5 size-5 shrink-0" strokeWidth={1.75} />
           <div className="flex flex-col gap-1">
             <p className="font-semibold">Nenhuma festa hoje nem nos próximos dias.</p>

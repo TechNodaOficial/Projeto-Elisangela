@@ -1,35 +1,37 @@
 import type { Metadata } from "next";
-import { ArrowLeft, FileText, Pencil } from "lucide-react";
-import { headers } from "next/headers";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Armchair,
+  CircleAlert,
+  CircleCheck,
+  Clock,
+  FileText,
+  Footprints,
+  Handshake,
+  HeartHandshake,
+  KeyRound,
+  Map as IconeMapa,
+  Pencil,
+  ScrollText,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
-import { diasAte, festaConcluida, FUSO, partesData, rotuloProximidade } from "@/lib/datas";
+import { lugaresDe } from "@/lib/convidados/contagem";
+import { diasAte, festaConcluida, partesData, rotuloProximidade } from "@/lib/datas";
 import { buscarFesta, listarColunas } from "@/lib/festas/consultas";
-import { apagamentoPrevisto } from "@/lib/retencao/prazo";
+import { situacoesDoQuadro, type Botao } from "@/lib/festas/quadro";
 import { versaoPlanta } from "@/lib/planta/blob";
+import { cn } from "@/lib/utils";
 
-import { ColunaCronograma } from "./colunas/coluna-cronograma";
-import { ColunaFornecedores } from "./colunas/coluna-fornecedores";
-import { ColunaMesas } from "./colunas/coluna-mesas";
-import { SecaoConvidados } from "./convidados/secao-convidados";
+import { AvisoArquivo } from "./arquivo";
 import { ExcluirFesta } from "./excluir-festa";
-import { CampoPlanta } from "./planta/campo-planta";
-
-// Endereço público do site (para montar os links dos convites), igual ao do request.
-async function origemDoSite() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const protocolo =
-    h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https");
-  return `${protocolo}://${host}`;
-}
-
-// "2 de janeiro de 2027", no fuso de São Paulo.
-const dataCurta = (d: Date) =>
-  new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, dateStyle: "long" }).format(d);
+import { BotaoFoto } from "./foto/botao-foto";
 
 export async function generateMetadata(props: PageProps<"/painel/festas/[id]">): Promise<Metadata> {
   const { id } = await props.params;
@@ -42,10 +44,9 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   const festa = await buscarFesta(id);
   if (!festa) notFound();
 
-  const [convidados, colunas, origem] = await Promise.all([
+  const [convidados, colunas] = await Promise.all([
     listarConvidados(festa.id),
     listarColunas(festa.id),
-    origemDoSite(),
   ]);
   const data = partesData(festa.dataHora);
   const concluida = festaConcluida(festa.dataHora);
@@ -54,25 +55,151 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
     ? { href: "/painel/concluidas", rotulo: "Festas concluídas" }
     : { href: "/painel", rotulo: "Festas pendentes" };
 
-  // Linhas do roteiro: rótulo à esquerda, valor na pauta.
+  const contagem = contarPorStatus(convidados);
+  const situacoes = situacoesDoQuadro({
+    contratacoes: colunas.contratacoes.map((c) => ({
+      ...c,
+      fornecedorId: c.fornecedor?.id ?? null,
+    })),
+    convidados: festa.convidadosApagadosEm ? null : contagem,
+    temCroqui: !!festa.plantaUrl,
+    mesas: colunas.mesas.length,
+    pessoasSemMesa: convidados
+      .filter((c) => !c.mesaId && c.rsvp === "CONFIRMADO")
+      .reduce((s, c) => s + lugaresDe(c), 0),
+    cronograma: colunas.cronograma.length,
+    menu: colunas.menu.length,
+    cerimonial: colunas.cerimonial.length,
+    entradas: colunas.entradas.length,
+    padrinhos: colunas.padrinhos.map((p) => ({
+      itens: p.checklist.length,
+      feitos: p.checklist.filter((i) => i.feito).length,
+    })),
+  });
+
+  // O quadro da festa, como o kanban da Elisangela: três raias, cada botão abre uma página.
+  // A cor de raia vale para os botões neutros; verde/amarelo mostram a situação.
+  const raias: {
+    titulo: string;
+    cor: string;
+    botoes: { href: string; titulo: string; icone: LucideIcon; botao: Botao }[];
+  }[] = [
+    {
+      titulo: "Fornecedores e cronograma",
+      cor: "bg-pastel-pessego",
+      botoes: [
+        {
+          href: "fornecedores",
+          titulo: "Fornecedores",
+          icone: Handshake,
+          botao: situacoes.fornecedores,
+        },
+        {
+          href: "cronograma",
+          titulo: "Cronograma e menu",
+          icone: Clock,
+          botao: situacoes.cronograma,
+        },
+      ],
+    },
+    {
+      titulo: "Recepção",
+      cor: "bg-pastel-rosa",
+      botoes: [
+        {
+          href: "convidados",
+          titulo: "Lista de convidados",
+          icone: Users,
+          botao: situacoes.convidados,
+        },
+        { href: "croqui", titulo: "Croqui", icone: IconeMapa, botao: situacoes.croqui },
+        { href: "mesas", titulo: "Layout", icone: Armchair, botao: situacoes.layout },
+      ],
+    },
+    {
+      titulo: "Cerimônia",
+      cor: "bg-pastel-lilas",
+      botoes: [
+        {
+          href: "cerimonial",
+          titulo: "Cerimonial",
+          icone: ScrollText,
+          botao: situacoes.cerimonial,
+        },
+        {
+          href: "entradas",
+          titulo: "Entradas cerimônia",
+          icone: Footprints,
+          botao: situacoes.entradas,
+        },
+        {
+          href: "padrinhos",
+          titulo: "Checklist dos padrinhos",
+          icone: HeartHandshake,
+          botao: situacoes.padrinhos,
+        },
+      ],
+    },
+  ];
+
+  // Dados do roteiro que aparecem no topo.
   const linhas = [
     { rotulo: "Local", valor: festa.localNome },
     { rotulo: "Endereço", valor: festa.endereco },
     { rotulo: "Traje", valor: festa.traje },
     { rotulo: "Observações", valor: festa.observacoes },
-  ];
+  ].filter((linha) => linha.valor);
 
   return (
-    <div className="w-full">
+    // Com foto, ela ocupa a área toda do conteúdo (desfaz o padding do <main>), por trás.
+    <div className="relative isolate -mx-4 -mt-4 min-h-[calc(100dvh-3.5rem)] w-auto px-4 pt-4 md:-mx-8 md:-mt-6 md:px-8 md:pt-6">
+      {festa.fotoUrl && (
+        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
+          {/* Imagem privada servida pelo próprio painel (com login): o otimizador do next/image não teria a sessão. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/painel/festas/${festa.id}/foto?v=${versaoPlanta(festa.fotoUrl)}`}
+            alt=""
+            className="size-full object-cover"
+          />
+          {/* Véu bege: a foto aparece, mas texto e cartões continuam legíveis; some no fim. */}
+          <div className="from-mesa/60 via-mesa/35 to-mesa absolute inset-0 bg-linear-to-b" />
+        </div>
+      )}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <Link
           href={voltar.href}
-          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring inline-flex items-center gap-1.5 rounded-sm text-sm focus-visible:outline-2"
+          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring bg-mesa/80 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm focus-visible:outline-2"
         >
           <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
           {voltar.rotulo}
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          {!concluida && (
+            <Button asChild variant="outline" className="bg-card h-9">
+              <Link href={`/painel/festas/${festa.id}/portaria`}>
+                <KeyRound aria-hidden strokeWidth={1.75} />
+                Portaria
+              </Link>
+            </Button>
+          )}
+          <BotaoFoto festaId={festa.id} temFoto={!!festa.fotoUrl} />
+          {[
+            { tipo: "convite", rotulo: "Convite" },
+            { tipo: "roteiro", rotulo: "Roteiro" },
+          ].map((pdf) => (
+            <Button key={pdf.tipo} asChild variant="outline" className="bg-card h-9">
+              <a
+                href={`/painel/festas/${festa.id}/pdf/${pdf.tipo}`}
+                target="_blank"
+                rel="noopener"
+                aria-label={`Abrir PDF: ${pdf.rotulo}`}
+              >
+                <FileText aria-hidden strokeWidth={1.75} />
+                {pdf.rotulo}
+              </a>
+            </Button>
+          ))}
           <Button asChild variant="outline" className="bg-card h-9">
             <Link href={`/painel/festas/${festa.id}/editar`}>
               <Pencil aria-hidden strokeWidth={1.75} />
@@ -83,204 +210,112 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </div>
       </div>
 
-      {/* Quatro colunas lado a lado em telas largas; 2×2 em telas médias; uma no celular. */}
-      {/* Nas colunas estreitas a linha de margem fica mais perto da borda. */}
-      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-[1.25fr_1fr_1fr_1fr] xl:[--margem:1.75rem]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <article className="folha @container pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)">
-            <header className="flex flex-wrap items-start justify-between gap-x-6">
-              <div className="flex items-start gap-3">
-                <span className="font-mono text-[4.25rem] leading-[calc(var(--linha)*3)] font-medium tracking-[-0.04em]">
-                  {data.dia}
-                </span>
-                <span className="flex flex-col text-sm leading-(--linha)">
-                  <span className="font-semibold tracking-[0.04em] uppercase">
-                    {data.mes} {data.ano}
-                  </span>
-                  <span className="text-tinta-suave first-letter:uppercase">
-                    {data.extenso.split(",")[0]}
-                  </span>
-                  <span className="font-mono">{data.hora}</span>
-                </span>
-              </div>
+      {/* Topo: data, nome e dados da festa. */}
+      <header className="folha px-4 py-3 md:px-5">
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[2rem] leading-none font-medium tracking-[-0.04em]">
+            {data.dia}
+          </span>
+          <div className="min-w-0 flex-1">
+            <h1 className="truncate text-lg leading-tight font-semibold tracking-[-0.01em]">
+              {festa.titulo}
+            </h1>
+            <p className="text-tinta-suave text-[0.8125rem] leading-snug">
+              {data.semana.replace(/^./, (c) => c.toUpperCase())}, {data.mes} {data.ano} ·{" "}
+              <span className="font-mono">{data.hora}</span> ·{" "}
               <span
-                className={
-                  !concluida && dias <= 7
-                    ? "grifo text-sm font-semibold"
-                    : "text-tinta-suave text-sm"
-                }
+                className={!concluida && dias <= 7 ? "grifo text-foreground font-semibold" : ""}
               >
                 {concluida
                   ? `Concluída · ${rotuloProximidade(dias).toLowerCase()}`
                   : rotuloProximidade(dias)}
               </span>
-            </header>
-
-            <h1 className="min-h-[calc(var(--linha)*2)] pt-[calc(var(--linha)*0.25)] text-2xl leading-(--linha) font-semibold tracking-[-0.02em] text-balance @md:text-[1.75rem]">
-              {festa.titulo}
-            </h1>
-
-            <dl className="mt-(--linha)">
-              {linhas.map((linha) => (
-                <div key={linha.rotulo} className="grid grid-cols-1 @md:grid-cols-[8.5rem_1fr]">
-                  <dt className="text-tinta-suave text-sm leading-(--linha)">{linha.rotulo}</dt>
-                  <dd className={linha.valor ? "whitespace-pre-line" : "text-tinta-suave"}>
-                    {linha.valor ?? "—"}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </article>
-
-          {/* No celular as colunas ficam uma embaixo da outra: o índice leva direto a cada uma. */}
-          <nav
-            aria-label="Seções da festa"
-            className="folha folha-lisa py-(--linha) pr-5 pl-[calc(var(--margem)+0.875rem)] leading-(--linha) md:hidden"
-          >
-            <ul className="pautado">
-              {[
-                ["#convidados", "Convidados", `${convidados.length}`],
-                ["#fornecedores", "Fornecedores", `${colunas.fornecedores.length}`],
-                ["#mesas", "Mesas", `${colunas.mesas.length}`],
-                ["#cronograma", "Cronograma", `${colunas.cronograma.length}`],
-                ["#planta", "Planta do salão", festa.plantaUrl ? "1" : ""],
-                ["#pdfs", "PDFs", "2"],
-              ].map(([href, rotulo, n]) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    className="group focus-visible:outline-ring flex h-[calc(var(--linha)*2)] items-end justify-between rounded-sm focus-visible:outline-2"
-                  >
-                    <span className="grifo-ao-passar">{rotulo}</span>
-                    <span className="text-tinta-suave font-mono text-[0.8125rem]">{n}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {festa.convidadosApagadosEm ? (
-            // LGPD: 90 dias depois da festa os convidados foram apagados; ficam os números.
-            <section
-              id="convidados"
-              aria-labelledby="titulo-convidados"
-              className="folha folha-lisa pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
-            >
-              <h2 id="titulo-convidados" className="text-lg font-semibold">
-                Convidados
-              </h2>
-              <p className="text-tinta-suave text-sm leading-(--linha)">
-                <strong className="text-foreground font-semibold">{festa.resumoConvidados}</strong>{" "}
-                convidados ·{" "}
-                <strong className="text-foreground font-semibold">{festa.resumoConfirmados}</strong>{" "}
-                confirmaram ·{" "}
-                <strong className="text-foreground font-semibold">{festa.resumoPresentes}</strong>{" "}
-                chegaram
-              </p>
-              <p className="text-tinta-suave text-sm leading-(--linha)">
-                Nomes e telefones apagados em {dataCurta(festa.convidadosApagadosEm)}, 90 dias
-                depois da festa, como manda a LGPD.
-              </p>
-            </section>
-          ) : (
-            <SecaoConvidados
-              festaId={festa.id}
-              festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
-              convidados={convidados}
-              contagem={contarPorStatus(convidados)}
-              origem={origem}
-              aviso={
-                concluida && convidados.length > 0
-                  ? `Nomes e telefones serão apagados em ${dataCurta(apagamentoPrevisto(festa.dataHora))}, 90 dias depois da festa (LGPD).`
-                  : undefined
-              }
-            />
-          )}
+            </p>
+          </div>
         </div>
-        {/* Em telas médias, as três colunas empilham à direita; em telas largas viram colunas. */}
-        <div className="flex min-w-0 flex-col gap-6 xl:contents">
-          <ColunaFornecedores festaId={festa.id} fornecedores={colunas.fornecedores} />
-          <ColunaMesas
-            festaId={festa.id}
-            mesas={colunas.mesas}
-            convidados={convidados.map((c) => ({ id: c.id, nome: c.nome, mesaId: c.mesaId }))}
-          />
-          <ColunaCronograma
-            festaId={festa.id}
-            cronograma={colunas.cronograma}
-            fornecedores={colunas.fornecedores}
-          />
-        </div>
-      </div>
 
-      <section
-        id="planta"
-        aria-labelledby="titulo-planta"
-        className="folha folha-lisa mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
-      >
-        <h2 id="titulo-planta" className="text-lg font-semibold">
-          Planta do salão
-        </h2>
-        <p className="text-tinta-suave text-sm leading-(--linha)">
-          O salão visto de cima. Também sai no roteiro em PDF.
-        </p>
-        <CampoPlanta
-          festaId={festa.id}
-          planta={
-            festa.plantaUrl && festa.plantaLargura && festa.plantaAltura
-              ? {
-                  src: `/painel/festas/${festa.id}/planta?v=${versaoPlanta(festa.plantaUrl)}`,
-                  largura: festa.plantaLargura,
-                  altura: festa.plantaAltura,
-                }
-              : null
-          }
-        />
-      </section>
-
-      <section
-        id="pdfs"
-        aria-labelledby="titulo-pdfs"
-        className="folha folha-lisa mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
-      >
-        <h2 id="titulo-pdfs" className="text-lg font-semibold">
-          PDFs
-        </h2>
-        <ul className="pautado mt-(--linha) max-w-3xl">
-          {[
-            {
-              tipo: "convite",
-              titulo: "Convite",
-              detalhe:
-                "Para os convidados: data, horário, local e traje (sem as observações). Dá para imprimir ou mandar no WhatsApp.",
-            },
-            {
-              tipo: "roteiro",
-              titulo: "Roteiro completo",
-              detalhe:
-                "Dados, fornecedores com valores, mesas, cronograma e planta. Para você e a equipe.",
-            },
-          ].map((pdf) => (
-            // Tudo na altura da pauta: título e ação numa linha, descrição embaixo.
-            <li key={pdf.tipo}>
-              <div className="flex items-end justify-between gap-4">
-                <span className="min-w-0 truncate font-medium">{pdf.titulo}</span>
-                <a
-                  href={`/painel/festas/${festa.id}/pdf/${pdf.tipo}`}
-                  target="_blank"
-                  rel="noopener"
-                  aria-label={`Abrir PDF: ${pdf.titulo}`}
-                  className="group focus-visible:outline-ring inline-flex h-(--linha) shrink-0 items-center gap-1.5 rounded-sm text-sm font-medium focus-visible:outline-2"
-                >
-                  <FileText aria-hidden className="size-4" strokeWidth={1.75} />
-                  <span className="grifo-ao-passar">Abrir PDF</span>
-                </a>
+        {linhas.length > 0 && (
+          <dl className="border-border mt-2.5 flex flex-wrap gap-x-5 gap-y-1 border-t pt-2.5 text-[0.8125rem] leading-snug">
+            {linhas.map((linha) => (
+              <div key={linha.rotulo} className="flex min-w-0 gap-1.5">
+                <dt className="text-tinta-suave shrink-0">{linha.rotulo}:</dt>
+                <dd className="line-clamp-2 min-w-0">{linha.valor}</dd>
               </div>
-              <p className="text-tinta-suave text-sm leading-(--linha)">{pdf.detalhe}</p>
-            </li>
+            ))}
+          </dl>
+        )}
+      </header>
+
+      {/* Concluída: baixar o PDF completo antes da limpeza (ou o aviso de arquivada). */}
+      {concluida && <AvisoArquivo festa={festa} />}
+
+      {/* Corpo: o quadro, três raias lado a lado (uma embaixo da outra no celular).
+          Festa arquivada não tem mais dados: o quadro sai. */}
+      {!festa.convidadosApagadosEm && (
+        <nav
+          aria-label="Quadro da festa"
+          className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-3"
+        >
+          {raias.map((raia) => (
+            <section
+              key={raia.titulo}
+              aria-labelledby={`raia-${raia.titulo}`}
+              className="bg-card/75 rounded-2xl p-3 shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)] backdrop-blur-sm"
+            >
+              <h2
+                id={`raia-${raia.titulo}`}
+                className="text-tinta-suave px-1 pb-2 text-xs font-semibold tracking-[0.06em] uppercase"
+              >
+                {raia.titulo}
+              </h2>
+              <ul className="flex flex-col gap-3">
+                {raia.botoes.map(({ href, titulo, icone: Icone, botao }) => (
+                  <li key={href}>
+                    <Link
+                      href={`/painel/festas/${festa.id}/${href}`}
+                      className={cn(
+                        botao.situacao === "ok"
+                          ? "bg-resolvida"
+                          : botao.situacao === "pendente"
+                            ? "bg-pendente"
+                            : raia.cor,
+                        "group focus-visible:outline-ring flex items-center gap-3 rounded-xl p-4 transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-14px_oklch(0.2_0.01_250/35%)] focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                      )}
+                    >
+                      <Icone aria-hidden className="size-6 shrink-0" strokeWidth={1.5} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold">{titulo}</span>
+                        <span className="text-tinta-suave flex items-center gap-1 text-sm">
+                          {botao.situacao === "ok" && (
+                            <CircleCheck
+                              aria-hidden
+                              className="text-resolvida-forte size-3.5 shrink-0"
+                              strokeWidth={2}
+                            />
+                          )}
+                          {botao.situacao === "pendente" && (
+                            <CircleAlert
+                              aria-hidden
+                              className="size-3.5 shrink-0"
+                              strokeWidth={2}
+                            />
+                          )}
+                          <span className="truncate">{botao.resumo}</span>
+                        </span>
+                      </span>
+                      <ArrowRight
+                        aria-hidden
+                        className="size-5 shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                        strokeWidth={1.75}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
-      </section>
+        </nav>
+      )}
     </div>
   );
 }

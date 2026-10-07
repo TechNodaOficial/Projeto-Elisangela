@@ -6,6 +6,7 @@ import { partesData } from "@/lib/datas";
 import { contarFestas } from "@/lib/festas/consultas";
 
 import { BotaoSairRodape, NavegacaoInferior, NavegacaoLateral } from "./navegacao";
+import { BotaoNovidades } from "./novidades/botao-novidades";
 
 export const metadata: Metadata = {
   title: "Painel de Festas",
@@ -21,12 +22,15 @@ export default async function LayoutPainel({ children }: LayoutProps<"/painel">)
       <header className="bg-background sticky top-0 z-20">
         <div className="flex h-14 items-center justify-between gap-4 px-4 md:pr-8 md:pl-6">
           <Logo />
-          <p className="text-tinta-suave text-sm first-letter:uppercase">
-            <span className="hidden md:inline">{hoje.extenso}</span>
-            <span className="md:hidden">
-              {hoje.semana}, {Number(hoje.dia)} {hoje.mes}
-            </span>
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="text-tinta-suave text-sm first-letter:uppercase">
+              <span className="hidden md:inline">{hoje.extenso}</span>
+              <span className="md:hidden">
+                {hoje.semana}, {Number(hoje.dia)} {hoje.mes}
+              </span>
+            </p>
+            <BotaoNovidades />
+          </div>
         </div>
       </header>
 

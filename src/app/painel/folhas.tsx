@@ -1,4 +1,4 @@
-import { MapPin, Plus } from "lucide-react";
+import { CircleAlert, CircleCheck, MapPin, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { diasAte, partesData, rotuloProximidade } from "@/lib/datas";
@@ -43,9 +43,14 @@ export function FolhaFesta({ festa, concluida }: { festa: FestaResumo; concluida
   const dias = diasAte(festa.dataHora);
   const urgente = !concluida && dias <= URGENTE_ATE_DIAS;
   const linhaFinal = contagem(festa, concluida);
+  // Verde: tudo resolvido. Amarelo: alguma pendência (mesma regra do calendário).
+  const pendente = festa.pendencias.length > 0;
 
   return (
-    <Link href={`/painel/festas/${festa.id}`} className={FOLHA}>
+    <Link
+      href={`/painel/festas/${festa.id}`}
+      className={`${FOLHA} ${pendente ? "folha-pendente" : "folha-resolvida"}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
           <span className="font-mono text-[2.75rem] leading-[calc(var(--linha)*2)] font-medium tracking-[-0.04em]">
@@ -72,6 +77,27 @@ export function FolhaFesta({ festa, concluida }: { festa: FestaResumo; concluida
         <span className="truncate">{festa.localNome}</span>
       </p>
       <p className="text-tinta-suave text-sm leading-(--linha)">{linhaFinal.conteudo}</p>
+      {concluida && !festa.arquivada && !festa.pdfCompletoEm && (
+        <p className="text-sm leading-(--linha) font-semibold">Baixe o PDF completo</p>
+      )}
+      {concluida && festa.arquivada && (
+        <p className="text-tinta-suave text-sm leading-(--linha)">Arquivada</p>
+      )}
+      <p
+        className="flex items-center gap-1.5 text-sm leading-(--linha) font-medium"
+        title={pendente ? festa.pendencias.join(" · ") : undefined}
+      >
+        {pendente ? (
+          <CircleAlert aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
+        ) : (
+          <CircleCheck aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
+        )}
+        <span className="truncate">
+          {pendente
+            ? `${festa.pendencias.length} ${festa.pendencias.length === 1 ? "pendência" : "pendências"}: ${festa.pendencias[0]}`
+            : "Tudo resolvido"}
+        </span>
+      </p>
     </Link>
   );
 }

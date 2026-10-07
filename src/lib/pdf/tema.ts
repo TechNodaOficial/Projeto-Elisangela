@@ -10,11 +10,15 @@ export const cor = {
   tinta: "#212325",
   suave: "#575b5f",
   pauta: "#bed3ef",
-  margem: "#7ba0d6",
   grifo: "#f7e967",
   borda: "#d3d6da",
   superficie: "#f2f4f5",
 };
+
+// Logo da Elisangela Schubert (dourado sobre transparente, 900×412). Também vai na
+// função da Vercel pelo next.config.ts.
+export const LOGO = path.join(process.cwd(), "src/lib/pdf/logo.png");
+export const PROPORCAO_LOGO = 412 / 900;
 
 // Fontes Geist (licença OFL, ver fontes/OFL.txt), as mesmas do painel.
 // Ficam em disco; next.config.ts inclui a pasta na função da Vercel.

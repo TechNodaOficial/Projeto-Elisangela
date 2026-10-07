@@ -416,7 +416,7 @@ Linhas das listas, todas em pautas inteiras:
 
 **Leitor de QR** (`/painel/checkin`): uma coluna centrada de até 36rem (`max-w-xl`), dentro do painel com topo e navegação. Sem festa escolhida, a página mostra a lista de festas (ver Components); com exatamente uma festa a até 20h de agora, vai direto ao leitor. No leitor, de cima para baixo: "Trocar festa" (link de texto com seta, só quando há mais de uma festa), o título da festa em Headline e o contador; o visor quadrado em largura toda, em qualquer largura de tela; e a folha lisa "Buscar pelo nome" 1.5rem abaixo. Ao focar a busca, a folha sobe para logo abaixo do topo (4rem de respiro) e passa a ter no mínimo `100dvh - 4rem` de altura, para os resultados não ficarem embaixo do teclado nem a página encolher ao filtrar. O veredito é fixo de borda a borda por cima de tudo, inclusive do topo e da barra inferior, com 1.5rem de padding lateral e respeitando as áreas seguras; o conteúdo fica numa coluna de até 36rem, centrado na vertical, com as ações no pé.
 
-**The Recuo de Margem Rule.** Todo conteúdo de folha, pautada ou lisa, começa depois da linha de margem: `padding-left: calc(var(--margem) + 0.875rem)`. Nada cruza a margem. Para estreitar uma folha, move-se a margem (`--margem`), nunca o recuo à mão.
+**The Recuo de Margem Rule.** As folhas não têm mais pautas nem linha de margem (papel liso). O recuo esquerdo continua vindo de `padding-left: calc(var(--margem) + 0.875rem)`, com `--margem: 0.375rem`, o que dá 1.25rem, igual ao `pr-5` da direita. Folhas com `pr-6` (login, avisos, diálogo de confirmação) usam `px-6`. Para mudar o recuo de todas as folhas, ajusta-se `--margem`, nunca o recuo à mão.
 
 ## Elevation & Depth
 

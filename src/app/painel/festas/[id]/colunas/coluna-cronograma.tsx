@@ -3,14 +3,22 @@
 import { useState } from "react";
 
 import type { Colunas } from "@/lib/festas/consultas";
+import { BANDEJA, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
+import { cn } from "@/lib/utils";
 
 import { criarItemCronograma, editarItemCronograma, removerItemCronograma } from "./actions";
 import { Adicionar, Coluna, FormCampos, MenuLinha, N, Vazio, type Campo } from "./pecas";
 
 type Item = Colunas["cronograma"][number];
-type Fornecedor = Colunas["fornecedores"][number];
+type Contratacao = Colunas["contratacoes"][number];
 
-function campos(fornecedores: Fornecedor[]): Campo[] {
+// "Buffet · Sabor & Arte" ou só "Buffet" enquanto não escolheu o fornecedor.
+const rotuloContratacao = (c: {
+  servico: { nome: string };
+  fornecedor: { nome: string } | null;
+}) => (c.fornecedor ? `${c.servico.nome} · ${c.fornecedor.nome}` : c.servico.nome);
+
+function campos(contratacoes: Contratacao[]): Campo[] {
   return [
     { nome: "hora", rotulo: "Horário", tipo: "time", mono: true },
     { nome: "atividade", rotulo: "Atividade", placeholder: "Ex.: Entrada dos noivos", max: 160 },
@@ -21,7 +29,7 @@ function campos(fornecedores: Fornecedor[]): Campo[] {
       opcional: true,
       opcoes: [
         { valor: "", rotulo: "Ninguém em específico" },
-        ...fornecedores.map((f) => ({ valor: `f:${f.id}`, rotulo: `${f.servico} · ${f.nome}` })),
+        ...contratacoes.map((c) => ({ valor: `c:${c.id}`, rotulo: rotuloContratacao(c) })),
         { valor: "outro", rotulo: "Outro (escrever)…" },
       ],
     },
@@ -36,25 +44,25 @@ function campos(fornecedores: Fornecedor[]): Campo[] {
 }
 
 function responsavelDe(item: Item) {
-  if (item.fornecedor) return `${item.fornecedor.servico} · ${item.fornecedor.nome}`;
+  if (item.contratacao) return rotuloContratacao(item.contratacao);
   return item.responsavelTexto;
 }
 
-function Linha({ item, fornecedores }: { item: Item; fornecedores: Fornecedor[] }) {
+function Linha({ item, contratacoes }: { item: Item; contratacoes: Contratacao[] }) {
   const [editando, setEditando] = useState(false);
   const responsavel = responsavelDe(item);
 
   if (editando) {
     return (
-      <li className="bg-card">
+      <li className="bg-card my-1 rounded-lg px-3">
         <FormCampos
           acao={editarItemCronograma.bind(null, item.id)}
-          campos={campos(fornecedores)}
+          campos={campos(contratacoes)}
           inicial={{
             hora: item.hora,
             atividade: item.atividade,
-            responsavel: item.fornecedor
-              ? `f:${item.fornecedor.id}`
+            responsavel: item.contratacao
+              ? `c:${item.contratacao.id}`
               : item.responsavelTexto
                 ? "outro"
                 : "",
@@ -73,7 +81,9 @@ function Linha({ item, fornecedores }: { item: Item; fornecedores: Fornecedor[] 
   return (
     // Pautas inteiras: horário e atividade (largura toda, quebra se precisar);
     // na pauta de baixo, o menu fica sob o horário e o responsável ao lado.
-    <li className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-2">
+    <li
+      className={cn(LINHA_ALTERNADA, "grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-2 px-2 py-0.5")}
+    >
       <span className="font-mono font-medium">{item.hora}</span>
       <span className="break-words hyphens-auto">{item.atividade}</span>
       <div className="-ml-1.5 flex h-(--linha) items-center">
@@ -99,22 +109,27 @@ function Linha({ item, fornecedores }: { item: Item; fornecedores: Fornecedor[] 
   );
 }
 
+// Serve ao cronograma da festa e ao roteiro da cerimônia (cerimonial): mesma lista de
+// horários, em seções separadas.
 export function ColunaCronograma({
   festaId,
   cronograma,
-  fornecedores,
+  contratacoes,
+  secao = "FESTA",
 }: {
   festaId: string;
   cronograma: Item[];
-  fornecedores: Fornecedor[];
+  contratacoes: Contratacao[];
+  secao?: "FESTA" | "CERIMONIA";
 }) {
+  const cerimonia = secao === "CERIMONIA";
   const primeiro = cronograma[0]?.hora;
   const ultimo = cronograma.at(-1)?.hora;
 
   return (
     <Coluna
-      id="cronograma"
-      titulo="Cronograma"
+      id={cerimonia ? "cerimonial" : "cronograma"}
+      titulo={cerimonia ? "Cerimonial" : "Cronograma"}
       resumo={
         cronograma.length > 0 && (
           <>
@@ -132,11 +147,11 @@ export function ColunaCronograma({
       }
     >
       <div className="mt-(--linha)">
-        <Adicionar rotulo="Adicionar ao cronograma">
+        <Adicionar rotulo={cerimonia ? "Adicionar ao cerimonial" : "Adicionar ao cronograma"}>
           {(fechar) => (
             <FormCampos
-              acao={criarItemCronograma.bind(null, festaId)}
-              campos={campos(fornecedores)}
+              acao={criarItemCronograma.bind(null, festaId, secao)}
+              campos={campos(contratacoes)}
               rotuloEnviar="Adicionar"
               rotuloEnviando="Adicionando…"
               prefixo="novo-item"
@@ -148,12 +163,17 @@ export function ColunaCronograma({
 
       {cronograma.length === 0 ? (
         <Vazio>
-          Do horário da equipe ao encerramento. Horários depois da meia-noite aparecem no fim.
+          {cerimonia
+            ? "O roteiro da cerimônia: chegada do celebrante, entrada dos noivos, votos, alianças…"
+            : "Do horário da equipe ao encerramento. Horários depois da meia-noite aparecem no fim."}
         </Vazio>
       ) : (
-        <ul className="pautado" aria-label="Itens do cronograma">
+        <ul
+          className={cn(BANDEJA, cerimonia ? COR_RAIA.cerimonia : COR_RAIA.fornecedores, "mt-2")}
+          aria-label={cerimonia ? "Itens do cerimonial" : "Itens do cronograma"}
+        >
           {cronograma.map((item) => (
-            <Linha key={item.id} item={item} fornecedores={fornecedores} />
+            <Linha key={item.id} item={item} contratacoes={contratacoes} />
           ))}
         </ul>
       )}

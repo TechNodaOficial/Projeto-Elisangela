@@ -20,18 +20,29 @@ export async function festasParaCheckin(agora = new Date()) {
 
 export async function dadosCheckin(festaId: string) {
   await exigirUsuario();
+  return dadosLeitor(festaId);
+}
+
+// Os mesmos dados, sem checar o login: para o link da portaria, que confere o acesso do
+// ajudante antes (lib/portaria/sessao.ts). Não use em páginas do painel.
+export async function dadosLeitor(festaId: string) {
   const festa = await prisma.festa.findUnique({
     where: { id: festaId },
     select: {
       id: true,
       titulo: true,
       dataHora: true,
+      mesas: { select: { id: true, nome: true, lugares: true } },
       convidados: {
         select: {
           id: true,
           nome: true,
           rsvp: true,
+          pessoas: true,
+          confirmadas: true,
+          entraram: true,
           presenteEm: true,
+          mesaId: true,
           mesa: { select: { nome: true } },
         },
       },
@@ -51,6 +62,9 @@ const SELECAO_LEITURA = {
   nome: true,
   festaId: true,
   rsvp: true,
+  pessoas: true,
+  confirmadas: true,
+  entraram: true,
   presenteEm: true,
   festa: { select: { titulo: true } },
   mesa: { select: { nome: true } },
@@ -61,6 +75,9 @@ type Linha = {
   nome: string;
   festaId: string;
   rsvp: ConvidadoLido["rsvp"];
+  pessoas: number;
+  confirmadas: number | null;
+  entraram: number;
   presenteEm: Date | null;
   festa: { titulo: string };
   mesa: { nome: string } | null;

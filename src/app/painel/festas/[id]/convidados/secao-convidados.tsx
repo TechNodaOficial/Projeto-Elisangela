@@ -5,7 +5,9 @@ import { Fragment, useDeferredValue, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
+import { BANDEJA, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
 import { semAcento } from "@/lib/texto";
+import { cn } from "@/lib/utils";
 
 import { adicionarConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
@@ -72,7 +74,7 @@ export function SecaoConvidados({
     <section
       id="convidados"
       aria-labelledby="titulo-convidados"
-      className="folha folha-lisa @container pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
+      className="folha @container pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
     >
       <h2 id="titulo-convidados" className="text-lg font-semibold">
         Convidados
@@ -92,8 +94,9 @@ export function SecaoConvidados({
         <div className="text-tinta-suave mt-(--linha) flex items-start gap-3 text-sm">
           <Users aria-hidden className="mt-1.5 size-4 shrink-0" strokeWidth={1.75} />
           <p className="leading-(--linha)">
-            Nenhum convidado ainda. Cada pessoa que você adicionar recebe um link próprio para
-            confirmar a presença; envie pelo botão de WhatsApp ou copie o link.
+            Nenhum convidado ainda. Cada convite (uma pessoa ou uma família inteira) recebe um link
+            próprio para confirmar a presença e um QR Code só; envie pelo botão de WhatsApp ou copie
+            o link.
           </p>
         </div>
       ) : (
@@ -116,9 +119,13 @@ export function SecaoConvidados({
             </div>
           )}
 
-          <ul className="pautado mt-(--linha)" aria-label="Lista de convidados">
+          <ul
+            className={cn(BANDEJA, COR_RAIA.recepcao, "mt-(--linha)")}
+            aria-label="Lista de convidados"
+          >
             {visiveis.map((convidado) => (
               <LinhaConvidado
+                className={cn(LINHA_ALTERNADA, "px-2 py-1")}
                 key={convidado.id}
                 convidado={convidado}
                 festa={festa}

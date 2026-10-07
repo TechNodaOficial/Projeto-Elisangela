@@ -23,7 +23,9 @@ import {
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
 import { mensagemConvite } from "@/lib/convidados/mensagem";
 import { formatarTelefone, linkWhatsApp } from "@/lib/convidados/telefone";
+import { confirmadasDe } from "@/lib/convidados/contagem";
 import { paraCampos } from "@/lib/datas";
+import { cn } from "@/lib/utils";
 
 import { editarConvidado, removerConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
@@ -37,10 +39,12 @@ const STATUS = {
 } as const;
 
 function Status({ convidado }: { convidado: ConvidadoResumo }) {
-  if (convidado.presenteEm) {
+  const { pessoas, entraram, presenteEm } = convidado;
+  if (presenteEm && entraram > 0) {
     return (
       <span className="grifo text-sm leading-(--linha) font-semibold">
-        Chegou <span className="font-mono">{paraCampos(convidado.presenteEm).hora}</span>
+        {pessoas === 1 ? "Chegou" : `Chegaram ${entraram} de ${pessoas}`}{" "}
+        <span className="font-mono">{paraCampos(presenteEm).hora}</span>
       </span>
     );
   }
@@ -50,6 +54,9 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
     <span className={`flex items-center gap-1 text-sm leading-(--linha) ${s.classe}`}>
       <Icone aria-hidden className="size-3.5" strokeWidth={2} />
       {s.rotulo}
+      {convidado.rsvp === "CONFIRMADO" &&
+        pessoas > 1 &&
+        ` ${confirmadasDe(convidado)} de ${pessoas}`}
     </span>
   );
 }
@@ -58,7 +65,9 @@ export function LinhaConvidado({
   convidado,
   festa,
   origem,
+  className,
 }: {
+  className?: string;
   convidado: ConvidadoResumo;
   festa: DadosFesta;
   origem: string;
@@ -72,6 +81,7 @@ export function LinhaConvidado({
     convidado.telefone,
     mensagemConvite({
       nomeConvidado: convidado.nome,
+      pessoas: convidado.pessoas,
       tituloFesta: festa.titulo,
       dataHora: festa.dataHora,
       localNome: festa.localNome,
@@ -87,10 +97,14 @@ export function LinhaConvidado({
 
   if (editando) {
     return (
-      <li className="bg-card py-3">
+      <li className="bg-card my-1 rounded-lg px-3 py-3">
         <FormConvidado
           acao={editarConvidado.bind(null, convidado.id)}
-          inicial={{ nome: convidado.nome, telefone: convidado.telefone ?? "" }}
+          inicial={{
+            nome: convidado.nome,
+            pessoas: String(convidado.pessoas),
+            telefone: convidado.telefone ?? "",
+          }}
           rotuloEnviar="Salvar"
           rotuloEnviando="Salvando…"
           prefixo={`editar-${convidado.id}`}
@@ -106,9 +120,14 @@ export function LinhaConvidado({
     // depois telefone e mesa com as ações. Todo texto usa a altura da pauta (alinhado ao centro,
     // não pela linha de base, que somaria pixels); os botões ficam numa faixa da altura da
     // pauta e transbordam sem empurrar a linha.
-    <li className="group/linha grid grid-cols-[minmax(0,1fr)_auto] gap-x-3">
+    <li className={cn("group/linha grid grid-cols-[minmax(0,1fr)_auto] gap-x-3", className)}>
       <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-3">
-        <span className="font-semibold break-words hyphens-auto">{convidado.nome}</span>
+        <span className="font-semibold break-words hyphens-auto">
+          {convidado.nome}
+          {convidado.pessoas > 1 && (
+            <span className="text-tinta-suave font-normal"> · {convidado.pessoas} pessoas</span>
+          )}
+        </span>
         <Status convidado={convidado} />
       </div>
       {/* Telefone e mesa na mesma pauta; a mesa desce para a pauta seguinte se não couber. */}

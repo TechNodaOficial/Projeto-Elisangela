@@ -5,6 +5,7 @@ import { startTransition, useActionState, useRef, useState } from "react";
 
 import { ConfirmarExclusao } from "@/components/confirmar-exclusao";
 import { Button } from "@/components/ui/button";
+import { reduzirImagem } from "@/lib/imagem-navegador";
 import { LADO_MAXIMO_PLANTA, TAMANHO_MAXIMO_PLANTA } from "@/lib/planta/limites";
 import { cn } from "@/lib/utils";
 
@@ -12,40 +13,14 @@ import { enviarPlanta, removerPlanta, type EstadoPlanta } from "./actions";
 
 type Planta = { src: string; largura: number; altura: number } | null;
 
-// Reduz a imagem no navegador antes de enviar: fotos de celular passam fácil de 4 MB,
-// e a imagem reduzida carrega rápido no painel e no PDF. Também desfaz a rotação EXIF
-// e converte formatos que o PDF não aceita (WebP, HEIC no iPhone) para JPEG.
-async function prepararImagem(arquivo: File): Promise<File> {
-  const bitmap = await createImageBitmap(arquivo);
-  const escala = Math.min(1, LADO_MAXIMO_PLANTA / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * escala);
-  canvas.height = Math.round(bitmap.height * escala);
-  const ctx = canvas.getContext("2d")!;
-  // Fundo branco: áreas transparentes de um PNG ficariam pretas no JPEG.
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-
-  const gerar = (tipo: string, qualidade?: number) =>
-    new Promise<Blob | null>((ok) => canvas.toBlob(ok, tipo, qualidade));
-
-  // Desenhos (PNG) ficam mais nítidos em PNG; se pesar demais, vai em JPEG.
-  if (arquivo.type === "image/png") {
-    const png = await gerar("image/png");
-    if (png && png.size <= TAMANHO_MAXIMO_PLANTA) {
-      return new File([png], "planta.png", { type: "image/png" });
-    }
-  }
-  for (const qualidade of [0.9, 0.8, 0.65]) {
-    const jpeg = await gerar("image/jpeg", qualidade);
-    if (jpeg && jpeg.size <= TAMANHO_MAXIMO_PLANTA) {
-      return new File([jpeg], "planta.jpg", { type: "image/jpeg" });
-    }
-  }
-  throw new Error("grande demais");
-}
+// Planta: até 3000px, e desenhos em PNG continuam PNG (mais nítidos no PDF).
+const prepararImagem = (arquivo: File) =>
+  reduzirImagem(arquivo, {
+    ladoMaximo: LADO_MAXIMO_PLANTA,
+    tamanhoMaximo: TAMANHO_MAXIMO_PLANTA,
+    nome: "planta",
+    manterPng: true,
+  });
 
 export function CampoPlanta({ festaId, planta }: { festaId: string; planta: Planta }) {
   const [estado, enviar, enviando] = useActionState<EstadoPlanta, FormData>(
@@ -158,7 +133,7 @@ export function CampoPlanta({ festaId, planta }: { festaId: string; planta: Plan
           height={planta.altura}
           alt="Planta do salão vista de cima"
           className={cn(
-            "border-borda h-auto max-h-[80vh] w-auto max-w-full rounded-[3px] border bg-white object-contain",
+            "border-borda bg-card h-auto max-h-[80vh] w-auto max-w-full rounded-[3px] border object-contain",
             enviando && "opacity-50",
           )}
         />

@@ -12,6 +12,8 @@ import {
   type CamposFesta,
   type ErrosFesta,
 } from "@/lib/festas/schema";
+import { apagarContratos } from "@/lib/contratos/blob";
+import { apagarFoto } from "@/lib/festas/foto";
 import { apagarPlanta } from "@/lib/planta/blob";
 import { prisma } from "@/lib/prisma";
 
@@ -65,10 +67,19 @@ export async function atualizarFesta(
 
 export async function excluirFesta(id: string) {
   await exigirUsuario();
-  const festa = await prisma.festa.findUnique({ where: { id }, select: { plantaUrl: true } });
-  // deleteMany não falha se outra aba já excluiu; os convidados saem junto (cascade).
+  const festa = await prisma.festa.findUnique({
+    where: { id },
+    select: {
+      plantaUrl: true,
+      fotoUrl: true,
+      contratacoes: { select: { contratoUrl: true } },
+    },
+  });
+  // deleteMany não falha se outra aba já excluiu; convidados e serviços saem junto (cascade).
   await prisma.festa.deleteMany({ where: { id } });
   await apagarPlanta(festa?.plantaUrl);
+  await apagarFoto(festa?.fotoUrl);
+  await apagarContratos(festa?.contratacoes.map((c) => c.contratoUrl) ?? []);
   revalidatePath("/painel", "layout");
   redirect("/painel");
 }

@@ -138,7 +138,7 @@ export function Camera({ pausada, aoLer }: { pausada: boolean; aoLer: (codigo: s
             type="button"
             onClick={abrir}
             disabled={estado === "abrindo"}
-            className="text-foreground h-12 rounded-lg bg-white px-6 text-[0.9375rem] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-70"
+            className="text-foreground bg-card h-12 rounded-lg px-6 text-[0.9375rem] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-70"
           >
             {estado === "abrindo"
               ? "Abrindo…"
