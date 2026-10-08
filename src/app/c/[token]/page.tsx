@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { IconeInstagram, IconeWhatsApp } from "@/components/icones-marca";
 import { contatoElisangela } from "@/lib/contato";
+import { nomeDaSaudacao } from "@/lib/convidados/saudacao";
 import { linkWhatsApp } from "@/lib/convidados/telefone";
 import { buscarConvite } from "@/lib/convites/consultas";
 import { estadoConvite } from "@/lib/convites/estado";
@@ -15,6 +16,7 @@ import { FUSO, partesData } from "@/lib/datas";
 import { obterIp } from "@/lib/ip";
 
 import { Aviso, Moldura } from "@/components/moldura-publica";
+import { RegistrarAbertura } from "./registrar-abertura";
 import { Resposta } from "./resposta";
 
 // Link pessoal: não indexar e não vazar o token para outros sites pelo Referer.
@@ -49,8 +51,8 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
   const data = partesData(festa.dataHora);
   const semana = data.extenso.split(",")[0];
   const familia = convite.pessoas > 1;
-  // "Olá, Ana" para uma pessoa; "Olá, Família Silva" para um grupo.
-  const saudacao = familia ? convite.nome.trim() : convite.nome.trim().split(/\s+/)[0];
+  // "Olá, Ana" / "Olá, Tia Cida" para uma pessoa; "Olá, Família Silva" para um grupo.
+  const saudacao = nomeDaSaudacao(convite.nome, convite.pessoas);
   const confirmadas = Math.min(convite.confirmadas ?? convite.pessoas, convite.pessoas);
   const comQr = estado === "confirmado";
   const svg = comQr ? await qrSvg(convite.codigoCheckin) : null;
@@ -75,6 +77,7 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
 
   return (
     <Moldura>
+      <RegistrarAbertura token={token} />
       <article
         aria-labelledby="titulo-festa"
         className="folha overflow-hidden pt-0 pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"

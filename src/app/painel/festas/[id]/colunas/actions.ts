@@ -44,11 +44,19 @@ export async function contratarServico(
     select: { itensModelo: { select: { texto: true, ordem: true } } },
   });
   if (!servico || !(await festaExiste(festaId))) return { erroGeral: NAO_EXISTE };
+  if (v.dados.fornecedorId) {
+    const f = await prisma.fornecedor.findUnique({
+      where: { id: v.dados.fornecedorId },
+      select: { servicoId: true },
+    });
+    if (f?.servicoId !== v.dados.servicoId) return { erroGeral: NAO_EXISTE };
+  }
 
   await prisma.contratacao.create({
     data: {
       festaId,
       servicoId: v.dados.servicoId,
+      fornecedorId: v.dados.fornecedorId,
       checklist: { create: servico.itensModelo.map(({ texto, ordem }) => ({ texto, ordem })) },
     },
   });

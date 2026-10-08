@@ -1,6 +1,8 @@
 import { prazoDoConvite } from "@/lib/convites/prazo";
 import { partesData } from "@/lib/datas";
 
+import { nomeDaSaudacao } from "./saudacao";
+
 // Texto que vai junto do link no WhatsApp.
 export function mensagemConvite(dados: {
   nomeConvidado: string;
@@ -12,7 +14,7 @@ export function mensagemConvite(dados: {
   link: string;
 }): string {
   const familia = (dados.pessoas ?? 1) > 1;
-  const nome = familia ? dados.nomeConvidado.trim() : dados.nomeConvidado.trim().split(/\s+/)[0];
+  const nome = nomeDaSaudacao(dados.nomeConvidado, dados.pessoas);
   const data = partesData(dados.dataHora);
   const [semana, diaMes] = data.extenso.split(", ");
   const diaSemAno = diaMes.replace(/ de \d{4}$/, "");

@@ -109,6 +109,10 @@ model Convidado {
   // Quantas pessoas vão, informado ao confirmar (1 a `pessoas`). Vazio se não confirmou.
   confirmadas   Int?
   respondidoEm  DateTime?   @db.Timestamptz(3)
+  // Envio do convite: quando ela abriu o WhatsApp com a mensagem (vazio = ainda não enviou)
+  // e a primeira vez que o convidado abriu o link no navegador (a prévia do WhatsApp não conta).
+  enviadoEm     DateTime?   @db.Timestamptz(3)
+  abertoEm      DateTime?   @db.Timestamptz(3)
   // Quantas já entraram: a família pode chegar em partes (3 agora, 1 depois).
   entraram      Int         @default(0)
   // Hora da última entrada registrada; vazio enquanto ninguém entrou.

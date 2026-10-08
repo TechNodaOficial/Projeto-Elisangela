@@ -4,7 +4,8 @@ import { pendenciasDaFesta } from "./pendencias";
 // neutro (parte sem pendência definida, ou ainda vazia), com uma linha de resumo.
 
 export type Situacao = "ok" | "pendente" | "neutro";
-export type Botao = { situacao: Situacao; resumo: string };
+// detalhes: o que falta, item por item (só quando há pendência e vale detalhar).
+export type Botao = { situacao: Situacao; resumo: string; detalhes?: string[] };
 
 const n = (q: number, um: string, varios: string) => `${q} ${q === 1 ? um : varios}`;
 
@@ -39,7 +40,11 @@ export function situacoesDoQuadro(d: {
       d.contratacoes.length === 0
         ? { situacao: "neutro", resumo: "Nenhum serviço ainda" }
         : pendencias.length > 0
-          ? { situacao: "pendente", resumo: n(pendencias.length, "pendência", "pendências") }
+          ? {
+              situacao: "pendente",
+              resumo: n(pendencias.length, "pendência", "pendências"),
+              detalhes: pendencias,
+            }
           : {
               situacao: "ok",
               resumo: `${n(d.contratacoes.length, "serviço", "serviços")} resolvidos`,

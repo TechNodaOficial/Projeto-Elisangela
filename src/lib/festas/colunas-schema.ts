@@ -40,11 +40,12 @@ export const SchemaItem = z.object({
 });
 export const CAMPOS_ITEM = ["texto"] as const;
 
-// Serviço numa festa: qual serviço contratar.
+// Serviço numa festa: qual serviço contratar e, se já souber, o fornecedor (vazio = depois).
 export const SchemaNovaContratacao = z.object({
   servicoId: z.string().min(1, "Escolha o serviço."),
+  fornecedorId: z.string().transform((v) => v || null),
 });
-export const CAMPOS_NOVA_CONTRATACAO = ["servicoId"] as const;
+export const CAMPOS_NOVA_CONTRATACAO = ["servicoId", "fornecedorId"] as const;
 
 // Serviço numa festa: fornecedor escolhido (vazio = ainda não escolheu), valor e em quantas vezes.
 export const SchemaContratacao = z.object({

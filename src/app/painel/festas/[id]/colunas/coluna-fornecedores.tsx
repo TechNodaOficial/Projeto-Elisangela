@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, FileText, MessageCircle, Upload, X } from "lucide-react";
+import { Check, FileText, MessageCircle, Plus, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 
@@ -27,6 +27,12 @@ import {
 import { Adicionar, Coluna, FormCampos, MenuLinha, N, NovoItem, Vazio, type Campo } from "./pecas";
 
 type Contratacao = Colunas["contratacoes"][number];
+
+// Linhas "Valor" e "Contrato" do cartão: rótulo à esquerda, conteúdo à direita.
+const ROTULO_LINHA = "text-tinta-suave flex h-8 w-16 shrink-0 items-center text-[0.8125rem]";
+// O que falta preencher: botão tracejado em amarelo, para saltar aos olhos.
+const FALTA =
+  "border-pendente-forte bg-pendente hover:bg-card focus-visible:outline-ring inline-flex h-8 items-center gap-1.5 rounded-md border border-dashed px-2.5 text-[0.8125rem] font-medium focus-visible:outline-2 disabled:opacity-60";
 
 // Escolher o fornecedor (só os da base com o mesmo serviço), o valor e em quantas vezes.
 function camposContratacao(fornecedores: Servicos[number]["fornecedores"]): Campo[] {
@@ -100,6 +106,7 @@ function Pagamento({ contratacao }: { contratacao: Contratacao }) {
           · {quitado ? "tudo pago" : `${parcelasPagas} de ${parcelas} pagas`}
         </span>
       </p>
+      <p className="text-tinta-suave text-xs">Toque na parcela para marcar como paga.</p>
       <ul className="flex flex-wrap gap-1" aria-label="Parcelas">
         {valores.map((valor, i) => {
           const n = i + 1;
@@ -147,7 +154,7 @@ function Contrato({ festaId, contratacao }: { festaId: string; contratacao: Cont
     "focus-visible:outline-ring flex items-center gap-1.5 rounded-sm px-1 hover:bg-card focus-visible:outline-2";
 
   return (
-    <div className="mt-2 shrink-0 text-[0.8125rem]">
+    <div className="min-w-0 flex-1 text-[0.8125rem]">
       <form ref={formRef} action={enviar} className="flex min-w-0 items-center gap-1">
         <input
           ref={inputRef}
@@ -203,10 +210,10 @@ function Contrato({ festaId, contratacao }: { festaId: string; contratacao: Cont
             type="button"
             disabled={enviando}
             onClick={() => inputRef.current?.click()}
-            className={cn(link, "text-tinta-suave hover:text-foreground")}
+            className={FALTA}
           >
             <Upload aria-hidden className="size-4" strokeWidth={1.75} />
-            {enviando ? "Enviando…" : "Enviar contrato (PDF ou foto)"}
+            {enviando ? "Enviando…" : "Enviar PDF ou foto"}
           </button>
         )}
       </form>
@@ -222,15 +229,19 @@ function Contrato({ festaId, contratacao }: { festaId: string; contratacao: Cont
 function Checklist({ contratacao }: { contratacao: Contratacao }) {
   const itens = contratacao.checklist;
   const feitos = itens.filter((i) => i.feito).length;
+  const abertos = itens.length - feitos;
 
   return (
-    <div className="mt-2 flex min-h-0 flex-1 flex-col">
+    <div className="mt-3 flex min-h-0 flex-1 flex-col">
       <p className="text-tinta-suave shrink-0 text-[0.8125rem]">
         Checklist{" "}
         {itens.length > 0 && (
-          <span className={cn("font-mono", feitos === itens.length && "text-foreground")}>
+          <span className={cn("font-mono", abertos === 0 && "text-foreground")}>
             {feitos}/{itens.length}
           </span>
+        )}
+        {abertos > 0 && (
+          <span className="text-foreground font-semibold"> · {abertos} em aberto</span>
         )}
       </p>
       <ul className={cn(AREA_ROLAVEL, "mt-1 flex flex-col")}>
@@ -381,31 +392,34 @@ function Linha({
           )}
         </div>
       ) : (
-        <div className="mt-1 flex min-w-0 shrink-0 flex-wrap items-center gap-x-2 text-sm">
-          {contratacao.valorCentavos === null ? (
-            <button
-              type="button"
-              onClick={() => setEditando(true)}
-              className="text-tinta-suave hover:text-foreground focus-visible:outline-ring rounded-sm underline-offset-2 hover:underline focus-visible:outline-2"
-            >
-              Valor a definir
-            </button>
-          ) : (
-            <>
-              <span className="font-mono">{formatarReais(contratacao.valorCentavos)}</span>
-              {contratacao.parcelas > 1 ? (
-                <div className="basis-full">
+        <div className="mt-3 flex min-w-0 shrink-0 items-start gap-2">
+          <p className={ROTULO_LINHA}>Valor</p>
+          <div className="flex min-h-8 min-w-0 flex-1 flex-wrap items-center gap-x-2 text-sm">
+            {contratacao.valorCentavos === null ? (
+              <button type="button" onClick={() => setEditando(true)} className={FALTA}>
+                <Plus aria-hidden className="size-4" strokeWidth={1.75} />
+                Definir valor
+              </button>
+            ) : (
+              <>
+                <span className="font-mono">{formatarReais(contratacao.valorCentavos)}</span>
+                {contratacao.parcelas > 1 ? (
+                  <div className="basis-full">
+                    <Pagamento contratacao={contratacao} />
+                  </div>
+                ) : (
                   <Pagamento contratacao={contratacao} />
-                </div>
-              ) : (
-                <Pagamento contratacao={contratacao} />
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
 
-      <Contrato festaId={festaId} contratacao={contratacao} />
+      <div className="mt-2 flex min-w-0 shrink-0 items-start gap-2">
+        <p className={ROTULO_LINHA}>Contrato</p>
+        <Contrato festaId={festaId} contratacao={contratacao} />
+      </div>
       <Checklist contratacao={contratacao} />
     </li>
   );
@@ -459,6 +473,27 @@ export function ColunaFornecedores({
                     { valor: "", rotulo: "Escolha…" },
                     ...servicos.map((s) => ({ valor: s.id, rotulo: s.nome })),
                   ],
+                },
+                {
+                  nome: "fornecedorId",
+                  rotulo: "Fornecedor",
+                  tipo: "select",
+                  opcional: true,
+                  travadoSe: (s) => !s.servicoId,
+                  opcoes: (s) => {
+                    if (!s.servicoId) return [{ valor: "", rotulo: "Escolha o serviço primeiro" }];
+                    const doServico = fornecedoresPorServico.get(s.servicoId) ?? [];
+                    return [
+                      {
+                        valor: "",
+                        rotulo:
+                          doServico.length === 0
+                            ? "Nenhum fornecedor deste serviço na base"
+                            : "Ainda não escolhido",
+                      },
+                      ...doServico.map((f) => ({ valor: f.id, rotulo: f.nome })),
+                    ];
+                  },
                 },
               ]}
               rotuloEnviar="Adicionar"

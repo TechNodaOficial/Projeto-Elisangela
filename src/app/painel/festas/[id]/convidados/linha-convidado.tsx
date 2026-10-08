@@ -2,15 +2,18 @@
 
 import {
   Check,
-  CircleDashed,
   Copy,
+  Eye,
+  MailCheck,
+  MailX,
   MessageCircle,
   MoreHorizontal,
   Pencil,
+  Send,
   Trash2,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { startTransition, useState } from "react";
 
 import { ConfirmarExclusao } from "@/components/confirmar-exclusao";
 import { Button } from "@/components/ui/button";
@@ -24,23 +27,56 @@ import type { ConvidadoResumo } from "@/lib/convidados/consultas";
 import { mensagemConvite } from "@/lib/convidados/mensagem";
 import { formatarTelefone, linkWhatsApp } from "@/lib/convidados/telefone";
 import { confirmadasDe } from "@/lib/convidados/contagem";
+import { etapaDoConvite, type Etapa } from "@/lib/convidados/etapa";
 import { paraCampos } from "@/lib/datas";
 import { cn } from "@/lib/utils";
 
-import { editarConvidado, removerConvidado } from "./actions";
+import { editarConvidado, marcarEnvio, removerConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
 
 export type DadosFesta = { titulo: string; dataHora: Date; localNome: string };
 
-const STATUS = {
-  CONFIRMADO: { rotulo: "Confirmou", icone: Check, classe: "text-foreground font-medium" },
-  RECUSADO: { rotulo: "Não vai", icone: X, classe: "text-tinta-suave" },
-  PENDENTE: { rotulo: "Aguardando", icone: CircleDashed, classe: "text-tinta-suave" },
-} as const;
+// Link do convite e o WhatsApp já com a mensagem (usados na linha e na fila de envio).
+export function linksDoConvite(convidado: ConvidadoResumo, festa: DadosFesta, origem: string) {
+  const link = `${origem}/c/${convidado.tokenConvite}`;
+  const whatsapp = linkWhatsApp(
+    convidado.telefone,
+    mensagemConvite({
+      nomeConvidado: convidado.nome,
+      pessoas: convidado.pessoas,
+      tituloFesta: festa.titulo,
+      dataHora: festa.dataHora,
+      localNome: festa.localNome,
+      link,
+    }),
+  );
+  return { link, whatsapp };
+}
+
+// "08/10" no fuso de São Paulo.
+const diaMes = (d: Date) => paraCampos(d).data.split("-").reverse().slice(0, 2).join("/");
+
+// Etiqueta da etapa do convite, com cor: amarelo falta enviar, verde confirmou,
+// lilás abriu o link, branco com borda enviado (aguardando) ou não vai. Quem chegou fica grifado.
+const ETIQUETA: Record<
+  Exclude<Etapa, "chegou">,
+  { rotulo: string; icone: typeof Check; classe: string }
+> = {
+  nao_enviado: { rotulo: "Não enviado", icone: MailX, classe: "bg-pendente text-foreground" },
+  enviado: {
+    rotulo: "Enviado",
+    icone: Send,
+    classe: "bg-card border-border border text-tinta-suave",
+  },
+  abriu: { rotulo: "Abriu o convite", icone: Eye, classe: "bg-pastel-lilas text-foreground" },
+  confirmou: { rotulo: "Confirmou", icone: Check, classe: "bg-resolvida text-foreground" },
+  nao_vai: { rotulo: "Não vai", icone: X, classe: "bg-card border-border border text-tinta-suave" },
+};
 
 function Status({ convidado }: { convidado: ConvidadoResumo }) {
   const { pessoas, entraram, presenteEm } = convidado;
-  if (presenteEm && entraram > 0) {
+  const etapa = etapaDoConvite(convidado);
+  if (etapa === "chegou" && presenteEm) {
     return (
       <span className="grifo text-sm leading-(--linha) font-semibold">
         {pessoas === 1 ? "Chegou" : `Chegaram ${entraram} de ${pessoas}`}{" "}
@@ -48,15 +84,24 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
       </span>
     );
   }
-  const s = STATUS[convidado.rsvp];
-  const Icone = s.icone;
+  const e = ETIQUETA[etapa === "chegou" ? "confirmou" : etapa];
+  const Icone = e.icone;
+  const detalhe =
+    etapa === "enviado" && convidado.enviadoEm
+      ? ` ${diaMes(convidado.enviadoEm)}`
+      : etapa === "confirmou" && pessoas > 1
+        ? ` ${confirmadasDe(convidado)} de ${pessoas}`
+        : "";
   return (
-    <span className={`flex items-center gap-1 text-sm leading-(--linha) ${s.classe}`}>
+    <span
+      className={cn(
+        "inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-medium whitespace-nowrap",
+        e.classe,
+      )}
+    >
       <Icone aria-hidden className="size-3.5" strokeWidth={2} />
-      {s.rotulo}
-      {convidado.rsvp === "CONFIRMADO" &&
-        pessoas > 1 &&
-        ` ${confirmadasDe(convidado)} de ${pessoas}`}
+      {e.rotulo}
+      {detalhe}
     </span>
   );
 }
@@ -76,18 +121,8 @@ export function LinhaConvidado({
   const [removendo, setRemovendo] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
-  const link = `${origem}/c/${convidado.tokenConvite}`;
-  const whatsapp = linkWhatsApp(
-    convidado.telefone,
-    mensagemConvite({
-      nomeConvidado: convidado.nome,
-      pessoas: convidado.pessoas,
-      tituloFesta: festa.titulo,
-      dataHora: festa.dataHora,
-      localNome: festa.localNome,
-      link,
-    }),
-  );
+  const { link, whatsapp } = linksDoConvite(convidado, festa, origem);
+  const marcar = (enviado: boolean) => startTransition(() => marcarEnvio(convidado.id, enviado));
 
   async function copiar() {
     await navigator.clipboard.writeText(link);
@@ -144,17 +179,25 @@ export function LinhaConvidado({
         {convidado.mesa && !copiado && (
           <span className="whitespace-nowrap">· {convidado.mesa.nome}</span>
         )}
+        {!convidado.mesa && !copiado && convidado.rsvp === "CONFIRMADO" && (
+          <span className="whitespace-nowrap">· sem mesa</span>
+        )}
       </p>
 
       <div className="text-tinta-suave group-focus-within/linha:text-foreground group-hover/linha:text-foreground col-start-2 flex h-(--linha) items-center gap-0.5 transition-colors duration-150">
+        {/* Com espaço, o botão diz o que faz: "Enviar" (ainda não foi) ou "Reenviar". */}
         <Button asChild variant="ghost" className="h-11 min-w-11 px-2.5 sm:h-9 sm:min-w-0">
           <a
             href={whatsapp}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => marcar(true)}
             aria-label={`Enviar convite para ${convidado.nome} pelo WhatsApp`}
           >
             <MessageCircle aria-hidden strokeWidth={1.75} />
+            <span className="hidden text-sm @xl:inline">
+              {convidado.enviadoEm ? "Reenviar" : "Enviar"}
+            </span>
           </a>
         </Button>
         <DropdownMenu>
@@ -168,11 +211,22 @@ export function LinhaConvidado({
               <MoreHorizontal aria-hidden strokeWidth={1.75} />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="papel-solto w-48 rounded-[3px] ring-0">
+          <DropdownMenuContent align="end" className="papel-solto w-56 rounded-[3px] ring-0">
             <DropdownMenuItem onSelect={copiar}>
               <Copy aria-hidden strokeWidth={1.75} />
               Copiar link do convite
             </DropdownMenuItem>
+            {convidado.enviadoEm ? (
+              <DropdownMenuItem onSelect={() => marcar(false)}>
+                <MailX aria-hidden strokeWidth={1.75} />
+                Marcar como não enviado
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onSelect={() => marcar(true)}>
+                <MailCheck aria-hidden strokeWidth={1.75} />
+                Marcar como enviado
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem onSelect={() => setEditando(true)}>
               <Pencil aria-hidden strokeWidth={1.75} />
               Editar

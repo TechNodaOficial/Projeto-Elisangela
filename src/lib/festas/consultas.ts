@@ -31,6 +31,7 @@ export async function listarFestas(status: StatusLista) {
       contratacoes: {
         select: {
           fornecedorId: true,
+          contratoNome: true,
           valorCentavos: true,
           parcelas: true,
           parcelasPagas: true,
@@ -103,6 +104,7 @@ export async function listarFestasNoPeriodo(inicio: Date, fim: Date) {
       contratacoes: {
         select: {
           fornecedorId: true,
+          contratoNome: true,
           valorCentavos: true,
           parcelas: true,
           parcelasPagas: true,

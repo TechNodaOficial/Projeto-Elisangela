@@ -163,18 +163,26 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
             className="size-full object-cover"
           />
           {/* Véu bege: a foto aparece, mas texto e cartões continuam legíveis; some no fim. */}
-          <div className="from-mesa/60 via-mesa/35 to-mesa absolute inset-0 bg-linear-to-b" />
+          <div className="from-mesa/35 via-mesa/15 to-mesa absolute inset-0 bg-linear-to-b" />
         </div>
       )}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      {/* Voltar, ações e o topo da festa. No celular as ações vêm depois do topo, numa faixa
+          que rola de lado, para o nome da festa aparecer primeiro. */}
+      <div className="flex flex-col gap-3 md:grid md:grid-cols-[auto_1fr] md:items-center md:gap-x-2 md:gap-y-4">
         <Link
           href={voltar.href}
-          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring bg-mesa/80 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm focus-visible:outline-2"
+          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring bg-mesa/80 inline-flex items-center gap-1.5 self-start rounded-md px-2 py-1 text-sm focus-visible:outline-2 md:self-center"
         >
           <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
           {voltar.rotulo}
         </Link>
-        <div className="flex flex-wrap items-center justify-end gap-1">
+        <div className="order-last -mx-4 flex items-center gap-1 overflow-x-auto px-4 md:order-none md:mx-0 md:flex-wrap md:justify-end md:overflow-visible md:px-0 [&>*]:shrink-0">
+          <Button asChild variant="outline" className="bg-card h-9">
+            <Link href={`/painel/festas/${festa.id}/editar`}>
+              <Pencil aria-hidden strokeWidth={1.75} />
+              Editar
+            </Link>
+          </Button>
           {!concluida && (
             <Button asChild variant="outline" className="bg-card h-9">
               <Link href={`/painel/festas/${festa.id}/portaria`}>
@@ -185,66 +193,60 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           )}
           <BotaoFoto festaId={festa.id} temFoto={!!festa.fotoUrl} />
           {[
-            { tipo: "convite", rotulo: "Convite" },
-            { tipo: "roteiro", rotulo: "Roteiro" },
+            { tipo: "convite", rotulo: "PDF do convite" },
+            { tipo: "roteiro", rotulo: "PDF do roteiro" },
           ].map((pdf) => (
             <Button key={pdf.tipo} asChild variant="outline" className="bg-card h-9">
               <a
                 href={`/painel/festas/${festa.id}/pdf/${pdf.tipo}`}
                 target="_blank"
                 rel="noopener"
-                aria-label={`Abrir PDF: ${pdf.rotulo}`}
+                title="Abre em outra aba"
               >
                 <FileText aria-hidden strokeWidth={1.75} />
                 {pdf.rotulo}
               </a>
             </Button>
           ))}
-          <Button asChild variant="outline" className="bg-card h-9">
-            <Link href={`/painel/festas/${festa.id}/editar`}>
-              <Pencil aria-hidden strokeWidth={1.75} />
-              Editar
-            </Link>
-          </Button>
           <ExcluirFesta id={festa.id} titulo={festa.titulo} />
         </div>
-      </div>
 
-      {/* Topo: data, nome e dados da festa. */}
-      <header className="folha px-4 py-3 md:px-5">
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-[2rem] leading-none font-medium tracking-[-0.04em]">
-            {data.dia}
-          </span>
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-lg leading-tight font-semibold tracking-[-0.01em]">
-              {festa.titulo}
-            </h1>
-            <p className="text-tinta-suave text-[0.8125rem] leading-snug">
-              {data.semana.replace(/^./, (c) => c.toUpperCase())}, {data.mes} {data.ano} ·{" "}
-              <span className="font-mono">{data.hora}</span> ·{" "}
-              <span
-                className={!concluida && dias <= 7 ? "grifo text-foreground font-semibold" : ""}
-              >
-                {concluida
-                  ? `Concluída · ${rotuloProximidade(dias).toLowerCase()}`
-                  : rotuloProximidade(dias)}
-              </span>
-            </p>
+        {/* Topo: data, nome e dados da festa. */}
+        <header className="folha px-4 py-3 md:col-span-2 md:px-5">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[2rem] leading-none font-medium tracking-[-0.04em]">
+              {data.dia}
+            </span>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg leading-tight font-semibold tracking-[-0.01em] text-balance">
+                {festa.titulo}
+              </h1>
+              <p className="text-tinta-suave text-[0.8125rem] leading-snug">
+                {data.semana.replace(/^./, (c) => c.toUpperCase())}, {data.mes} {data.ano} ·{" "}
+                <span className="font-mono">{data.hora}</span> ·{" "}
+                <span
+                  className={!concluida && dias <= 7 ? "grifo text-foreground font-semibold" : ""}
+                >
+                  {concluida
+                    ? `Concluída · ${rotuloProximidade(dias).toLowerCase()}`
+                    : rotuloProximidade(dias)}
+                </span>
+              </p>
+            </div>
           </div>
-        </div>
 
-        {linhas.length > 0 && (
-          <dl className="border-border mt-2.5 flex flex-wrap gap-x-5 gap-y-1 border-t pt-2.5 text-[0.8125rem] leading-snug">
-            {linhas.map((linha) => (
-              <div key={linha.rotulo} className="flex min-w-0 gap-1.5">
-                <dt className="text-tinta-suave shrink-0">{linha.rotulo}:</dt>
-                <dd className="line-clamp-2 min-w-0">{linha.valor}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-      </header>
+          {linhas.length > 0 && (
+            <dl className="border-border mt-2.5 flex flex-wrap gap-x-5 gap-y-1 border-t pt-2.5 text-[0.8125rem] leading-snug">
+              {linhas.map((linha) => (
+                <div key={linha.rotulo} className="flex min-w-0 gap-1.5">
+                  <dt className="text-tinta-suave shrink-0">{linha.rotulo}:</dt>
+                  <dd className="line-clamp-2 min-w-0">{linha.valor}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </header>
+      </div>
 
       {/* Concluída: baixar o PDF completo antes da limpeza (ou o aviso de arquivada). */}
       {concluida && <AvisoArquivo festa={festa} />}
@@ -302,6 +304,19 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
                           )}
                           <span className="truncate">{botao.resumo}</span>
                         </span>
+                        {/* O que falta, um por linha (spans: dentro do link não cabe lista). */}
+                        {botao.detalhes && (
+                          <span className="mt-1.5 flex flex-col gap-0.5 text-[0.8125rem] leading-snug">
+                            {botao.detalhes.map((d) => (
+                              <span
+                                key={d}
+                                className="before:bg-pendente-forte relative block pl-3 first-letter:uppercase before:absolute before:top-[0.45em] before:left-0.5 before:size-1.5 before:rounded-full"
+                              >
+                                {d}
+                              </span>
+                            ))}
+                          </span>
+                        )}
                       </span>
                       <ArrowRight
                         aria-hidden

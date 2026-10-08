@@ -7,6 +7,7 @@ const contratacao = (
 ) => ({
   servico: { nome: "Buffet" },
   fornecedorId: "f1",
+  contratoNome: "contrato.pdf",
   valorCentavos: 50000,
   parcelas: 1,
   parcelasPagas: 1,
@@ -20,21 +21,22 @@ describe("pendenciasDaFesta", () => {
     expect(pendenciasDaFesta({ contratacoes: [contratacao()] })).toEqual([]);
   });
 
-  it("aponta fornecedor não escolhido, pagamento, valor e checklist", () => {
+  it("aponta fornecedor não escolhido, contrato, valor, pagamento e checklist", () => {
     expect(
       pendenciasDaFesta({
         contratacoes: [
           contratacao({ fornecedorId: null, servico: { nome: "DJ e som" } }),
           contratacao({ parcelas: 3, parcelasPagas: 2 }),
           contratacao({ parcelasPagas: 0, servico: { nome: "Decoração" } }),
-          contratacao({ valorCentavos: null, parcelasPagas: 0 }),
+          contratacao({ valorCentavos: null, parcelasPagas: 0, contratoNome: null }),
           contratacao({ checklist: [{ feito: false }, { feito: false }, { feito: true }] }),
         ],
       }),
     ).toEqual([
       "sem fornecedor: DJ e som",
-      "2 serviços a pagar",
+      "1 serviço sem contrato",
       "1 serviço com valor a definir",
+      "2 serviços a pagar",
       "2 itens do checklist em aberto",
     ]);
   });

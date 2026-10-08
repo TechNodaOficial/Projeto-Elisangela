@@ -6,6 +6,7 @@ import { buscarConvite } from "@/lib/convites/consultas";
 import { estadoConvite } from "@/lib/convites/estado";
 import { erroDePrazo, faseDoConvite } from "@/lib/convites/prazo";
 import { conviteBloqueado, registrarErroConvite } from "@/lib/convites/limite";
+import { obterUsuarioLogado } from "@/lib/dal";
 import { obterIp } from "@/lib/ip";
 import { prisma } from "@/lib/prisma";
 
@@ -64,4 +65,22 @@ export async function responderConvite(
   revalidatePath(`/c/${token}`);
   revalidatePath(`/painel/festas/${convite.festaId}`);
   return {};
+}
+
+// O convidado abriu o link no navegador (chamado pela página, depois de carregar: a prévia
+// que o WhatsApp monta ao enviar não roda JavaScript e não conta). Só a primeira vez vale,
+// e a própria Elisangela conferindo o convite logada no painel não conta.
+export async function registrarAbertura(token: string) {
+  if (await obterUsuarioLogado()) return;
+  const ip = await obterIp();
+  if (await conviteBloqueado(ip)) return;
+  const convite = await buscarConvite(token);
+  if (!convite) {
+    await registrarErroConvite(ip);
+    return;
+  }
+  await prisma.convidado.updateMany({
+    where: { id: convite.id, abertoEm: null },
+    data: { abertoEm: new Date() },
+  });
 }

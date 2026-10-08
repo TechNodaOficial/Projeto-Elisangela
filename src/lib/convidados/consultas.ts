@@ -17,6 +17,8 @@ export async function listarConvidados(festaId: string) {
       rsvp: true,
       confirmadas: true,
       respondidoEm: true,
+      enviadoEm: true,
+      abertoEm: true,
       entraram: true,
       presenteEm: true,
       mesaId: true,

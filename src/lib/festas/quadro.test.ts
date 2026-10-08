@@ -32,6 +32,7 @@ describe("situacoesDoQuadro", () => {
         {
           servico: { nome: "Buffet" },
           fornecedorId: null,
+          contratoNome: null,
           valorCentavos: null,
           parcelas: 1,
           parcelasPagas: 0,
@@ -46,7 +47,15 @@ describe("situacoesDoQuadro", () => {
         { itens: 4, feitos: 1 },
       ],
     });
-    expect(s.fornecedores).toEqual({ situacao: "pendente", resumo: "2 pendências" });
+    expect(s.fornecedores).toEqual({
+      situacao: "pendente",
+      resumo: "3 pendências",
+      detalhes: [
+        "sem fornecedor: Buffet",
+        "1 serviço sem contrato",
+        "1 serviço com valor a definir",
+      ],
+    });
     expect(s.convidados).toEqual({
       situacao: "pendente",
       resumo: "3 sem resposta · 6 confirmados",

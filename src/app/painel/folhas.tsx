@@ -83,21 +83,29 @@ export function FolhaFesta({ festa, concluida }: { festa: FestaResumo; concluida
       {concluida && festa.arquivada && (
         <p className="text-tinta-suave text-sm leading-(--linha)">Arquivada</p>
       )}
-      <p
-        className="flex items-center gap-1.5 text-sm leading-(--linha) font-medium"
-        title={pendente ? festa.pendencias.join(" · ") : undefined}
-      >
+      <p className="flex items-center gap-1.5 text-sm leading-(--linha) font-medium">
         {pendente ? (
           <CircleAlert aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
         ) : (
           <CircleCheck aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
         )}
-        <span className="truncate">
-          {pendente
-            ? `${festa.pendencias.length} ${festa.pendencias.length === 1 ? "pendência" : "pendências"}: ${festa.pendencias[0]}`
-            : "Tudo resolvido"}
-        </span>
+        {pendente
+          ? `${festa.pendencias.length} ${festa.pendencias.length === 1 ? "pendência" : "pendências"}`
+          : "Tudo resolvido"}
       </p>
+      {/* O que falta, item por item: ela vê sem abrir a festa. */}
+      {pendente && (
+        <ul className="text-[0.8125rem] leading-5">
+          {festa.pendencias.map((p) => (
+            <li
+              key={p}
+              className="before:bg-pendente-forte relative truncate pl-5 first-letter:uppercase before:absolute before:top-[0.5rem] before:left-1 before:size-1.5 before:rounded-full"
+            >
+              {p}
+            </li>
+          ))}
+        </ul>
+      )}
     </Link>
   );
 }

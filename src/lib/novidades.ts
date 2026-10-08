@@ -11,6 +11,46 @@ export type Novidade = {
 
 export const NOVIDADES: Novidade[] = [
   {
+    id: "2026-10-08-pendencias",
+    data: "2026-10-08",
+    titulo: "Pendências mais claras e atalhos",
+    secoes: [
+      {
+        titulo: "O que falta, à vista",
+        itens: [
+          "O cartão da festa e o botão Fornecedores do quadro agora listam cada pendência: sem fornecedor, sem contrato, valor a definir, a pagar e itens do checklist em aberto.",
+          "Contrato que ainda não foi enviado passa a contar como pendência (a festa fica amarela até enviar).",
+          "No cartão de cada serviço, as linhas “Valor” e “Contrato” ficam em amarelo quando falta preencher, com os botões “Definir valor” e “Enviar PDF ou foto”.",
+        ],
+      },
+      {
+        titulo: "Envio dos convites",
+        itens: [
+          "Na lista de convidados, o botão “Enviar convites em sequência” mostra um convidado por vez com a mensagem pronta: você abre o WhatsApp, envia, volta e já aparece o próximo.",
+          "A cada 20 envios ele sugere uma pausa de 5 minutos, para o WhatsApp não limitar a sua conta.",
+          "Cada convidado tem uma etiqueta colorida: Não enviado (amarelo), Enviado, Abriu o convite (lilás), Confirmou (verde) ou Não vai.",
+          "Filtros na lista de convidados: Não enviados, Enviados sem resposta, Confirmaram, Não vão e Sem WhatsApp, cada um com a quantidade.",
+          "Se muitos convites enviados há mais de um dia não forem abertos, aparece um aviso: as mensagens podem não estar chegando.",
+        ],
+      },
+      {
+        titulo: "Mais rápido",
+        itens: [
+          "Ao adicionar um serviço, você já escolhe o fornecedor: depois de escolher o serviço, a lista mostra só os fornecedores dele.",
+          "Dentro de cada parte da festa, uma faixa no topo leva direto para as outras (Fornecedores, Convidados, Layout…), sem voltar ao quadro.",
+          "Os botões de adicionar (serviço, mesa, convidado, padrinho…) ficaram com contorno, mais fáceis de achar.",
+        ],
+      },
+      {
+        titulo: "Calendário e foto",
+        itens: [
+          "No calendário, as festas que já passaram aparecem esmaecidas: elas ficam em Festas concluídas.",
+          "A foto de fundo da festa aparece mais, com um véu bege mais leve.",
+        ],
+      },
+    ],
+  },
+  {
     id: "2026-10-07-reuniao",
     data: "2026-10-07",
     titulo: "Versão 2.0",

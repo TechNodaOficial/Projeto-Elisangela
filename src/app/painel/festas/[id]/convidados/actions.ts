@@ -12,6 +12,7 @@ import {
 import { exigirUsuario } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { gerarTokensConvidado } from "@/lib/tokens";
+import { lerLista, MAXIMO_LINHAS } from "@/lib/convidados/importar";
 
 export type EstadoFormConvidado = {
   erros?: ErrosConvidado;
@@ -95,5 +96,57 @@ export async function removerConvidado(id: string) {
 
   // deleteMany não falha se outra aba já removeu.
   await prisma.convidado.deleteMany({ where: { id } });
+  atualizarTelas(convidado.festaId);
+}
+
+export type ResultadoImportacao = { adicionados: number; ignorados: number } | { erro: string };
+
+// Vários convidados de uma vez, a partir da lista colada. O texto é lido de novo aqui
+// (não confia na prévia do navegador): só entram as linhas sem problema.
+export async function importarConvidados(
+  festaId: string,
+  texto: string,
+): Promise<ResultadoImportacao> {
+  await exigirUsuario();
+  if (typeof texto !== "string" || texto.length > 200_000) {
+    return { erro: "Lista grande demais. Cole em partes menores." };
+  }
+  const festa = await prisma.festa.findUnique({ where: { id: festaId }, select: { id: true } });
+  if (!festa) return { erro: "Esta festa não existe mais." };
+
+  const existentes = await prisma.convidado.findMany({
+    where: { festaId },
+    select: { nome: true, telefone: true },
+  });
+  const linhas = lerLista(texto, existentes);
+  if (linhas.length > MAXIMO_LINHAS) {
+    return { erro: `No máximo ${MAXIMO_LINHAS} convites por vez.` };
+  }
+  const validas = linhas.filter((l) => !l.problema);
+  if (validas.length > 0) {
+    await prisma.convidado.createMany({
+      data: validas.map((l) => ({
+        festaId,
+        nome: l.nome,
+        pessoas: l.pessoas,
+        telefone: l.telefone,
+        ...gerarTokensConvidado(),
+      })),
+    });
+    atualizarTelas(festaId);
+  }
+  return { adicionados: validas.length, ignorados: linhas.length - validas.length };
+}
+
+// Ela abriu o WhatsApp com o convite: conta como enviado (sai da fila de envio).
+// `enviado: false` desfaz, para quando ela abriu mas não chegou a mandar.
+export async function marcarEnvio(id: string, enviado: boolean) {
+  await exigirUsuario();
+  const convidado = await prisma.convidado.findUnique({ where: { id }, select: { festaId: true } });
+  if (!convidado) return;
+  await prisma.convidado.updateMany({
+    where: { id },
+    data: { enviadoEm: enviado ? new Date() : null },
+  });
   atualizarTelas(convidado.festaId);
 }

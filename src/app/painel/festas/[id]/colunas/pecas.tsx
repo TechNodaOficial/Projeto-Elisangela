@@ -58,6 +58,8 @@ export function N({ children }: { children: React.ReactNode }) {
 
 // ── Formulário genérico ──────────────────────────────────────────────────────
 
+type Opcao = { valor: string; rotulo: string };
+
 export type Campo = {
   nome: string;
   rotulo: string;
@@ -67,7 +69,10 @@ export type Campo = {
   mono?: boolean;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   max?: number;
-  opcoes?: { valor: string; rotulo: string }[];
+  // Opções fixas, ou calculadas a partir dos outros selects (ex.: fornecedores do serviço).
+  opcoes?: Opcao[] | ((selecionados: Record<string, string>) => Opcao[]);
+  // Select travado enquanto a função devolver true (ex.: até escolher o serviço).
+  travadoSe?: (selecionados: Record<string, string>) => boolean;
   // Mostra o campo só quando a função, com os valores dos selects, devolver true.
   mostrarSe?: (selecionados: Record<string, string>) => boolean;
 };
@@ -113,6 +118,13 @@ export function FormCampos({
   }, [estado.sucesso]);
 
   const id = (campo: string) => `${prefixo}-${campo}`;
+  const opcoesDe = (campo: Campo) =>
+    typeof campo.opcoes === "function" ? campo.opcoes(selecionados) : (campo.opcoes ?? []);
+  // Se as opções mudaram (outro serviço) e o valor escolhido sumiu, volta para a primeira.
+  const valorDoSelect = (campo: Campo) => {
+    const valor = selecionados[campo.nome];
+    return opcoesDe(campo).some((o) => o.valor === valor) ? valor : "";
+  };
 
   return (
     <form action={enviar} noValidate className="flex flex-col gap-3 pt-2 pb-(--linha)">
@@ -134,11 +146,12 @@ export function FormCampos({
             {campo.tipo === "select" ? (
               <select
                 {...comum}
-                value={selecionados[campo.nome]}
+                value={valorDoSelect(campo)}
+                disabled={campo.travadoSe?.(selecionados)}
                 onChange={(e) => setSelecionados((s) => ({ ...s, [campo.nome]: e.target.value }))}
-                className="border-input bg-card focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full min-w-0 rounded-md border px-2.5 text-base outline-none focus-visible:ring-3 md:text-sm"
+                className="border-input bg-card focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full min-w-0 rounded-md border px-2.5 text-base outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               >
-                {campo.opcoes?.map((o) => (
+                {opcoesDe(campo).map((o) => (
                   <option key={o.valor} value={o.valor}>
                     {o.rotulo}
                   </option>
@@ -200,14 +213,15 @@ export function Adicionar({
   const [aberto, setAberto] = useState(false);
   if (aberto) return <div className="mt-2">{children(() => setAberto(false))}</div>;
   return (
+    // Botão com contorno, para não passar despercebido como um texto solto.
     <Button
       type="button"
-      variant="ghost"
+      variant="outline"
       onClick={() => setAberto(true)}
-      className="group -my-2 -ml-2.5 h-11 px-2.5 font-medium sm:my-0 sm:h-(--linha)"
+      className="bg-card h-11 self-start px-3.5 font-medium sm:h-10"
     >
       <Plus aria-hidden strokeWidth={2} />
-      <span className="grifo-ao-passar">{rotulo}</span>
+      {rotulo}
     </Button>
   );
 }

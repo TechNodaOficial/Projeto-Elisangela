@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
+import { nomeDaSaudacao } from "@/lib/convidados/saudacao";
 import { buscarConvite } from "@/lib/convites/consultas";
 import { estadoConvite } from "@/lib/convites/estado";
 import { conviteBloqueado, registrarErroConvite } from "@/lib/convites/limite";
@@ -79,8 +80,7 @@ export async function GET(_request: Request, ctx: RouteContext<"/c/[token]/qr">)
   const qr = await qrPngDataUrl(convite.codigoCheckin, LADO_QR);
   const data = partesData(convite.festa.dataHora);
   const semana = data.extenso.split(",")[0];
-  const primeiroNome = convite.nome.trim().split(/\s+/)[0];
-  const arquivo = `convite-${primeiroNome}`
+  const arquivo = `convite-${nomeDaSaudacao(convite.nome, convite.pessoas)}`
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()

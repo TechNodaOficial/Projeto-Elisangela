@@ -69,7 +69,13 @@ export function BotaoFoto({ festaId, temFoto }: { festaId: string; temFoto: bool
         onClick={() => inputRef.current?.click()}
       >
         <ImagePlus aria-hidden strokeWidth={1.75} />
-        {preparando ? "Preparando…" : enviando ? "Enviando…" : temFoto ? "Trocar foto" : "Foto"}
+        {preparando
+          ? "Preparando…"
+          : enviando
+            ? "Enviando…"
+            : temFoto
+              ? "Trocar foto de fundo"
+              : "Foto de fundo"}
       </Button>
       {temFoto && (
         <ConfirmarExclusao

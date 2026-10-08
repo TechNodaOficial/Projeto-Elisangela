@@ -123,7 +123,14 @@ function Legenda() {
           aria-hidden
           className="bg-pendente border-pendente-forte size-3 rounded-sm border-l-[3px]"
         />
-        Tem pendência (fornecedor, pagamento ou checklist)
+        Tem pendência (fornecedor, contrato, valor, pagamento ou checklist)
+      </li>
+      <li className="flex items-center gap-1.5">
+        <span
+          aria-hidden
+          className="bg-resolvida border-resolvida-forte size-3 rounded-sm border-l-[3px] opacity-45"
+        />
+        Já passou (fica em Concluídas)
       </li>
     </ul>
   );
@@ -133,6 +140,7 @@ function Legenda() {
 // - Mês: os dias com as festas escritas, verde se está tudo resolvido, amarelo se falta
 //   algo (ver pendenciasDaFesta). Cada festa leva à sua página.
 // - Ano: os 12 meses pequenos, com os dias comprometidos marcados; o dia abre o mês.
+// Festas de dias que já passaram aparecem esmaecidas: saíram das pendentes.
 export async function Calendario({
   vista,
   mes,
@@ -217,6 +225,7 @@ async function CalendarioAno({ ano }: { ano: number }) {
                         );
                         if (doDia.length === 0) return <td key={dia.data}>{numero}</td>;
                         const pendente = doDia.some((f) => f.pendencias.length > 0);
+                        const passou = dia.data < hoje;
                         const nomes = doDia
                           .map((f) => `${paraCampos(f.dataHora).hora} ${f.titulo}`)
                           .join(" · ");
@@ -226,12 +235,13 @@ async function CalendarioAno({ ano }: { ano: number }) {
                             <Link
                               href={`?mes=${chave}`}
                               title={nomes}
-                              aria-label={`${dia.dia}: ${nomes}${pendente ? " (com pendência)" : ""}`}
+                              aria-label={`${dia.dia}: ${nomes}${pendente ? " (com pendência)" : ""}${passou ? " (concluída)" : ""}`}
                               className={cn(
                                 "focus-visible:outline-ring block rounded-full font-semibold focus-visible:outline-2 [&>span]:ring-2",
                                 pendente
                                   ? "bg-pendente [&>span]:ring-pendente-forte"
                                   : "bg-resolvida [&>span]:ring-resolvida-forte",
+                                passou && "opacity-45",
                               )}
                             >
                               {numero}
@@ -296,13 +306,14 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
               {semana.map((dia) => {
                 const doDia = porDia.get(dia.data) ?? [];
                 const comPendencia = doDia.some((f) => f.pendencias.length > 0);
+                const passou = doDia.length > 0 && dia.data < hoje;
                 return (
                   <td
                     key={dia.data}
                     className={cn(
                       "border-border h-14 border p-1 align-top md:h-20",
                       doDia.length > 0 && (comPendencia ? "bg-pendente" : "bg-resolvida"),
-                      !dia.doMes && "opacity-45",
+                      (!dia.doMes || passou) && "opacity-45",
                     )}
                   >
                     <span
@@ -319,11 +330,12 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
                           festa.pendencias.length > 0
                             ? `Pendente: ${festa.pendencias.join(", ")}`
                             : "Tudo resolvido";
+                        const rotulo = passou ? `Concluída · ${situacao}` : situacao;
                         return (
                           <li key={festa.id}>
                             <Link
                               href={`/painel/festas/${festa.id}`}
-                              title={`${festa.titulo} · ${situacao}`}
+                              title={`${festa.titulo} · ${rotulo}`}
                               className={cn(
                                 "bg-card hover:bg-muted focus-visible:outline-ring block truncate rounded-sm border-l-[3px] px-1 text-[0.6875rem] leading-5 font-medium focus-visible:outline-2 md:text-xs",
                                 festa.pendencias.length > 0
@@ -339,7 +351,7 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
                                 {paraCampos(festa.dataHora).hora}
                               </span>
                               <span className="sr-only md:not-sr-only"> {festa.titulo}</span>
-                              <span className="sr-only"> · {situacao}</span>
+                              <span className="sr-only"> · {rotulo}</span>
                             </Link>
                           </li>
                         );
