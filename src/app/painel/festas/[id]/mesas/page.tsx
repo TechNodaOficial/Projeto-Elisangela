@@ -26,7 +26,7 @@ export default async function PaginaMesas(props: PageProps<"/painel/festas/[id]/
   ]);
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full">
       <VoltarFesta festa={festa} observacoes="layout" />
       <ColunaMesas
         festaId={festa.id}

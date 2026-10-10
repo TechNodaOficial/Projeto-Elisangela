@@ -1,9 +1,10 @@
 import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
+import { somarFaixas } from "@/lib/convidados/contagem";
 import { exigirUsuario } from "@/lib/dal";
 import { buscarFesta, listarColunas } from "@/lib/festas/consultas";
+import { SECAO_FALA } from "@/lib/festas/observacoes";
 import { festaConcluida } from "@/lib/datas";
 import { gerarPdfCompleto } from "@/lib/pdf/completo";
-import { gerarPdfConvite } from "@/lib/pdf/convite";
 import { gerarPdfRoteiro } from "@/lib/pdf/roteiro";
 import { lerBytesPlanta } from "@/lib/planta/blob";
 import { lerImagem } from "@/lib/planta/imagem";
@@ -16,22 +17,20 @@ async function imagemDoBlob(url: string | null) {
   return bytes && info ? { bytes, info } : null;
 }
 
-// /painel/festas/[id]/pdf/convite  → convite para os convidados (só dados da festa)
-// /painel/festas/[id]/pdf/roteiro  → roteiro completo para a Elisangela e a equipe
+// /painel/festas/[id]/pdf/roteiro   → roteiro impresso para o dia da festa, sem valores
+// /painel/festas/[id]/pdf/checklist → o mesmo roteiro com valores e pagamentos, para os noivos
 // /painel/festas/[id]/pdf/completo → arquivo com TUDO da festa, para guardar antes da limpeza
 export async function GET(_request: Request, ctx: RouteContext<"/painel/festas/[id]/pdf/[tipo]">) {
   await exigirUsuario();
   const { id, tipo } = await ctx.params;
-  if (tipo !== "convite" && tipo !== "roteiro" && tipo !== "completo")
+  if (tipo !== "roteiro" && tipo !== "checklist" && tipo !== "completo")
     return new Response("Não encontrado", { status: 404 });
 
   const festa = await buscarFesta(id);
   if (!festa) return new Response("Festa não encontrada", { status: 404 });
 
   let pdf: Buffer;
-  if (tipo === "convite") {
-    pdf = await gerarPdfConvite(festa);
-  } else if (tipo === "completo") {
+  if (tipo === "completo") {
     const [colunas, convidados, observacoes, planta, foto] = await Promise.all([
       listarColunas(festa.id),
       listarConvidados(festa.id),
@@ -67,10 +66,14 @@ export async function GET(_request: Request, ctx: RouteContext<"/painel/festas/[
       await prisma.festa.update({ where: { id: festa.id }, data: { pdfCompletoEm: geradoEm } });
     }
   } else {
-    const [colunas, convidados, bytesPlanta] = await Promise.all([
+    const [colunas, convidados, bytesPlanta, fala] = await Promise.all([
       listarColunas(festa.id),
       listarConvidados(festa.id),
       festa.plantaUrl ? lerBytesPlanta(festa.plantaUrl) : null,
+      prisma.observacao.findUnique({
+        where: { festaId_secao: { festaId: festa.id, secao: SECAO_FALA } },
+        select: { conteudo: true },
+      }),
     ]);
     const info = bytesPlanta && lerImagem(bytesPlanta);
     pdf = await gerarPdfRoteiro({
@@ -86,7 +89,10 @@ export async function GET(_request: Request, ctx: RouteContext<"/painel/festas/[
           }
         : contarPorStatus(convidados),
       semMesa: convidados.filter((c) => !c.mesaId).reduce((s, c) => s + c.pessoas, 0),
+      buffet: festa.convidadosApagadosEm ? null : somarFaixas(convidados),
+      fala: { texto: fala?.conteudo ?? null, link: festa.cerimonialLink },
       planta: bytesPlanta && info ? { bytes: bytesPlanta, info } : null,
+      comValores: tipo === "checklist",
     });
   }
 

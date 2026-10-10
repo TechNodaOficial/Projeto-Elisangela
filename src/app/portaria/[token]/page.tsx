@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { MarcaLogo } from "@/components/logo";
+import { FaixaLogo } from "@/components/logo";
 import { Aviso, Moldura } from "@/components/moldura-publica";
 import { dadosLeitor } from "@/lib/checkin/consultas";
 import { conviteBloqueado, registrarErroConvite } from "@/lib/convites/limite";
@@ -82,11 +82,11 @@ export default async function PaginaPortaria(props: PageProps<"/portaria/[token]
     return <Aviso titulo="Festa não encontrada" texto="Peça um novo link para a Elisangela." />;
   }
   return (
-    <main className="px-4 pt-4 pb-10">
-      <div className="mb-3 flex justify-center">
-        <MarcaLogo className="h-10 w-auto" />
-      </div>
-      <Leitor festa={dados} />
-    </main>
+    <>
+      <FaixaLogo className="h-10 w-auto" />
+      <main className="px-4 pt-4 pb-10">
+        <Leitor festa={dados} />
+      </main>
+    </>
   );
 }

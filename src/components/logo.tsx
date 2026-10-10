@@ -16,6 +16,16 @@ export function MarcaLogo({ className, prioridade }: { className?: string; prior
   );
 }
 
+// Faixa creme no topo das páginas públicas (convite, portaria): o dourado da logo some
+// sobre a mesa caqui ou cinza, então ela fica sempre sobre o papel, como no logo original.
+export function FaixaLogo({ className }: { className?: string }) {
+  return (
+    <div className="bg-card border-border flex justify-center border-b px-4 py-3">
+      <MarcaLogo prioridade className={className} />
+    </div>
+  );
+}
+
 // Logo no topo do painel: leva às festas pendentes.
 export function Logo() {
   return (

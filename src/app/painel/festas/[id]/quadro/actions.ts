@@ -6,9 +6,9 @@ import { exigirUsuario } from "@/lib/dal";
 import {
   CAMPOS_ENTRADA,
   CAMPOS_ITEM,
+  CHECKLIST_CERIMONIA_SUGERIDO,
   CAMPOS_MENU,
   CAMPOS_PADRINHO,
-  CHECKLIST_PADRINHO,
   SchemaEntrada,
   SchemaItem,
   SchemaItemMenu,
@@ -123,6 +123,53 @@ export async function moverEntrada(id: string, direcao: -1 | 1) {
   atualizar();
 }
 
+// ── Checklist da cerimônia ───────────────────────────────────────────────────
+
+export async function adicionarItemCerimonia(
+  festaId: string,
+  _e: EstadoForm,
+  formData: FormData,
+): Promise<EstadoForm> {
+  await exigirUsuario();
+  const v = validarForm(SchemaItem, lerCampos(formData, CAMPOS_ITEM));
+  if (!v.ok) return v.estado;
+  if (!(await festaExiste(festaId))) return { erroGeral: NAO_EXISTE };
+  const ultimo = await prisma.itemCerimonia.aggregate({
+    where: { festaId },
+    _max: { ordem: true },
+  });
+  await prisma.itemCerimonia.create({
+    data: { festaId, texto: v.dados.texto, ordem: proxima(ultimo._max.ordem) },
+  });
+  atualizar();
+  return { sucesso: Date.now() };
+}
+
+// Lista vazia: começa pelos itens de sempre (lapelas, buquês, porta-alianças…).
+export async function usarChecklistCerimoniaSugerido(festaId: string) {
+  await exigirUsuario();
+  if (!(await festaExiste(festaId))) return;
+  if (await prisma.itemCerimonia.count({ where: { festaId } })) return;
+  await prisma.itemCerimonia.createMany({
+    data: CHECKLIST_CERIMONIA_SUGERIDO.map((texto, ordem) => ({ festaId, texto, ordem })),
+  });
+  atualizar();
+}
+
+export async function alternarItemCerimonia(id: string) {
+  await exigirUsuario();
+  const atual = await prisma.itemCerimonia.findUnique({ where: { id }, select: { feito: true } });
+  if (!atual) return;
+  await prisma.itemCerimonia.update({ where: { id }, data: { feito: !atual.feito } });
+  atualizar();
+}
+
+export async function removerItemCerimonia(id: string) {
+  await exigirUsuario();
+  await prisma.itemCerimonia.deleteMany({ where: { id } });
+  atualizar();
+}
+
 // ── Padrinhos ────────────────────────────────────────────────────────────────
 
 export async function criarPadrinho(
@@ -141,7 +188,6 @@ export async function criarPadrinho(
       festaId,
       ...v.dados,
       ordem: proxima(ultimo._max.ordem),
-      checklist: { create: CHECKLIST_PADRINHO.map((texto, ordem) => ({ texto, ordem })) },
     },
   });
   atualizar();
@@ -168,39 +214,14 @@ export async function removerPadrinho(id: string) {
   atualizar();
 }
 
-export async function adicionarItemPadrinho(
-  padrinhoId: string,
-  _e: EstadoForm,
-  formData: FormData,
-): Promise<EstadoForm> {
+// Lista de presença do dia: marca (com a hora) ou desmarca a chegada do padrinho.
+export async function alternarPresencaPadrinho(id: string) {
   await exigirUsuario();
-  const v = validarForm(SchemaItem, lerCampos(formData, CAMPOS_ITEM));
-  if (!v.ok) return v.estado;
-  if (!(await prisma.padrinho.count({ where: { id: padrinhoId } }))) {
-    return { erroGeral: NAO_EXISTE };
-  }
-  const ultimo = await prisma.itemPadrinho.aggregate({
-    where: { padrinhoId },
-    _max: { ordem: true },
-  });
-
-  await prisma.itemPadrinho.create({
-    data: { padrinhoId, texto: v.dados.texto, ordem: proxima(ultimo._max.ordem) },
-  });
-  atualizar();
-  return { sucesso: Date.now() };
-}
-
-export async function alternarItemPadrinho(id: string) {
-  await exigirUsuario();
-  const atual = await prisma.itemPadrinho.findUnique({ where: { id }, select: { feito: true } });
+  const atual = await prisma.padrinho.findUnique({ where: { id }, select: { presenteEm: true } });
   if (!atual) return;
-  await prisma.itemPadrinho.update({ where: { id }, data: { feito: !atual.feito } });
-  atualizar();
-}
-
-export async function removerItemPadrinho(id: string) {
-  await exigirUsuario();
-  await prisma.itemPadrinho.deleteMany({ where: { id } });
+  await prisma.padrinho.update({
+    where: { id },
+    data: { presenteEm: atual.presenteEm ? null : new Date() },
+  });
   atualizar();
 }

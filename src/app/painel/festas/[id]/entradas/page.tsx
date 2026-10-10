@@ -21,9 +21,13 @@ export default async function PaginaEntradas(props: PageProps<"/painel/festas/[i
   const colunas = await listarColunas(festa.id);
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full">
       <VoltarFesta festa={festa} observacoes="entradas" />
-      <ColunaEntradas festaId={festa.id} entradas={colunas.entradas} />
+      <ColunaEntradas
+        festaId={festa.id}
+        entradas={colunas.entradas}
+        checklist={colunas.checklistCerimonia}
+      />
     </div>
   );
 }

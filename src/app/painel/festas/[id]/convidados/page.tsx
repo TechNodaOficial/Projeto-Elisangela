@@ -14,6 +14,14 @@ import { SecaoConvidados } from "./secao-convidados";
 const dataCurta = (d: Date) =>
   new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, dateStyle: "long" }).format(d);
 
+// Quando a exportação para o Google Planilhas não chega à planilha.
+const AVISOS_PLANILHA = {
+  negado: "A planilha não foi criada: a autorização do Google foi cancelada. Tente de novo.",
+  erro: "Não deu para criar a planilha no Google agora. Tente de novo em instantes.",
+  "sem-google":
+    "A exportação para o Google Planilhas ainda não foi configurada (falta a chave do Google).",
+};
+
 export async function generateMetadata(
   props: PageProps<"/painel/festas/[id]/convidados">,
 ): Promise<Metadata> {
@@ -24,13 +32,14 @@ export async function generateMetadata(
 
 export default async function PaginaConvidados(props: PageProps<"/painel/festas/[id]/convidados">) {
   const { id } = await props.params;
+  const { planilha } = await props.searchParams;
   const festa = await buscarFesta(id);
   if (!festa) notFound();
   const [convidados, origem] = await Promise.all([listarConvidados(festa.id), origemDoSite()]);
   const concluida = festaConcluida(festa.dataHora);
 
   return (
-    <div className="w-full max-w-5xl">
+    <div className="w-full">
       <VoltarFesta festa={festa} observacoes="convidados" />
       {festa.convidadosApagadosEm ? (
         // Festa arquivada: os dados foram apagados (ver src/lib/retencao); ficam os números.
@@ -59,6 +68,12 @@ export default async function PaginaConvidados(props: PageProps<"/painel/festas/
         <SecaoConvidados
           festaId={festa.id}
           festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
+          mesasDemarcadas={festa.mesasDemarcadas}
+          avisoPlanilha={
+            typeof planilha === "string" && planilha in AVISOS_PLANILHA
+              ? AVISOS_PLANILHA[planilha as keyof typeof AVISOS_PLANILHA]
+              : undefined
+          }
           convidados={convidados}
           contagem={contarPorStatus(convidados)}
           origem={origem}

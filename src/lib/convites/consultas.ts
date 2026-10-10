@@ -17,11 +17,22 @@ export async function buscarConvite(token: string) {
       pessoas: true,
       rsvp: true,
       confirmadas: true,
+      criancas4a11: true,
+      criancas0a3: true,
       entraram: true,
       presenteEm: true,
       codigoCheckin: true,
+      mensagem: true,
+      membros: { orderBy: { ordem: "asc" }, select: { nome: true, faixa: true } },
       festa: {
-        select: { titulo: true, dataHora: true, localNome: true, endereco: true, traje: true },
+        select: {
+          titulo: true,
+          dataHora: true,
+          localNome: true,
+          endereco: true,
+          traje: true,
+          mesasDemarcadas: true,
+        },
       },
     },
   });

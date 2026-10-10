@@ -169,11 +169,12 @@ export function BaseFornecedores({ servicos }: { servicos: Servicos }) {
         {servicos
           .filter((s) => s.fornecedores.length > 0)
           .map((servico) => (
-            // Altura fixa: com muitos fornecedores, a lista rola dentro do cartão.
+            // Altura fixa (todos os cartões iguais na grade): com muitos fornecedores, a lista rola
+            // dentro do cartão.
             <section
               key={servico.id}
               aria-labelledby={`servico-${servico.id}`}
-              className={cn(CARTAO, corDoServico(servico.id), "max-h-80")}
+              className={cn(CARTAO, corDoServico(servico.id), "h-80")}
             >
               <h2 id={`servico-${servico.id}`} className="shrink-0 text-lg font-semibold">
                 {servico.nome}{" "}

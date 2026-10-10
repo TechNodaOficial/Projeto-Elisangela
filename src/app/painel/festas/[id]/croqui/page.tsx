@@ -22,7 +22,7 @@ export default async function PaginaCroqui(props: PageProps<"/painel/festas/[id]
   if (!festa) notFound();
 
   return (
-    <div className="w-full max-w-4xl">
+    <div className="w-full">
       <VoltarFesta festa={festa} observacoes="croqui" />
       <section
         id="planta"

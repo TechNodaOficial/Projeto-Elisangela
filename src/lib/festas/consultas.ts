@@ -135,76 +135,89 @@ export async function buscarFesta(id: string) {
 // e cronograma de uma festa.
 export async function listarColunas(festaId: string) {
   await exigirUsuario();
-  const [contratacoes, mesas, cronogramaTodo, menu, entradas, padrinhos] = await Promise.all([
-    prisma.contratacao.findMany({
-      where: { festaId },
-      orderBy: { criadoEm: "asc" },
-      select: {
-        id: true,
-        valorCentavos: true,
-        parcelas: true,
-        parcelasPagas: true,
-        contratoNome: true,
-        servico: { select: { id: true, nome: true } },
-        fornecedor: { select: { id: true, nome: true, telefone: true } },
-        checklist: {
-          orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-          select: { id: true, texto: true, feito: true },
-        },
-      },
-    }),
-    prisma.mesa.findMany({
-      where: { festaId },
-      select: {
-        id: true,
-        nome: true,
-        lugares: true,
-        convidados: {
-          select: { id: true, nome: true, pessoas: true, rsvp: true, confirmadas: true },
-        },
-      },
-    }),
-    prisma.itemCronograma.findMany({
-      where: { festaId },
-      select: {
-        id: true,
-        secao: true,
-        hora: true,
-        atividade: true,
-        responsavelTexto: true,
-        contratacao: {
-          select: {
-            id: true,
-            servico: { select: { nome: true } },
-            fornecedor: { select: { nome: true } },
+  const [contratacoes, mesas, cronogramaTodo, menu, entradas, padrinhos, checklistCerimonia] =
+    await Promise.all([
+      prisma.contratacao.findMany({
+        where: { festaId },
+        orderBy: { criadoEm: "asc" },
+        select: {
+          id: true,
+          valorCentavos: true,
+          parcelas: true,
+          parcelasPagas: true,
+          contratoNome: true,
+          servico: { select: { id: true, nome: true } },
+          fornecedor: { select: { id: true, nome: true, telefone: true } },
+          checklist: {
+            orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+            select: { id: true, texto: true, feito: true },
           },
         },
-      },
-    }),
-    prisma.itemMenu.findMany({
-      where: { festaId },
-      orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-      select: { id: true, etapa: true, texto: true },
-    }),
-    prisma.entradaCerimonia.findMany({
-      where: { festaId },
-      orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-      select: { id: true, quem: true, musica: true },
-    }),
-    prisma.padrinho.findMany({
-      where: { festaId },
-      orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-      select: {
-        id: true,
-        nome: true,
-        telefone: true,
-        checklist: {
-          orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
-          select: { id: true, texto: true, feito: true },
+      }),
+      prisma.mesa.findMany({
+        where: { festaId },
+        select: {
+          id: true,
+          nome: true,
+          lugares: true,
+          convidados: {
+            select: {
+              id: true,
+              nome: true,
+              pessoas: true,
+              rsvp: true,
+              confirmadas: true,
+              criancas4a11: true,
+              criancas0a3: true,
+              membros: { orderBy: { ordem: "asc" }, select: { nome: true, faixa: true } },
+            },
+          },
         },
-      },
-    }),
-  ]);
+      }),
+      prisma.itemCronograma.findMany({
+        where: { festaId },
+        select: {
+          id: true,
+          secao: true,
+          hora: true,
+          atividade: true,
+          responsavelTexto: true,
+          etapasMenu: true,
+          contratacao: {
+            select: {
+              id: true,
+              servico: { select: { nome: true } },
+              fornecedor: { select: { nome: true } },
+            },
+          },
+        },
+      }),
+      prisma.itemMenu.findMany({
+        where: { festaId },
+        orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+        select: { id: true, etapa: true, texto: true },
+      }),
+      prisma.entradaCerimonia.findMany({
+        where: { festaId },
+        orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+        select: { id: true, quem: true, musica: true },
+      }),
+      prisma.padrinho.findMany({
+        where: { festaId },
+        orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+        select: {
+          id: true,
+          nome: true,
+          telefone: true,
+          presenteEm: true,
+        },
+      }),
+      prisma.itemCerimonia.findMany({
+        where: { festaId },
+        orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+        select: { id: true, texto: true, feito: true },
+      }),
+    ]);
   const porHorario = (secao: "FESTA" | "CERIMONIA") =>
     cronogramaTodo
       .filter((i) => i.secao === secao)
@@ -222,6 +235,7 @@ export async function listarColunas(festaId: string) {
     cerimonial: porHorario("CERIMONIA"),
     menu,
     entradas,
+    checklistCerimonia,
     padrinhos,
   };
 }

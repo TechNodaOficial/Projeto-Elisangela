@@ -67,17 +67,41 @@
 }
 
 /*
- * Prancheta da cerimonialista: folhas de papel liso sobre uma mesa bege pastel,
+ * Prancheta da cerimonialista: folhas de papel liso sobre uma mesa colorida,
  * tinta grafite e marca-texto amarelo reservado para seleção e urgência.
  * Tema claro: o painel é usado de dia, na mesa ou no celular.
+ * A mesa tem dois temas, caqui (padrão) e cinza, escolhidos no topo do painel
+ * (cookie "tema" -> data-tema no <html>; ver src/lib/tema.ts). Cada tema troca só a
+ * mesa, o papel e os tons neutros; as cores de significado (porta, pastéis, calendário)
+ * são as mesmas nos dois.
  */
+:root,
+:root[data-tema="caqui"] {
+  --mesa: oklch(0.78 0.038 70); /* noz-moscada: fundo atrás das folhas */
+  --papel: oklch(0.955 0.015 80); /* agulha de costura: folhas, campos e menus (nada de branco) */
+  --tinta-suave: oklch(0.4 0.02 60); /* 4.6:1 sobre a mesa */
+  --pauta: oklch(0.84 0.035 72); /* fios e divisórias */
+  --pauta-forte: oklch(0.5 0.06 60); /* foco */
+  --neutro: oklch(0.905 0.025 75); /* hover, abas e fundos discretos dentro do papel */
+  --border: oklch(0.85 0.03 72);
+  --input: oklch(0.78 0.035 70);
+  --rolagem: oklch(0.6 0.03 65);
+}
+
+:root[data-tema="cinza"] {
+  --mesa: oklch(0.74 0.004 95); /* cinza quente, do post da Projetar */
+  --papel: oklch(0.965 0.003 95);
+  --tinta-suave: oklch(0.36 0.006 95); /* 4.7:1 sobre a mesa */
+  --pauta: oklch(0.84 0.004 95);
+  --pauta-forte: oklch(0.46 0.01 95);
+  --neutro: oklch(0.915 0.004 95);
+  --border: oklch(0.86 0.004 95);
+  --input: oklch(0.78 0.005 95);
+  --rolagem: oklch(0.58 0.005 95);
+}
+
 :root {
-  --mesa: oklch(0.935 0.026 78); /* fundo bege pastel, atrás das folhas */
-  --papel: oklch(0.962 0.03 50); /* creme pêssego: folhas, campos e menus (nada de branco) */
   --tinta: oklch(0.255 0.004 250); /* grafite */
-  --tinta-suave: oklch(0.47 0.008 250);
-  --pauta: oklch(0.86 0.045 255); /* fios do papel pautado */
-  --pauta-forte: oklch(0.7 0.09 258); /* linha de margem e foco */
   --grifo: oklch(0.92 0.15 103); /* marca-texto */
 
   /* Veredito do leitor de QR, em tela cheia na porta (só lá). Contraste: 7.0, 7.2 e 9.5. */
@@ -107,15 +131,13 @@
   --popover-foreground: var(--tinta);
   --primary: var(--tinta);
   --primary-foreground: var(--papel);
-  --secondary: oklch(0.93 0.03 55);
+  --secondary: var(--neutro);
   --secondary-foreground: var(--tinta);
-  --muted: oklch(0.93 0.03 55);
+  --muted: var(--neutro);
   --muted-foreground: var(--tinta-suave);
-  --accent: oklch(0.93 0.03 55);
+  --accent: var(--neutro);
   --accent-foreground: var(--tinta);
   --destructive: oklch(0.52 0.19 27);
-  --border: oklch(0.87 0.025 60);
-  --input: oklch(0.83 0.03 60);
   --ring: var(--pauta-forte);
   --radius: 0.375rem;
 
@@ -133,7 +155,7 @@
 }
 html {
   caret-color: var(--tinta);
-  scrollbar-color: oklch(0.78 0.008 250) transparent;
+  scrollbar-color: var(--rolagem) transparent;
   font-variant-numeric: tabular-nums;
 }
 
@@ -159,32 +181,6 @@ input::-webkit-calendar-picker-indicator {
   box-shadow:
     0 1px 1px oklch(0.2 0.01 250 / 6%),
     0 6px 16px -8px oklch(0.2 0.01 250 / 22%);
-}
-
-/* Faixa de festa no topo do convite: pastel em diagonal com confete de pontinhos. */
-.convite-faixa {
-  background-color: var(--pastel-rosa);
-  background-image:
-    radial-gradient(circle, oklch(0.75 0.12 350 / 55%) 1.5px, transparent 2px),
-    radial-gradient(circle, oklch(0.72 0.1 165 / 55%) 1.5px, transparent 2px),
-    radial-gradient(circle, oklch(0.8 0.12 85 / 60%) 1.5px, transparent 2px),
-    linear-gradient(
-      120deg,
-      var(--pastel-rosa),
-      var(--pastel-lilas) 35%,
-      var(--pastel-azul) 65%,
-      var(--pastel-menta)
-    );
-  background-size:
-    22px 22px,
-    30px 30px,
-    26px 26px,
-    100% 100%;
-  background-position:
-    0 0,
-    11px 7px,
-    5px 15px,
-    0 0;
 }
 
 /* Folha de festa na lista: verde se está tudo resolvido, amarelo se tem pendência. */

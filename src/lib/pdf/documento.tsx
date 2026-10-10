@@ -148,3 +148,13 @@ export function DocumentoPdf({ doc }: { doc: unknown }) {
   const raiz = doc as No;
   return <Blocos nos={raiz?.content} />;
 }
+
+// Linha de checklist: caixinha + texto.
+export function ItemMarcavel({ texto, feito }: { texto: string; feito: boolean }) {
+  return (
+    <View style={{ flexDirection: "row", paddingVertical: 1.5 }} wrap={false}>
+      <Caixinha marcada={feito} />
+      <Text style={[{ flex: 1, fontSize: 9 }, feito ? base.suave : {}]}>{texto}</Text>
+    </View>
+  );
+}

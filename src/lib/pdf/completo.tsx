@@ -3,22 +3,35 @@ import "server-only";
 import { Document, Image, Page, renderToBuffer, Text, View } from "@react-pdf/renderer";
 
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
-import { confirmadasDe } from "@/lib/convidados/contagem";
+import { confirmadasDe, descreverFaixas, faixasDe, somarFaixas } from "@/lib/convidados/contagem";
 import { formatarTelefone } from "@/lib/convidados/telefone";
-import { FUSO } from "@/lib/datas";
+import { FUSO, paraCampos } from "@/lib/datas";
 import type { Colunas } from "@/lib/festas/consultas";
 import { ETAPAS_MENU } from "@/lib/festas/colunas-schema";
 import {
   documentoVazio,
   ehSecaoObservacao,
-  SECOES_OBSERVACAO,
+  SECAO_FALA,
   type SecaoObservacao,
+  SECOES_OBSERVACAO,
 } from "@/lib/festas/observacoes";
 import type { InfoImagem } from "@/lib/planta/imagem";
 
 import { dataDaFesta, LinhaDado, linhasDaFesta, type DadosFesta } from "./comum";
-import { Caixinha, DocumentoPdf } from "./documento";
-import { Cronograma, Fornecedores, linha, M, Mesas, Rodape, Secao, Vazio } from "./roteiro";
+import { Caixinha, DocumentoPdf, ItemMarcavel } from "./documento";
+import {
+  Cronograma,
+  EntradasCerimonia,
+  Fornecedores,
+  linha,
+  M,
+  Mesas,
+  Rodape,
+  Secao,
+  textoBuffet,
+  TextoDoCerimonial,
+  Vazio,
+} from "./roteiro";
 import { base, LOGO, PROPORCAO_LOGO } from "./tema";
 
 // Arquivo completo da festa, para guardar: tudo o que existe no painel, inclusive
@@ -55,16 +68,6 @@ const imagem = (img: Imagem) => ({
   data: Buffer.from(img.bytes),
   format: (img.info.tipo === "png" ? "png" : "jpg") as "png" | "jpg",
 });
-
-// Linha de checklist: caixinha + texto.
-function ItemMarcavel({ texto, feito }: { texto: string; feito: boolean }) {
-  return (
-    <View style={{ flexDirection: "row", paddingVertical: 1.5 }} wrap={false}>
-      <Caixinha marcada={feito} />
-      <Text style={[{ flex: 1, fontSize: 9 }, feito ? base.suave : {}]}>{texto}</Text>
-    </View>
-  );
-}
 
 function ChecklistsServicos({ contratacoes }: { contratacoes: Colunas["contratacoes"] }) {
   const comItens = contratacoes.filter((c) => c.checklist.length > 0 || c.contratoNome);
@@ -110,10 +113,32 @@ function Menu({ menu }: { menu: Colunas["menu"] }) {
   );
 }
 
+// Recados que os convidados deixaram no convite, para entregar a quem fez a festa.
+function Recados({ convidados }: { convidados: ConvidadoResumo[] }) {
+  const comRecado = convidados.filter((c) => c.mensagem);
+  if (comRecado.length === 0) return null;
+  return (
+    <Secao titulo="Recados dos convidados" resumo={`${comRecado.length}`}>
+      {comRecado.map((c) => (
+        <View key={c.id} style={[linha, { flexDirection: "column" }]} wrap={false}>
+          <Text style={base.forte}>
+            {c.nome}
+            <Text style={[base.suave, { fontWeight: 400, fontSize: 8.5 }]}>
+              {c.rsvp === "RECUSADO" ? "  ·  não foi" : ""}
+            </Text>
+          </Text>
+          <Text style={{ fontSize: 9.5 }}>{c.mensagem}</Text>
+        </View>
+      ))}
+    </Secao>
+  );
+}
+
 function Convidados({ convidados }: { convidados: ConvidadoResumo[] }) {
   const resposta = (c: ConvidadoResumo) =>
     c.rsvp === "CONFIRMADO"
-      ? `Confirmou ${confirmadasDe(c)}`
+      ? `Confirmou ${confirmadasDe(c)}` +
+        (c.pessoas > 1 ? ` (${descreverFaixas(faixasDe(c))})` : "")
       : c.rsvp === "RECUSADO"
         ? "Não vai"
         : "Sem resposta";
@@ -153,26 +178,6 @@ function Convidados({ convidados }: { convidados: ConvidadoResumo[] }) {
   );
 }
 
-function Entradas({ entradas }: { entradas: Colunas["entradas"] }) {
-  return (
-    <Secao titulo="Entradas da cerimônia">
-      {entradas.length === 0 ? (
-        <Vazio>Nenhuma entrada no cortejo.</Vazio>
-      ) : (
-        entradas.map((e, i) => (
-          <View key={e.id} style={linha} wrap={false}>
-            <Text style={[base.mono, { width: 22 }]}>{i + 1}.</Text>
-            <Text style={{ flex: 1 }}>{e.quem}</Text>
-            <Text style={[base.suave, { width: "45%", fontSize: 9, textAlign: "right" }]}>
-              {e.musica ?? ""}
-            </Text>
-          </View>
-        ))
-      )}
-    </Secao>
-  );
-}
-
 function Padrinhos({ padrinhos }: { padrinhos: Colunas["padrinhos"] }) {
   return (
     <Secao titulo="Padrinhos">
@@ -180,14 +185,15 @@ function Padrinhos({ padrinhos }: { padrinhos: Colunas["padrinhos"] }) {
         <Vazio>Nenhum padrinho.</Vazio>
       ) : (
         padrinhos.map((p) => (
-          <View key={p.id} style={[linha, { flexDirection: "column" }]} wrap={false}>
-            <Text style={base.forte}>
+          <View key={p.id} style={linha} wrap={false}>
+            <Caixinha marcada={p.presenteEm !== null} />
+            <Text style={[base.forte, { flex: 1 }]}>
               {p.nome}
               {p.telefone ? `  ·  ${formatarTelefone(p.telefone)}` : ""}
             </Text>
-            {p.checklist.map((i) => (
-              <ItemMarcavel key={i.id} texto={i.texto} feito={i.feito} />
-            ))}
+            <Text style={[base.suave, { fontSize: 9 }]}>
+              {p.presenteEm ? `Chegou às ${paraCampos(p.presenteEm).hora}` : "Não marcado"}
+            </Text>
           </View>
         ))
       )}
@@ -306,15 +312,23 @@ function Completo(d: DadosCompletos) {
               `${contagem.recusados} não foram`
             }
           />
+          {contagem.confirmados > 0 && d.convidados.length > 0 && (
+            <LinhaDado rotulo="Buffet" valor={textoBuffet(somarFaixas(d.convidados))} />
+          )}
 
           <Fornecedores contratacoes={colunas.contratacoes} />
           <ChecklistsServicos contratacoes={colunas.contratacoes} />
           <Cronograma itens={colunas.cronograma} />
           <Menu menu={colunas.menu} />
           <Convidados convidados={d.convidados} />
+          <Recados convidados={d.convidados} />
           <Mesas mesas={colunas.mesas} semMesa={semMesa} />
           <Cronograma itens={colunas.cerimonial} titulo="Cerimonial" />
-          <Entradas entradas={colunas.entradas} />
+          <TextoDoCerimonial
+            texto={d.observacoes.find((o) => o.secao === SECAO_FALA)?.conteudo ?? null}
+            link={festa.cerimonialLink ?? null}
+          />
+          <EntradasCerimonia entradas={colunas.entradas} checklist={colunas.checklistCerimonia} />
           <Padrinhos padrinhos={colunas.padrinhos} />
           <Observacoes observacoes={d.observacoes} />
         </View>

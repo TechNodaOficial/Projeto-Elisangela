@@ -19,7 +19,7 @@ export function situacoesDoQuadro(d: {
   menu: number;
   cerimonial: number;
   entradas: number;
-  padrinhos: { itens: number; feitos: number }[];
+  padrinhos: { presente: boolean }[];
 }): Record<
   | "fornecedores"
   | "cronograma"
@@ -32,7 +32,7 @@ export function situacoesDoQuadro(d: {
   Botao
 > {
   const pendencias = pendenciasDaFesta({ contratacoes: d.contratacoes });
-  const padrinhosProntos = d.padrinhos.filter((p) => p.itens > 0 && p.feitos === p.itens).length;
+  const padrinhosPresentes = d.padrinhos.filter((p) => p.presente).length;
   const c = d.convidados;
 
   return {
@@ -96,17 +96,17 @@ export function situacoesDoQuadro(d: {
           : `${n(d.entradas, "entrada", "entradas")} no cortejo`,
     },
 
+    // Antes da festa a lista pronta já está ok; no dia, fica amarela até todos chegarem.
     padrinhos:
       d.padrinhos.length === 0
         ? { situacao: "neutro", resumo: "Nenhum padrinho ainda" }
-        : padrinhosProntos < d.padrinhos.length
-          ? {
-              situacao: "pendente",
-              resumo: `${padrinhosProntos} de ${d.padrinhos.length} com tudo marcado`,
-            }
-          : {
-              situacao: "ok",
-              resumo: `${n(d.padrinhos.length, "padrinho", "padrinhos")}, tudo marcado`,
-            },
+        : padrinhosPresentes === 0
+          ? { situacao: "ok", resumo: `${n(d.padrinhos.length, "padrinho", "padrinhos")} na lista` }
+          : padrinhosPresentes < d.padrinhos.length
+            ? {
+                situacao: "pendente",
+                resumo: `${padrinhosPresentes} de ${d.padrinhos.length} chegaram`,
+              }
+            : { situacao: "ok", resumo: "Todos os padrinhos chegaram" },
   };
 }

@@ -71,10 +71,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
     menu: colunas.menu.length,
     cerimonial: colunas.cerimonial.length,
     entradas: colunas.entradas.length,
-    padrinhos: colunas.padrinhos.map((p) => ({
-      itens: p.checklist.length,
-      feitos: p.checklist.filter((i) => i.feito).length,
-    })),
+    padrinhos: colunas.padrinhos.map((p) => ({ presente: p.presenteEm !== null })),
   });
 
   // O quadro da festa, como o kanban da Elisangela: três raias, cada botão abre uma página.
@@ -134,7 +131,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         },
         {
           href: "padrinhos",
-          titulo: "Checklist dos padrinhos",
+          titulo: "Padrinhos",
           icone: HeartHandshake,
           botao: situacoes.padrinhos,
         },
@@ -193,15 +190,19 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           )}
           <BotaoFoto festaId={festa.id} temFoto={!!festa.fotoUrl} />
           {[
-            { tipo: "convite", rotulo: "PDF do convite" },
-            { tipo: "roteiro", rotulo: "PDF do roteiro" },
+            {
+              tipo: "roteiro",
+              rotulo: "PDF do roteiro",
+              dica: "Para imprimir no dia, sem valores",
+            },
+            { tipo: "checklist", rotulo: "PDF com valores", dica: "Checklist com os noivos" },
           ].map((pdf) => (
             <Button key={pdf.tipo} asChild variant="outline" className="bg-card h-9">
               <a
                 href={`/painel/festas/${festa.id}/pdf/${pdf.tipo}`}
                 target="_blank"
                 rel="noopener"
-                title="Abre em outra aba"
+                title={`${pdf.dica} (abre em outra aba)`}
               >
                 <FileText aria-hidden strokeWidth={1.75} />
                 {pdf.rotulo}

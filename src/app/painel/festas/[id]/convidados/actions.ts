@@ -60,6 +60,18 @@ export async function adicionarConvidado(
   return { sucesso: Date.now() };
 }
 
+// Mesas com lugar marcado: o convite passa a pedir o nome completo de cada pessoa.
+// Desligar não apaga os nomes já informados (só deixa de pedir).
+export async function definirMesasDemarcadas(festaId: string, demarcadas: boolean) {
+  await exigirUsuario();
+  await prisma.festa.updateMany({
+    where: { id: festaId },
+    data: { mesasDemarcadas: demarcadas === true },
+  });
+  atualizarTelas(festaId);
+  revalidatePath("/c/[token]", "page");
+}
+
 export async function editarConvidado(
   id: string,
   _e: EstadoFormConvidado,
@@ -77,14 +89,20 @@ export async function editarConvidado(
 
   // Grupo menor que antes: confirmadas e entradas não passam do novo tamanho.
   const caber = (n: number | null) => (n === null ? null : Math.min(n, v.dados.pessoas));
-  await prisma.convidado.update({
-    where: { id },
-    data: {
-      ...v.dados,
-      confirmadas: caber(convidado.confirmadas),
-      entraram: caber(convidado.entraram) ?? 0,
-    },
-  });
+  await prisma.$transaction([
+    prisma.convidado.update({
+      where: { id },
+      data: {
+        ...v.dados,
+        confirmadas: caber(convidado.confirmadas),
+        entraram: caber(convidado.entraram) ?? 0,
+      },
+    }),
+    // Nomes de quem não cabe mais no grupo saem também.
+    prisma.membroConvite.deleteMany({
+      where: { convidadoId: id, ordem: { gte: v.dados.pessoas } },
+    }),
+  ]);
   atualizarTelas(convidado.festaId);
   return { sucesso: Date.now() };
 }

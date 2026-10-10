@@ -22,7 +22,7 @@ export default async function PaginaCronograma(props: PageProps<"/painel/festas/
   const colunas = await listarColunas(festa.id);
 
   return (
-    <div className="w-full max-w-6xl">
+    <div className="w-full">
       <VoltarFesta festa={festa} observacoes="cronograma" />
       {/* Lado a lado em telas largas; um embaixo do outro no celular. */}
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
@@ -30,6 +30,7 @@ export default async function PaginaCronograma(props: PageProps<"/painel/festas/
           festaId={festa.id}
           cronograma={colunas.cronograma}
           contratacoes={colunas.contratacoes}
+          menu={colunas.menu}
         />
         <ColunaMenu festaId={festa.id} menu={colunas.menu} />
       </div>

@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  Armchair,
   Check,
   Copy,
   Eye,
   MailCheck,
   MailX,
   MessageCircle,
+  MessageSquareHeart,
   MoreHorizontal,
   Pencil,
   Send,
@@ -26,7 +28,8 @@ import {
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
 import { mensagemConvite } from "@/lib/convidados/mensagem";
 import { formatarTelefone, linkWhatsApp } from "@/lib/convidados/telefone";
-import { confirmadasDe } from "@/lib/convidados/contagem";
+import { confirmadasDe, faixasDe } from "@/lib/convidados/contagem";
+import { ROTULO_FAIXA_BANCO } from "@/lib/convites/membros";
 import { etapaDoConvite, type Etapa } from "@/lib/convidados/etapa";
 import { paraCampos } from "@/lib/datas";
 import { cn } from "@/lib/utils";
@@ -106,6 +109,42 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
   );
 }
 
+// Colunas da lista na folha larga (a linha e o cabeçalho usam a mesma grade).
+export const GRADE_LISTA =
+  "@3xl:grid-cols-[minmax(0,1.15fr)_10.5rem_minmax(0,1.6fr)_8rem_8.5rem] @3xl:gap-x-4";
+
+function Etiqueta({ children, aviso }: { children: React.ReactNode; aviso?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex min-h-6 items-center gap-1 rounded-full px-2 text-xs leading-tight font-medium",
+        aviso ? "bg-pendente text-foreground" : "bg-card text-foreground",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+// Títulos das colunas, só na folha larga (no celular cada convidado é um cartão).
+export function CabecalhoLista() {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "text-tinta-suave hidden px-3 pb-1 text-xs font-medium tracking-[0.04em] uppercase @3xl:grid",
+        GRADE_LISTA,
+      )}
+    >
+      <span>Convite</span>
+      <span>Situação</span>
+      <span>Quem vai</span>
+      <span>Mesa</span>
+      <span />
+    </div>
+  );
+}
+
 export function LinhaConvidado({
   convidado,
   festa,
@@ -150,41 +189,86 @@ export function LinhaConvidado({
     );
   }
 
-  return (
-    // Pautas inteiras: nome e status (quebram em mais pautas se a coluna for estreita),
-    // depois telefone e mesa com as ações. Todo texto usa a altura da pauta (alinhado ao centro,
-    // não pela linha de base, que somaria pixels); os botões ficam numa faixa da altura da
-    // pauta e transbordam sem empurrar a linha.
-    <li className={cn("group/linha grid grid-cols-[minmax(0,1fr)_auto] gap-x-3", className)}>
-      <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-3">
-        <span className="font-semibold break-words hyphens-auto">
-          {convidado.nome}
-          {convidado.pessoas > 1 && (
-            <span className="text-tinta-suave font-normal"> · {convidado.pessoas} pessoas</span>
-          )}
-        </span>
-        <Status convidado={convidado} />
-      </div>
-      {/* Telefone e mesa na mesma pauta; a mesa desce para a pauta seguinte se não couber. */}
-      <p className="text-tinta-suave col-start-1 flex flex-wrap gap-x-1.5 text-sm leading-(--linha)">
-        {copiado ? (
-          <span className="text-foreground font-medium">Link copiado</span>
-        ) : convidado.telefone ? (
-          <span className="font-mono whitespace-nowrap">
-            {formatarTelefone(convidado.telefone)}
-          </span>
-        ) : (
-          "Sem WhatsApp"
-        )}
-        {convidado.mesa && !copiado && (
-          <span className="whitespace-nowrap">· {convidado.mesa.nome}</span>
-        )}
-        {!convidado.mesa && !copiado && convidado.rsvp === "CONFIRMADO" && (
-          <span className="whitespace-nowrap">· sem mesa</span>
-        )}
-      </p>
+  const confirmou = convidado.rsvp === "CONFIRMADO";
+  const vai = confirmadasDe(convidado);
+  const faixas = faixasDe(convidado);
+  const nomes = confirmou ? convidado.membros.slice(0, vai) : [];
 
-      <div className="text-tinta-suave group-focus-within/linha:text-foreground group-hover/linha:text-foreground col-start-2 flex h-(--linha) items-center gap-0.5 transition-colors duration-150">
+  return (
+    // No celular, um cartão: nome e ações em cima; situação, mesa e quem vai em etiquetas
+    // embaixo. Com a folha larga, as mesmas peças viram colunas de uma tabela, alinhadas
+    // ao cabeçalho da lista (CabecalhoLista): Convite | Situação | Quem vai | Mesa | ações.
+    <li
+      className={cn(
+        "group/linha grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 py-2",
+        GRADE_LISTA,
+        className,
+      )}
+    >
+      <div className="col-start-1 row-start-1 min-w-0">
+        <p className="leading-snug font-semibold break-words hyphens-auto">{convidado.nome}</p>
+        <p className="text-tinta-suave text-[0.8125rem] leading-snug">
+          {copiado ? (
+            <span className="text-foreground font-medium">Link copiado</span>
+          ) : (
+            <>
+              {convidado.pessoas > 1 && `${convidado.pessoas} pessoas · `}
+              {convidado.telefone ? (
+                <span className="font-mono whitespace-nowrap">
+                  {formatarTelefone(convidado.telefone)}
+                </span>
+              ) : (
+                "Sem WhatsApp"
+              )}
+            </>
+          )}
+        </p>
+      </div>
+
+      {/* Situação, quem vai e mesa: etiquetas numa linha no celular; colunas na folha larga. */}
+      <div className="col-span-2 col-start-1 row-start-2 flex min-w-0 flex-wrap items-center gap-1.5 @3xl:contents">
+        <div className="@3xl:col-start-2 @3xl:row-start-1 @3xl:pt-0.5">
+          <Status convidado={convidado} />
+        </div>
+
+        <div className="flex min-w-0 flex-wrap gap-1 @3xl:col-start-3 @3xl:row-start-1 @3xl:pt-0.5">
+          {confirmou && nomes.length > 0
+            ? nomes.map((m, i) => (
+                <Etiqueta key={i}>
+                  {m.nome}
+                  {m.faixa !== "ADULTO" && (
+                    <span className="text-tinta-suave"> · {ROTULO_FAIXA_BANCO[m.faixa]}</span>
+                  )}
+                </Etiqueta>
+              ))
+            : confirmou &&
+              convidado.pessoas > 1 && (
+                <>
+                  {faixas.adultos > 0 && (
+                    <Etiqueta>
+                      {faixas.adultos} {faixas.adultos === 1 ? "adulto" : "adultos"}
+                    </Etiqueta>
+                  )}
+                  {faixas.criancas4a11 > 0 && <Etiqueta>{faixas.criancas4a11} de 4 a 11</Etiqueta>}
+                  {faixas.criancas0a3 > 0 && <Etiqueta>{faixas.criancas0a3} de 0 a 3</Etiqueta>}
+                  {faixas.semIdade > 0 && <Etiqueta aviso>{faixas.semIdade} sem idade</Etiqueta>}
+                </>
+              )}
+        </div>
+
+        <div className="@3xl:col-start-4 @3xl:row-start-1 @3xl:pt-0.5">
+          {convidado.mesa ? (
+            <Etiqueta>
+              <Armchair aria-hidden className="size-3.5" strokeWidth={1.75} />
+              {convidado.mesa.nome}
+            </Etiqueta>
+          ) : (
+            confirmou && <Etiqueta aviso>Sem mesa</Etiqueta>
+          )}
+        </div>
+      </div>
+
+      <div className="text-tinta-suave group-focus-within/linha:text-foreground group-hover/linha:text-foreground col-start-2 row-start-1 -my-1 flex items-center gap-0.5 transition-colors duration-150 @3xl:col-start-5 @3xl:justify-end">
         {/* Com espaço, o botão diz o que faz: "Enviar" (ainda não foi) ou "Reenviar". */}
         <Button asChild variant="ghost" className="h-11 min-w-11 px-2.5 sm:h-9 sm:min-w-0">
           <a
@@ -238,6 +322,26 @@ export function LinhaConvidado({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Recado do convidado para quem faz a festa (ou o motivo de não ir). */}
+      {convidado.mensagem && (
+        <blockquote className="bg-pastel-lilas/45 col-span-full flex gap-2 rounded-md px-2.5 py-1.5 text-sm leading-snug">
+          <MessageSquareHeart
+            aria-hidden
+            className="text-tinta-suave mt-0.5 size-4 shrink-0"
+            strokeWidth={1.75}
+          />
+          <span className="min-w-0 break-words whitespace-pre-line">
+            {convidado.mensagem}
+            {convidado.mensagemEm && (
+              <span className="text-tinta-suave whitespace-nowrap">
+                {" "}
+                · {diaMes(convidado.mensagemEm)}
+              </span>
+            )}
+          </span>
+        </blockquote>
+      )}
 
       <span aria-live="polite" className="sr-only">
         {copiado ? `Link de ${convidado.nome} copiado` : ""}

@@ -8,10 +8,14 @@ export const SECOES_OBSERVACAO = {
   layout: { titulo: "Layout", pagina: "mesas" },
   cerimonial: { titulo: "Cerimonial", pagina: "cerimonial" },
   entradas: { titulo: "Entradas da cerimônia", pagina: "entradas" },
-  padrinhos: { titulo: "Checklist dos padrinhos", pagina: "padrinhos" },
+  padrinhos: { titulo: "Padrinhos", pagina: "padrinhos" },
 } as const;
 
 export type SecaoObservacao = keyof typeof SECOES_OBSERVACAO;
+
+// Texto do cerimonial (a fala), escrito na própria aba Cerimonial com o mesmo editor das
+// observações. Guardado como uma folha à parte: não aparece no botão "Observações".
+export const SECAO_FALA = "fala-cerimonial";
 
 export const ehSecaoObservacao = (s: string): s is SecaoObservacao =>
   Object.hasOwn(SECOES_OBSERVACAO, s);

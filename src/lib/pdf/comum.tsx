@@ -13,6 +13,8 @@ export type DadosFesta = {
   endereco: string;
   traje: string | null;
   observacoes: string | null;
+  // Link do documento com a fala do cerimonial (só os PDFs que mostram a cerimônia).
+  cerimonialLink?: string | null;
 };
 
 export function dataDaFesta(dataHora: Date) {

@@ -11,6 +11,7 @@ import {
   CAMPOS_ITEM,
   CAMPOS_MESA,
   CAMPOS_NOVA_CONTRATACAO,
+  ETAPAS_MENU,
   SchemaContratacao,
   SchemaItem,
   SchemaItemCronograma,
@@ -329,6 +330,16 @@ export async function editarItemCronograma(
   await prisma.itemCronograma.update({ where: { id }, data: v.dados });
   atualizar();
   return { sucesso: Date.now() };
+}
+
+// Etapas do menu servidas num horário do cronograma (ex.: 19:30 → Entrada e Prato
+// principal). Guarda na ordem do menu e ignora o que não for etapa conhecida.
+export async function definirEtapasMenu(id: string, etapas: string[]) {
+  await exigirUsuario();
+  if (!Array.isArray(etapas)) return;
+  const validas = ETAPAS_MENU.filter((e) => etapas.includes(e));
+  await prisma.itemCronograma.updateMany({ where: { id }, data: { etapasMenu: validas } });
+  atualizar();
 }
 
 export async function removerItemCronograma(id: string) {

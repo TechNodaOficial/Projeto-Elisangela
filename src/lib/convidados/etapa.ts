@@ -27,11 +27,15 @@ export const FILTROS = [
   { id: "confirmou", rotulo: "Confirmaram" },
   { id: "nao_vai", rotulo: "Não vão" },
   { id: "sem_whatsapp", rotulo: "Sem WhatsApp" },
+  { id: "com_recado", rotulo: "Com recado" },
 ] as const;
 
 export type Filtro = (typeof FILTROS)[number]["id"];
 
-export function passaNoFiltro(c: Convite & { telefone: string | null }, filtro: Filtro) {
+export function passaNoFiltro(
+  c: Convite & { telefone: string | null; mensagem?: string | null },
+  filtro: Filtro,
+) {
   const etapa = etapaDoConvite(c);
   switch (filtro) {
     case "todos":
@@ -42,6 +46,8 @@ export function passaNoFiltro(c: Convite & { telefone: string | null }, filtro: 
       return etapa === "confirmou" || etapa === "chegou";
     case "sem_whatsapp":
       return !c.telefone;
+    case "com_recado":
+      return !!c.mensagem;
     default:
       return etapa === filtro;
   }

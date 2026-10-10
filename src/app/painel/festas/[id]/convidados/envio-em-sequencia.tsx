@@ -27,39 +27,22 @@ const relogio = (ms: number) => {
 
 // Acompanhamento: quantos convites foram enviados, abertos e respondidos, e o alerta
 // quando muitos envios antigos não foram abertos (as mensagens podem não estar chegando).
-function Acompanhamento({ convidados }: { convidados: ConvidadoResumo[] }) {
-  const r = resumoDoEnvio(convidados);
-  if (r.enviados === 0 && r.semWhatsApp === 0) return null;
+// Muitos convites enviados e quase ninguém abriu: as mensagens podem não estar chegando.
+// (Os números do envio ficam na ficha do topo da aba.)
+function AlertaDeEnvio({ convidados }: { convidados: ConvidadoResumo[] }) {
+  if (!resumoDoEnvio(convidados).alerta) return null;
   return (
-    <div className="mt-2 flex flex-col gap-1 text-sm leading-snug">
-      {r.enviados > 0 && (
-        <p className="text-tinta-suave">
-          Envio: <strong className="text-foreground font-semibold">{r.enviados}</strong>{" "}
-          {r.enviados === 1 ? "convite enviado" : "convites enviados"} ·{" "}
-          <strong className="text-foreground font-semibold">{r.abriram}</strong> abriram o link ·{" "}
-          <strong className="text-foreground font-semibold">{r.responderam}</strong> responderam
-        </p>
-      )}
-      {r.semWhatsApp > 0 && (
-        <p className="text-tinta-suave">
-          {n(r.semWhatsApp, "convite sem WhatsApp", "convites sem WhatsApp")}: copie o link no menu
-          ⋯ de cada um e mande por onde preferir.
-        </p>
-      )}
-      {r.alerta && (
-        <p
-          role="alert"
-          className="bg-pendente border-pendente-forte mt-1 flex items-start gap-2 rounded-lg border px-3 py-2"
-        >
-          <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={2} />
-          <span>
-            <strong className="font-semibold">Poucos convidados abriram o link.</strong> As
-            mensagens podem não estar chegando (WhatsApp limitando a sua conta ou números errados).
-            Pause os envios e pergunte a alguém da lista se recebeu.
-          </span>
-        </p>
-      )}
-    </div>
+    <p
+      role="alert"
+      className="bg-pendente border-pendente-forte mt-2 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm leading-snug"
+    >
+      <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={2} />
+      <span>
+        <strong className="font-semibold">Poucos convidados abriram o link.</strong> As mensagens
+        podem não estar chegando (WhatsApp limitando a sua conta ou números errados). Pause os
+        envios e pergunte a alguém da lista se recebeu.
+      </span>
+    </p>
   );
 }
 
@@ -130,7 +113,7 @@ export function EnvioEmSequencia({
             ? `Enviar convites em sequência · ${n(fila.length, "falta", "faltam")}`
             : "Todos os convites com WhatsApp foram enviados"}
         </Button>
-        <Acompanhamento convidados={convidados} />
+        <AlertaDeEnvio convidados={convidados} />
       </div>
     );
   }
@@ -251,7 +234,7 @@ export function EnvioEmSequencia({
         <p className="text-sm font-medium">Todos os convites com WhatsApp foram enviados.</p>
       )}
 
-      <Acompanhamento convidados={convidados} />
+      <AlertaDeEnvio convidados={convidados} />
 
       <Button
         type="button"

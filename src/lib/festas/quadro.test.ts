@@ -42,10 +42,7 @@ describe("situacoesDoQuadro", () => {
       convidados: { total: 10, aguardando: 3, confirmados: 6 },
       mesas: 2,
       pessoasSemMesa: 4,
-      padrinhos: [
-        { itens: 4, feitos: 4 },
-        { itens: 4, feitos: 1 },
-      ],
+      padrinhos: [{ presente: true }, { presente: false }],
     });
     expect(s.fornecedores).toEqual({
       situacao: "pendente",
@@ -61,7 +58,7 @@ describe("situacoesDoQuadro", () => {
       resumo: "3 sem resposta · 6 confirmados",
     });
     expect(s.layout).toEqual({ situacao: "pendente", resumo: "4 pessoas sem mesa · 2 mesas" });
-    expect(s.padrinhos).toEqual({ situacao: "pendente", resumo: "1 de 2 com tudo marcado" });
+    expect(s.padrinhos).toEqual({ situacao: "pendente", resumo: "1 de 2 chegaram" });
   });
 
   it("verde quando está resolvido", () => {
@@ -70,7 +67,7 @@ describe("situacoesDoQuadro", () => {
       convidados: { total: 10, aguardando: 0, confirmados: 8 },
       temCroqui: true,
       mesas: 2,
-      padrinhos: [{ itens: 4, feitos: 4 }],
+      padrinhos: [{ presente: true }],
     });
     expect(s.convidados.situacao).toBe("ok");
     expect(s.croqui.situacao).toBe("ok");

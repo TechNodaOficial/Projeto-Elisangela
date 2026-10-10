@@ -122,16 +122,18 @@ export const SchemaEntrada = z.object({
 });
 export const CAMPOS_ENTRADA = ["quem", "musica"] as const;
 
+// Checklist da cerimônia sugerido quando a lista está vazia (ela tira e acrescenta à vontade).
+export const CHECKLIST_CERIMONIA_SUGERIDO = [
+  "Lapelas",
+  "Buquê da noiva",
+  "Buquê para jogar",
+  "Buquê da daminha / pétalas",
+  "Porta-alianças",
+  "Imagens",
+] as const;
+
 export const SchemaPadrinho = z.object({
   nome: textoObrigatorio("Informe o nome."),
   telefone: telefoneOpcional,
 });
 export const CAMPOS_PADRINHO = ["nome", "telefone"] as const;
-
-// Checklist com que cada padrinho começa (dá para tirar e acrescentar itens).
-export const CHECKLIST_PADRINHO = [
-  "Confirmou presença",
-  "Traje definido",
-  "Foi ao ensaio",
-  "Chegou no dia",
-] as const;

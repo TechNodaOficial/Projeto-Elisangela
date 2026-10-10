@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
 import { Logo } from "@/components/logo";
 import { exigirUsuario } from "@/lib/dal";
 import { partesData } from "@/lib/datas";
 import { contarFestas } from "@/lib/festas/consultas";
+import { NOME_COOKIE_TEMA, temaValido } from "@/lib/tema";
 
+import { BotaoTema } from "./botao-tema";
 import { BotaoSairRodape, NavegacaoInferior, NavegacaoLateral } from "./navegacao";
 import { BotaoNovidades } from "./novidades/botao-novidades";
 
@@ -16,10 +19,11 @@ export const metadata: Metadata = {
 export default async function LayoutPainel({ children }: LayoutProps<"/painel">) {
   const [usuario, contagens] = await Promise.all([exigirUsuario(), contarFestas()]);
   const hoje = partesData(new Date());
+  const tema = temaValido((await cookies()).get(NOME_COOKIE_TEMA)?.value);
 
   return (
     <div className="flex flex-1 flex-col">
-      <header className="bg-background sticky top-0 z-20">
+      <header className="bg-card border-border sticky top-0 z-20 border-b">
         <div className="flex h-14 items-center justify-between gap-4 px-4 md:pr-8 md:pl-6">
           <Logo />
           <div className="flex items-center gap-3">
@@ -29,6 +33,7 @@ export default async function LayoutPainel({ children }: LayoutProps<"/painel">)
                 {hoje.semana}, {Number(hoje.dia)} {hoje.mes}
               </span>
             </p>
+            <BotaoTema inicial={tema} />
             <BotaoNovidades />
           </div>
         </div>
