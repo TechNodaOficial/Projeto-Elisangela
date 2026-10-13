@@ -51,9 +51,12 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
   const { festa } = convite;
   const contato = contatoElisangela();
   // Abre o app de mapas no celular (ou o Google Maps no computador) já no endereço da festa.
-  const mapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    `${festa.localNome}, ${festa.endereco}`,
-  )}`;
+  // Com o link do mapa colado por ela, vai direto nele (o ponto exato).
+  const mapa =
+    festa.linkMapa ??
+    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+      `${festa.localNome}, ${festa.endereco}`,
+    )}`;
   const estado = estadoConvite({ ...convite, dataHora: festa.dataHora });
   const data = partesData(festa.dataHora);
   const semana = data.extenso.split(",")[0];
@@ -132,7 +135,32 @@ export default async function PaginaConvite(props: PageProps<"/c/[token]">) {
               </span>
             </p>
           )}
+          {/* A mesa, só para quem confirmou (ou já entrou) e já foi colocado numa. */}
+          {(estado === "confirmado" || estado === "presente") && convite.mesa && (
+            <p className="mt-2">
+              <span className="text-tinta-suave">Sua mesa:</span>{" "}
+              <span className="font-semibold">{convite.mesa.nome}</span>
+            </p>
+          )}
         </header>
+
+        {/* Observação da Elisangela só para este convite. */}
+        {convite.observacaoConvite && estado !== "encerrado" && (
+          <section
+            aria-labelledby="titulo-observacao"
+            className="bg-pastel-areia/60 mt-(--linha) rounded-lg px-4 py-3 text-center"
+          >
+            <h2
+              id="titulo-observacao"
+              className="text-tinta-suave text-xs font-medium tracking-[0.12em] uppercase"
+            >
+              Recado da organização
+            </h2>
+            <p className="mt-1 leading-snug break-words whitespace-pre-line">
+              {convite.observacaoConvite}
+            </p>
+          </section>
+        )}
 
         {svg && (
           // Canhoto destacável: picote em cima e embaixo, papel liso por trás do QR, tudo centralizado.

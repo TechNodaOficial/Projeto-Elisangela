@@ -28,6 +28,7 @@ export default async function PaginaEditarFesta(props: PageProps<"/painel/festas
           hora,
           localNome: festa.localNome,
           endereco: festa.endereco,
+          linkMapa: festa.linkMapa ?? "",
           traje: festa.traje ?? "",
           observacoes: festa.observacoes ?? "",
         }}

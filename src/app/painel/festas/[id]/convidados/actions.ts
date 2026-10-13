@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import {
   lerFormularioConvidado,
+  OBSERVACAO_MAXIMO,
   SchemaConvidado,
   type CamposConvidado,
   type ErrosConvidado,
@@ -127,6 +128,37 @@ export async function editarConvidado(
   ]);
   atualizarTelas(convidado.festaId);
   return { sucesso: Date.now() };
+}
+
+// Observação dela para este convidado, mostrada no convite dele. Vazio apaga.
+export async function salvarObservacaoConvite(
+  id: string,
+  texto: string,
+): Promise<{ erro?: string }> {
+  await exigirUsuario();
+  if (typeof texto !== "string") return { erro: "Texto inválido." };
+  const limpo = texto.replace(/\r\n?/g, "\n").trim();
+  if (limpo.length > OBSERVACAO_MAXIMO) {
+    return { erro: `Use até ${OBSERVACAO_MAXIMO} caracteres.` };
+  }
+  const convidado = await prisma.convidado.findUnique({ where: { id }, select: { festaId: true } });
+  if (!convidado) return { erro: "Este convidado não existe mais." };
+  await prisma.convidado.updateMany({
+    where: { id },
+    data: { observacaoConvite: limpo || null },
+  });
+  atualizarTelas(convidado.festaId);
+  revalidatePath("/c/[token]", "page");
+  return {};
+}
+
+// Marca (ou desmarca) o convite como de padrinho: só uma etiqueta na lista.
+export async function marcarPadrinho(id: string, padrinho: boolean) {
+  await exigirUsuario();
+  const convidado = await prisma.convidado.findUnique({ where: { id }, select: { festaId: true } });
+  if (!convidado) return;
+  await prisma.convidado.updateMany({ where: { id }, data: { padrinho: padrinho === true } });
+  atualizarTelas(convidado.festaId);
 }
 
 export async function removerConvidado(id: string) {

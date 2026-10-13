@@ -172,8 +172,10 @@ export async function removerItemCerimonia(id: string) {
 
 // ── Padrinhos ────────────────────────────────────────────────────────────────
 
+// `papel`: a lista em que a pessoa entra (padrinhos ou pajens e daminhas).
 export async function criarPadrinho(
   festaId: string,
+  papel: "PADRINHO" | "PAJEM_DAMINHA",
   _e: EstadoForm,
   formData: FormData,
 ): Promise<EstadoForm> {
@@ -186,6 +188,7 @@ export async function criarPadrinho(
   await prisma.padrinho.create({
     data: {
       festaId,
+      papel: papel === "PAJEM_DAMINHA" ? "PAJEM_DAMINHA" : "PADRINHO",
       ...v.dados,
       ordem: proxima(ultimo._max.ordem),
     },
@@ -211,6 +214,40 @@ export async function editarPadrinho(
 export async function removerPadrinho(id: string) {
   await exigirUsuario();
   await prisma.padrinho.deleteMany({ where: { id } });
+  atualizar();
+}
+
+// De quem o padrinho é: do noivo, da noiva ou sem definir (null).
+export async function definirLadoPadrinho(id: string, lado: "NOIVO" | "NOIVA" | null) {
+  await exigirUsuario();
+  await prisma.padrinho.updateMany({
+    where: { id, papel: "PADRINHO" },
+    data: { lado: lado === "NOIVO" || lado === "NOIVA" ? lado : null },
+  });
+  atualizar();
+}
+
+// Sobe (-1) ou desce (1) uma posição na lista dele (padrinhos, ou pajens e daminhas),
+// trocando de lugar com o vizinho. Regrava a ordem da lista toda, que é curta.
+export async function moverPadrinho(id: string, direcao: -1 | 1) {
+  await exigirUsuario();
+  const atual = await prisma.padrinho.findUnique({
+    where: { id },
+    select: { festaId: true, papel: true },
+  });
+  if (!atual) return;
+  const lista = await prisma.padrinho.findMany({
+    where: { festaId: atual.festaId, papel: atual.papel },
+    orderBy: [{ ordem: "asc" }, { criadoEm: "asc" }],
+    select: { id: true },
+  });
+  const de = lista.findIndex((p) => p.id === id);
+  const para = de + (direcao === -1 ? -1 : 1);
+  if (para < 0 || para >= lista.length) return;
+  [lista[de], lista[para]] = [lista[para], lista[de]];
+  await prisma.$transaction(
+    lista.map((p, ordem) => prisma.padrinho.update({ where: { id: p.id }, data: { ordem } })),
+  );
   atualizar();
 }
 

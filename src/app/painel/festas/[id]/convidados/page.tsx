@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { contarPorStatus, listarConvidados } from "@/lib/convidados/consultas";
+import { contarPorStatus, listarConvidados, listarMesas } from "@/lib/convidados/consultas";
 import { festaConcluida, FUSO } from "@/lib/datas";
 import { buscarFesta } from "@/lib/festas/consultas";
 import { origemDoSite } from "@/lib/origem";
@@ -35,7 +35,11 @@ export default async function PaginaConvidados(props: PageProps<"/painel/festas/
   const { planilha } = await props.searchParams;
   const festa = await buscarFesta(id);
   if (!festa) notFound();
-  const [convidados, origem] = await Promise.all([listarConvidados(festa.id), origemDoSite()]);
+  const [convidados, mesas, origem] = await Promise.all([
+    listarConvidados(festa.id),
+    listarMesas(festa.id),
+    origemDoSite(),
+  ]);
   const concluida = festaConcluida(festa.dataHora);
 
   return (
@@ -80,6 +84,7 @@ export default async function PaginaConvidados(props: PageProps<"/painel/festas/
               : undefined
           }
           convidados={convidados}
+          mesas={mesas}
           contagem={contarPorStatus(convidados)}
           origem={origem}
           aviso={

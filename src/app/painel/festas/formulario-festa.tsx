@@ -78,6 +78,24 @@ export function FormularioFesta({ acao, inicial = {}, rotuloEnviar, voltarPara }
         maxLength: 120,
       })}
       {campo("endereco", "Endereço", { maxLength: 200, autoComplete: "street-address" })}
+      <div className="flex flex-col gap-1.5">
+        {campo(
+          "linkMapa",
+          "Link do mapa",
+          {
+            type: "url",
+            inputMode: "url",
+            placeholder: "Ex.: https://maps.app.goo.gl/…",
+            maxLength: 500,
+            autoComplete: "off",
+          },
+          true,
+        )}
+        <p className="text-tinta-suave text-sm leading-snug">
+          Cole o link de “Compartilhar” do Google Maps ou do Waze: o botão “Como chegar” do convite
+          abre exatamente esse ponto. Vazio, o convite busca pelo local e o endereço.
+        </p>
+      </div>
       {campo("traje", "Traje", { placeholder: "Ex.: Esporte fino", maxLength: 80 }, true)}
 
       <div className="flex flex-col gap-2">

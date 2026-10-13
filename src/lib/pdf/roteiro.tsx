@@ -548,22 +548,30 @@ export const textoBuffet = (f: Faixas) =>
     .filter(Boolean)
     .join(" · ");
 
+// `pajens`: a mesma lista para os pajens e as daminhas.
 export function PresencaPadrinhos({
   padrinhos,
+  pajens,
   novaPagina,
 }: {
   padrinhos: Colunas["padrinhos"];
+  pajens?: boolean;
   novaPagina?: boolean;
 }) {
   const n = padrinhos.length;
+  const [um, varios] = pajens
+    ? ["pajem ou daminha", "pajens e daminhas"]
+    : ["padrinho", "padrinhos"];
   return (
     <Secao
-      titulo="Padrinhos"
-      resumo={n ? `${n} ${n === 1 ? "padrinho" : "padrinhos"}` : undefined}
+      titulo={pajens ? "Pajens e daminhas" : "Padrinhos"}
+      resumo={n ? `${n} ${n === 1 ? um : varios}` : undefined}
       novaPagina={novaPagina}
     >
       {n === 0 ? (
-        <Vazio>Nenhum padrinho cadastrado.</Vazio>
+        <Vazio>
+          {pajens ? "Nenhum pajem ou daminha cadastrado." : "Nenhum padrinho cadastrado."}
+        </Vazio>
       ) : (
         <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
           {padrinhos.map((p, i) => (
@@ -594,6 +602,11 @@ export function PresencaPadrinhos({
               />
               <View style={{ flex: 1, paddingRight: 6 }}>
                 <Text style={base.forte}>{p.nome}</Text>
+                {p.lado && (
+                  <Text style={[base.suave, { fontSize: 7.5 }]}>
+                    {p.lado === "NOIVO" ? "Do noivo" : "Da noiva"}
+                  </Text>
+                )}
                 {p.telefone && (
                   <Text style={[base.mono, base.suave, { fontSize: 7.5 }]}>
                     {formatarTelefone(p.telefone)}
@@ -861,9 +874,18 @@ function Roteiro({
           />
         </Folha>
       )}
-      {colunas.padrinhos.length > 0 && (
+      {(colunas.padrinhos.length > 0 || colunas.pajens.length > 0) && (
         <Folha titulo={festa.titulo} rotulo={nome}>
-          <PresencaPadrinhos padrinhos={colunas.padrinhos} novaPagina />
+          {colunas.padrinhos.length > 0 && (
+            <PresencaPadrinhos padrinhos={colunas.padrinhos} novaPagina />
+          )}
+          {colunas.pajens.length > 0 && (
+            <PresencaPadrinhos
+              padrinhos={colunas.pajens}
+              pajens
+              novaPagina={colunas.padrinhos.length === 0}
+            />
+          )}
         </Folha>
       )}
 

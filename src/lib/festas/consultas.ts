@@ -209,6 +209,8 @@ export async function listarColunas(festaId: string) {
           id: true,
           nome: true,
           telefone: true,
+          papel: true,
+          lado: true,
           presenteEm: true,
         },
       }),
@@ -236,7 +238,8 @@ export async function listarColunas(festaId: string) {
     menu,
     entradas,
     checklistCerimonia,
-    padrinhos,
+    padrinhos: padrinhos.filter((p) => p.papel === "PADRINHO"),
+    pajens: padrinhos.filter((p) => p.papel === "PAJEM_DAMINHA"),
   };
 }
 

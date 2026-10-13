@@ -49,6 +49,9 @@ model Festa {
   dataHora             DateTime           @db.Timestamptz(3)
   localNome            String
   endereco             String
+  // Link do mapa (Google Maps, Waze) colado por ela: o "Como chegar" do convite abre ele.
+  // Vazio = o convite busca pelo nome do local e o endereço.
+  linkMapa             String?
   traje                String?
   observacoes          String?
   // Planta do salão vista de cima, num Blob store privado: só o painel (logado) mostra a imagem.
@@ -110,51 +113,56 @@ enum StatusRsvp {
 }
 
 model Convidado {
-  id            String          @id @default(cuid())
-  festaId       String
-  festa         Festa           @relation(fields: [festaId], references: [id], onDelete: Cascade)
-  nome          String
-  telefone      String?
+  id                String          @id @default(cuid())
+  festaId           String
+  festa             Festa           @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  nome              String
+  telefone          String?
   // Vai no link do convite (/c/[tokenConvite]).
-  tokenConvite  String          @unique
+  tokenConvite      String          @unique
   // Vai dentro do QR Code. Separado do token do convite para que uma foto do QR
   // não permita alterar a resposta do convidado.
-  codigoCheckin String          @unique
+  codigoCheckin     String          @unique
   // Um convite pode ser de uma família ou grupo ("Família Silva", 4 pessoas), com um QR só.
-  pessoas       Int             @default(1)
-  rsvp          StatusRsvp      @default(PENDENTE)
+  pessoas           Int             @default(1)
+  rsvp              StatusRsvp      @default(PENDENTE)
   // Quantas pessoas vão, informado ao confirmar (1 a `pessoas`). Vazio se não confirmou.
-  confirmadas   Int?
+  confirmadas       Int?
   // Idades de quem vai, por faixa do buffet (informadas no convite, ao confirmar):
   // 0 a 3 anos não pagam, 4 a 11 pagam menos; adultos (12+) = confirmadas - as duas.
   // Vazio = família confirmou sem dizer as idades (antes desta pergunta existir).
-  criancas4a11  Int?
-  criancas0a3   Int?
+  criancas4a11      Int?
+  criancas0a3       Int?
   // Recado do convidado para quem faz a festa (uma mensagem carinhosa, ou por que
   // não vai). Opcional; ele pode mudar ou apagar enquanto o convite estiver aberto.
-  mensagem      String?
-  mensagemEm    DateTime?       @db.Timestamptz(3)
-  respondidoEm  DateTime?       @db.Timestamptz(3)
+  mensagem          String?
+  mensagemEm        DateTime?       @db.Timestamptz(3)
+  respondidoEm      DateTime?       @db.Timestamptz(3)
   // Envio do convite: quando ela abriu o WhatsApp com a mensagem (vazio = ainda não enviou)
   // e a primeira vez que o convidado abriu o link no navegador (a prévia do WhatsApp não conta).
-  enviadoEm     DateTime?       @db.Timestamptz(3)
-  abertoEm      DateTime?       @db.Timestamptz(3)
+  enviadoEm         DateTime?       @db.Timestamptz(3)
+  abertoEm          DateTime?       @db.Timestamptz(3)
   // Quantas já entraram: a família pode chegar em partes (3 agora, 1 depois).
-  entraram      Int             @default(0)
+  entraram          Int             @default(0)
   // Hora da última entrada registrada; vazio enquanto ninguém entrou.
-  presenteEm    DateTime?       @db.Timestamptz(3)
+  presenteEm        DateTime?       @db.Timestamptz(3)
   // Reservado para acompanhantes (fora do MVP): o acompanhante aponta para o titular.
-  titularId     String?
-  titular       Convidado?      @relation("Acompanhantes", fields: [titularId], references: [id], onDelete: Cascade)
-  acompanhantes Convidado[]     @relation("Acompanhantes")
+  titularId         String?
+  titular           Convidado?      @relation("Acompanhantes", fields: [titularId], references: [id], onDelete: Cascade)
+  acompanhantes     Convidado[]     @relation("Acompanhantes")
   // Quem vai, pessoa por pessoa (nome completo e idade). Só quando as mesas são
   // demarcadas; senão o convite guarda só as contagens por idade acima.
-  membros       MembroConvite[]
+  membros           MembroConvite[]
+  // Observação que ela escreve para este convidado; aparece no convite dele.
+  observacaoConvite String?
+  // Marca de padrinho na lista de convidados (ela marca à mão). Não tem ligação com a
+  // lista de presença dos padrinhos, que é outra tabela.
+  padrinho          Boolean         @default(false)
   // Mesa onde o convidado vai sentar. Remover a mesa deixa o convidado sem mesa.
-  mesaId        String?
-  mesa          Mesa?           @relation(fields: [mesaId], references: [id], onDelete: SetNull)
-  criadoEm      DateTime        @default(now()) @db.Timestamptz(3)
-  atualizadoEm  DateTime        @updatedAt @db.Timestamptz(3)
+  mesaId            String?
+  mesa              Mesa?           @relation(fields: [mesaId], references: [id], onDelete: SetNull)
+  criadoEm          DateTime        @default(now()) @db.Timestamptz(3)
+  atualizadoEm      DateTime        @updatedAt @db.Timestamptz(3)
 
   @@index([festaId])
   @@index([titularId])
@@ -348,19 +356,35 @@ model ItemCerimonia {
   @@map("itens_cerimonia")
 }
 
+// Em qual lista de presença da cerimônia a pessoa está.
+enum PapelCortejo {
+  PADRINHO
+  PAJEM_DAMINHA
+}
+
+// De quem o padrinho é (opcional).
+enum LadoPadrinho {
+  NOIVO
+  NOIVA
+}
+
 // Padrinhos da cerimônia: uma lista de presença que ela marca no dia, conforme chegam.
+// Pajens e daminhas têm a mesma lista, à parte (papel); o telefone é o do responsável.
 // Têm nome e telefone: saem junto com os convidados na limpeza da LGPD.
 model Padrinho {
-  id           String    @id @default(cuid())
+  id           String        @id @default(cuid())
   festaId      String
-  festa        Festa     @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  festa        Festa         @relation(fields: [festaId], references: [id], onDelete: Cascade)
   nome         String
   telefone     String?
+  papel        PapelCortejo  @default(PADRINHO)
+  // Do noivo ou da noiva; vazio = ela não disse. Só para padrinhos.
+  lado         LadoPadrinho?
   ordem        Int
   // Quando ela marcou que chegou na festa; vazio = ainda não chegou.
-  presenteEm   DateTime? @db.Timestamptz(3)
-  criadoEm     DateTime  @default(now()) @db.Timestamptz(3)
-  atualizadoEm DateTime  @updatedAt @db.Timestamptz(3)
+  presenteEm   DateTime?     @db.Timestamptz(3)
+  criadoEm     DateTime      @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime      @updatedAt @db.Timestamptz(3)
 
   @@index([festaId])
   @@map("padrinhos")

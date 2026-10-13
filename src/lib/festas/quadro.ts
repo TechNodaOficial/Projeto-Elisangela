@@ -20,6 +20,7 @@ export function situacoesDoQuadro(d: {
   cerimonial: number;
   entradas: number;
   padrinhos: { presente: boolean }[];
+  pajens?: { presente: boolean }[]; // pajens e daminhas: mesma lista de presença, à parte
 }): Record<
   | "fornecedores"
   | "cronograma"
@@ -32,7 +33,9 @@ export function situacoesDoQuadro(d: {
   Botao
 > {
   const pendencias = pendenciasDaFesta({ contratacoes: d.contratacoes });
-  const padrinhosPresentes = d.padrinhos.filter((p) => p.presente).length;
+  const pajens = d.pajens ?? [];
+  const cortejo = [...d.padrinhos, ...pajens];
+  const cortejoPresentes = cortejo.filter((p) => p.presente).length;
   const c = d.convidados;
 
   return {
@@ -98,15 +101,26 @@ export function situacoesDoQuadro(d: {
 
     // Antes da festa a lista pronta já está ok; no dia, fica amarela até todos chegarem.
     padrinhos:
-      d.padrinhos.length === 0
+      cortejo.length === 0
         ? { situacao: "neutro", resumo: "Nenhum padrinho ainda" }
-        : padrinhosPresentes === 0
-          ? { situacao: "ok", resumo: `${n(d.padrinhos.length, "padrinho", "padrinhos")} na lista` }
-          : padrinhosPresentes < d.padrinhos.length
+        : cortejoPresentes === 0
+          ? {
+              situacao: "ok",
+              resumo: `${[
+                d.padrinhos.length > 0 && n(d.padrinhos.length, "padrinho", "padrinhos"),
+                pajens.length > 0 && n(pajens.length, "pajem ou daminha", "pajens e daminhas"),
+              ]
+                .filter(Boolean)
+                .join(" · ")} na lista`,
+            }
+          : cortejoPresentes < cortejo.length
             ? {
                 situacao: "pendente",
-                resumo: `${padrinhosPresentes} de ${d.padrinhos.length} chegaram`,
+                resumo: `${cortejoPresentes} de ${cortejo.length} chegaram`,
               }
-            : { situacao: "ok", resumo: "Todos os padrinhos chegaram" },
+            : {
+                situacao: "ok",
+                resumo: pajens.length > 0 ? "Todos chegaram" : "Todos os padrinhos chegaram",
+              },
   };
 }

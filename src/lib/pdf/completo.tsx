@@ -178,17 +178,26 @@ function Convidados({ convidados }: { convidados: ConvidadoResumo[] }) {
   );
 }
 
-function Padrinhos({ padrinhos }: { padrinhos: Colunas["padrinhos"] }) {
+function Padrinhos({
+  titulo,
+  vazio,
+  padrinhos,
+}: {
+  titulo: string;
+  vazio: string;
+  padrinhos: Colunas["padrinhos"];
+}) {
   return (
-    <Secao titulo="Padrinhos">
+    <Secao titulo={titulo}>
       {padrinhos.length === 0 ? (
-        <Vazio>Nenhum padrinho.</Vazio>
+        <Vazio>{vazio}</Vazio>
       ) : (
         padrinhos.map((p) => (
           <View key={p.id} style={linha} wrap={false}>
             <Caixinha marcada={p.presenteEm !== null} />
             <Text style={[base.forte, { flex: 1 }]}>
               {p.nome}
+              {p.lado ? `  ·  ${p.lado === "NOIVO" ? "do noivo" : "da noiva"}` : ""}
               {p.telefone ? `  ·  ${formatarTelefone(p.telefone)}` : ""}
             </Text>
             <Text style={[base.suave, { fontSize: 9 }]}>
@@ -329,7 +338,12 @@ function Completo(d: DadosCompletos) {
             link={festa.cerimonialLink ?? null}
           />
           <EntradasCerimonia entradas={colunas.entradas} checklist={colunas.checklistCerimonia} />
-          <Padrinhos padrinhos={colunas.padrinhos} />
+          <Padrinhos titulo="Padrinhos" vazio="Nenhum padrinho." padrinhos={colunas.padrinhos} />
+          <Padrinhos
+            titulo="Pajens e daminhas"
+            vazio="Nenhum pajem ou daminha."
+            padrinhos={colunas.pajens}
+          />
           <Observacoes observacoes={d.observacoes} />
         </View>
         <Rodape titulo={festa.titulo} rotulo="Arquivo completo" />

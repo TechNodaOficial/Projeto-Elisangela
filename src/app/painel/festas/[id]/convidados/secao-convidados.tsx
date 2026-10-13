@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import type { ConvidadoResumo } from "@/lib/convidados/consultas";
-import { somarFaixas } from "@/lib/convidados/contagem";
+import { lugaresDe, somarFaixas } from "@/lib/convidados/contagem";
 import { resumoDoEnvio } from "@/lib/convidados/envio";
 import { FILTROS, passaNoFiltro, type Filtro } from "@/lib/convidados/etapa";
 import { BANDEJA, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
@@ -18,7 +18,7 @@ import { adicionarConvidado, definirMesasDemarcadas } from "./actions";
 import { EnvioEmSequencia } from "./envio-em-sequencia";
 import { FormConvidado } from "./form-convidado";
 import { ImportarConvidados } from "./importar-convidados";
-import { CabecalhoLista, LinhaConvidado, type DadosFesta } from "./linha-convidado";
+import { BotaoAtualizar, CabecalhoLista, LinhaConvidado, type DadosFesta } from "./linha-convidado";
 import { MensagemDoConvite } from "./mensagem-do-convite";
 
 // A partir daqui vale mostrar a busca.
@@ -224,6 +224,7 @@ export function SecaoConvidados({
   festa,
   mesasDemarcadas,
   convidados,
+  mesas,
   contagem,
   origem,
   aviso,
@@ -233,6 +234,7 @@ export function SecaoConvidados({
   festa: DadosFesta;
   mesasDemarcadas: boolean;
   convidados: ConvidadoResumo[];
+  mesas: { id: string; nome: string; lugares: number }[];
   contagem: Contagem;
   origem: string;
   // Ex.: quando os dados serão apagados (LGPD), em festas concluídas.
@@ -248,6 +250,18 @@ export function SecaoConvidados({
   const cadastrados = useMemo(
     () => convidados.map((c) => ({ nome: c.nome, telefone: c.telefone })),
     [convidados],
+  );
+  // Lugares livres de cada mesa, em pessoas (a Família Silva confirmada com 4 ocupa 4).
+  const opcoesMesa = useMemo(
+    () =>
+      mesas.map((m) => ({
+        id: m.id,
+        nome: m.nome,
+        livres:
+          m.lugares -
+          convidados.filter((c) => c.mesaId === m.id).reduce((s, c) => s + lugaresDe(c), 0),
+      })),
+    [mesas, convidados],
   );
   const termo = semAcento(useDeferredValue(busca).trim());
   const visiveis = convidados.filter(
@@ -359,6 +373,10 @@ export function SecaoConvidados({
           </div>
 
           <div className="mt-3">
+            {/* No celular não há cabeçalho de colunas: o botão fica acima dos cartões. */}
+            <div className="flex justify-end pb-1 @3xl:hidden">
+              <BotaoAtualizar className="h-9 px-2 text-sm" />
+            </div>
             <CabecalhoLista />
             <ul className={cn(BANDEJA, COR_RAIA.recepcao)} aria-label="Lista de convidados">
               {visiveis.map((convidado) => (
@@ -367,6 +385,7 @@ export function SecaoConvidados({
                   key={convidado.id}
                   convidado={convidado}
                   festa={festa}
+                  mesas={opcoesMesa}
                   origem={origem}
                 />
               ))}

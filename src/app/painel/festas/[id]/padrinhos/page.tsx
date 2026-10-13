@@ -23,7 +23,13 @@ export default async function PaginaPadrinhos(props: PageProps<"/painel/festas/[
   return (
     <div className="w-full">
       <VoltarFesta festa={festa} observacoes="padrinhos" />
-      <ColunaPadrinhos festaId={festa.id} padrinhos={colunas.padrinhos} />
+      <ColunaPadrinhos festaId={festa.id} papel="PADRINHO" padrinhos={colunas.padrinhos} />
+      <ColunaPadrinhos
+        festaId={festa.id}
+        papel="PAJEM_DAMINHA"
+        padrinhos={colunas.pajens}
+        className="mt-4"
+      />
     </div>
   );
 }

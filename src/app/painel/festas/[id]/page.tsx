@@ -72,6 +72,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
     cerimonial: colunas.cerimonial.length,
     entradas: colunas.entradas.length,
     padrinhos: colunas.padrinhos.map((p) => ({ presente: p.presenteEm !== null })),
+    pajens: colunas.pajens.map((p) => ({ presente: p.presenteEm !== null })),
   });
 
   // O quadro da festa, como o kanban da Elisangela: três raias, cada botão abre uma página.

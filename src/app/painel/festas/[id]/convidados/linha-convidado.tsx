@@ -5,17 +5,21 @@ import {
   Check,
   Copy,
   Eye,
+  HeartHandshake,
   MailCheck,
   MailX,
   MessageCircle,
   MessageSquareHeart,
   MoreHorizontal,
   Pencil,
+  RefreshCw,
   Send,
+  StickyNote,
   Trash2,
   X,
 } from "lucide-react";
-import { startTransition, useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useOptimistic, useState, useTransition } from "react";
 
 import { ConfirmarExclusao } from "@/components/confirmar-exclusao";
 import { Button } from "@/components/ui/button";
@@ -34,8 +38,10 @@ import { etapaDoConvite, type Etapa } from "@/lib/convidados/etapa";
 import { paraCampos } from "@/lib/datas";
 import { cn } from "@/lib/utils";
 
-import { editarConvidado, marcarEnvio, removerConvidado } from "./actions";
+import { definirMesa } from "../colunas/actions";
+import { editarConvidado, marcarEnvio, marcarPadrinho, removerConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
+import { EditorObservacao } from "./observacao-convite";
 
 export type DadosFesta = {
   titulo: string;
@@ -133,38 +139,117 @@ function Etiqueta({ children, aviso }: { children: React.ReactNode; aviso?: bool
   );
 }
 
+// Busca de novo a lista no servidor (quem abriu, confirmou ou chegou desde que a página
+// carregou) sem recarregar a página: filtro, busca e rolagem ficam como estavam.
+export function BotaoAtualizar({ className }: { className?: string }) {
+  const router = useRouter();
+  const [atualizando, iniciar] = useTransition();
+  return (
+    <button
+      type="button"
+      onClick={() => iniciar(() => router.refresh())}
+      disabled={atualizando}
+      className={cn(
+        "text-tinta-suave hover:text-foreground hover:bg-card focus-visible:outline-ring inline-flex items-center gap-1.5 rounded-md font-medium whitespace-nowrap focus-visible:outline-2",
+        className,
+      )}
+    >
+      <RefreshCw
+        aria-hidden
+        className={cn("size-3.5", atualizando && "motion-safe:animate-spin")}
+        strokeWidth={2}
+      />
+      Atualizar situação
+    </button>
+  );
+}
+
 // Títulos das colunas, só na folha larga (no celular cada convidado é um cartão).
 export function CabecalhoLista() {
   return (
     <div
-      aria-hidden
       className={cn(
-        "text-tinta-suave hidden px-3 pb-1 text-xs font-medium tracking-[0.04em] uppercase @3xl:grid",
+        "text-tinta-suave hidden items-center px-3 pb-1 text-xs font-medium tracking-[0.04em] uppercase @3xl:grid",
         GRADE_LISTA,
       )}
     >
-      <span>Convite</span>
-      <span>Situação</span>
-      <span>Quem vai</span>
-      <span>Mesa</span>
-      <span />
+      <span aria-hidden>Convite</span>
+      {/* O título da coluna é o próprio botão. */}
+      <span>
+        <BotaoAtualizar className="-ml-1.5 h-6 px-1.5 text-xs tracking-[0.04em] uppercase" />
+      </span>
+      <span aria-hidden>Quem vai</span>
+      <span aria-hidden>Mesa</span>
+      <span aria-hidden />
     </div>
+  );
+}
+
+export type OpcaoMesa = { id: string; nome: string; livres: number };
+
+// Mesa do convidado, escolhida na própria linha: trocar já salva. As mesas cheias ficam
+// apagadas na lista (menos a dele), como na aba de mesas.
+function SeletorMesa({
+  convidado,
+  mesas,
+  aviso,
+}: {
+  convidado: ConvidadoResumo;
+  mesas: OpcaoMesa[];
+  aviso: boolean;
+}) {
+  const [mesaId, setMesaId] = useOptimistic(convidado.mesaId);
+  return (
+    <span
+      className={cn(
+        "focus-within:outline-ring inline-flex h-8 max-w-full items-center gap-1 rounded-full pl-2 text-xs font-medium focus-within:outline-2 @3xl:h-6",
+        !mesaId && aviso ? "bg-pendente text-foreground" : "bg-card text-foreground",
+      )}
+    >
+      <Armchair aria-hidden className="size-3.5 shrink-0" strokeWidth={1.75} />
+      <select
+        aria-label={`Mesa de ${convidado.nome}`}
+        value={mesaId ?? ""}
+        onChange={(e) => {
+          const nova = e.target.value || null;
+          startTransition(async () => {
+            setMesaId(nova);
+            await definirMesa(convidado.id, nova);
+          });
+        }}
+        className="h-full max-w-full min-w-0 cursor-pointer truncate rounded-full bg-transparent pr-1 outline-none"
+      >
+        <option value="">Sem mesa</option>
+        {mesas.map((m) => (
+          <option key={m.id} value={m.id} disabled={m.livres <= 0 && m.id !== mesaId}>
+            {m.nome}
+            {m.id !== mesaId &&
+              (m.livres <= 0
+                ? " · cheia"
+                : ` · ${m.livres} ${m.livres === 1 ? "livre" : "livres"}`)}
+          </option>
+        ))}
+      </select>
+    </span>
   );
 }
 
 export function LinhaConvidado({
   convidado,
   festa,
+  mesas,
   origem,
   className,
 }: {
   className?: string;
   convidado: ConvidadoResumo;
   festa: DadosFesta;
+  mesas: OpcaoMesa[];
   origem: string;
 }) {
   const [editando, setEditando] = useState(false);
   const [removendo, setRemovendo] = useState(false);
+  const [observando, setObservando] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
   const { link, whatsapp } = linksDoConvite(convidado, festa, origem);
@@ -213,7 +298,15 @@ export function LinhaConvidado({
       )}
     >
       <div className="col-start-1 row-start-1 min-w-0">
-        <p className="leading-snug font-semibold break-words hyphens-auto">{convidado.nome}</p>
+        <p className="leading-snug font-semibold break-words hyphens-auto">
+          {convidado.nome}
+          {convidado.padrinho && (
+            <span className="bg-pastel-lilas ml-1.5 inline-flex h-5 items-center gap-1 rounded-full px-1.5 align-middle text-xs font-medium whitespace-nowrap">
+              <HeartHandshake aria-hidden className="size-3" strokeWidth={1.75} />
+              Padrinho
+            </span>
+          )}
+        </p>
         <p className="text-tinta-suave text-[0.8125rem] leading-snug">
           {copiado ? (
             <span className="text-foreground font-medium">Link copiado</span>
@@ -264,11 +357,9 @@ export function LinhaConvidado({
         </div>
 
         <div className="@3xl:col-start-4 @3xl:row-start-1 @3xl:pt-0.5">
-          {convidado.mesa ? (
-            <Etiqueta>
-              <Armchair aria-hidden className="size-3.5" strokeWidth={1.75} />
-              {convidado.mesa.nome}
-            </Etiqueta>
+          {/* Quem não vai não ocupa lugar: só mostra a mesa se já tinha uma (para tirar). */}
+          {mesas.length > 0 && (convidado.rsvp !== "RECUSADO" || convidado.mesaId) ? (
+            <SeletorMesa convidado={convidado} mesas={mesas} aviso={confirmou} />
           ) : (
             confirmou && <Etiqueta aviso>Sem mesa</Etiqueta>
           )}
@@ -318,6 +409,18 @@ export function LinhaConvidado({
                 Marcar como enviado
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem
+              onSelect={() =>
+                startTransition(() => marcarPadrinho(convidado.id, !convidado.padrinho))
+              }
+            >
+              <HeartHandshake aria-hidden strokeWidth={1.75} />
+              {convidado.padrinho ? "Tirar marca de padrinho" : "Marcar como padrinho"}
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setObservando(true)}>
+              <StickyNote aria-hidden strokeWidth={1.75} />
+              {convidado.observacaoConvite ? "Editar observação" : "Observação no convite"}
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setEditando(true)}>
               <Pencil aria-hidden strokeWidth={1.75} />
               Editar
@@ -329,6 +432,35 @@ export function LinhaConvidado({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Observação dela para este convidado: é o que ele lê no convite. */}
+      {observando ? (
+        <EditorObservacao
+          convidadoId={convidado.id}
+          nome={convidado.nome}
+          inicial={convidado.observacaoConvite ?? ""}
+          aoFechar={() => setObservando(false)}
+        />
+      ) : (
+        convidado.observacaoConvite && (
+          <button
+            type="button"
+            onClick={() => setObservando(true)}
+            aria-label={`Editar a observação no convite de ${convidado.nome}`}
+            className="bg-pastel-areia/60 focus-visible:outline-ring col-span-full flex gap-2 rounded-md px-2.5 py-1.5 text-left text-sm leading-snug transition-[filter] hover:brightness-95 focus-visible:outline-2"
+          >
+            <StickyNote
+              aria-hidden
+              className="text-tinta-suave mt-0.5 size-4 shrink-0"
+              strokeWidth={1.75}
+            />
+            <span className="min-w-0 break-words whitespace-pre-line">
+              <span className="text-tinta-suave">No convite: </span>
+              {convidado.observacaoConvite}
+            </span>
+          </button>
+        )
+      )}
 
       {/* Recado do convidado para quem faz a festa (ou o motivo de não ir). */}
       {convidado.mensagem && (

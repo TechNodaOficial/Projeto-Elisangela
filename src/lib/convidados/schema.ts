@@ -3,6 +3,8 @@ import { z } from "zod";
 import { normalizarTelefone } from "./telefone";
 
 export const PESSOAS_MAXIMO = 30;
+// Observação dela no convite de um convidado.
+export const OBSERVACAO_MAXIMO = 500;
 
 export const SchemaConvidado = z.object({
   nome: z.string().trim().min(1, "Informe o nome.").max(120, "Use até 120 caracteres."),

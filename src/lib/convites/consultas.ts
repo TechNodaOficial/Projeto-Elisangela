@@ -23,6 +23,8 @@ export async function buscarConvite(token: string) {
       presenteEm: true,
       codigoCheckin: true,
       mensagem: true,
+      observacaoConvite: true,
+      mesa: { select: { nome: true } },
       membros: { orderBy: { ordem: "asc" }, select: { nome: true, faixa: true } },
       festa: {
         select: {
@@ -30,6 +32,7 @@ export async function buscarConvite(token: string) {
           dataHora: true,
           localNome: true,
           endereco: true,
+          linkMapa: true,
           traje: true,
           mesasDemarcadas: true,
         },
