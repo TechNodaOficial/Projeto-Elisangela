@@ -67,7 +67,12 @@ export default async function PaginaConvidados(props: PageProps<"/painel/festas/
       ) : (
         <SecaoConvidados
           festaId={festa.id}
-          festa={{ titulo: festa.titulo, dataHora: festa.dataHora, localNome: festa.localNome }}
+          festa={{
+            titulo: festa.titulo,
+            dataHora: festa.dataHora,
+            localNome: festa.localNome,
+            mensagemConvite: festa.mensagemConvite,
+          }}
           mesasDemarcadas={festa.mesasDemarcadas}
           avisoPlanilha={
             typeof planilha === "string" && planilha in AVISOS_PLANILHA

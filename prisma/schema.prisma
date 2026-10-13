@@ -76,6 +76,9 @@ model Festa {
   // Texto do cerimonial (a fala da cerimônia): link para o documento dela (Word, Google
   // Docs...). O texto escrito no painel fica em Observacao, seção "fala-cerimonial".
   cerimonialLink       String?
+  // Texto do WhatsApp do convite, escrito por ela, com campos como {nome} e {link}
+  // (src/lib/convidados/mensagem.ts). Vazio = o texto padrão.
+  mensagemConvite      String?
   criadoEm             DateTime           @default(now()) @db.Timestamptz(3)
   atualizadoEm         DateTime           @updatedAt @db.Timestamptz(3)
   convidados           Convidado[]

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { paraInstante } from "@/lib/datas";
 
-import { mensagemConvite } from "./mensagem";
+import { mensagemConvite, MODELO_PADRAO } from "./mensagem";
 import { formatarTelefone, linkWhatsApp, normalizarTelefone } from "./telefone";
 
 describe("normalizarTelefone", () => {
@@ -72,5 +72,43 @@ describe("mensagemConvite", () => {
         "Vocês estão na lista de convidados de Casamento Ana e João: sábado, 3 de outubro, às 19:30, em Espaço Jardim das Flores.\n\n" +
         "Confirme a presença até 23/09 por este link: https://exemplo.com/c/abc",
     );
+  });
+
+  const dados = {
+    nomeConvidado: "Maria Souza",
+    tituloFesta: "Casamento Ana e João",
+    dataHora: paraInstante("2026-10-03", "19:30"),
+    localNome: "Espaço Jardim das Flores",
+    link: "https://exemplo.com/c/abc",
+  };
+
+  it("o modelo padrão dá o mesmo texto de quem nunca editou", () => {
+    expect(mensagemConvite({ ...dados, modelo: MODELO_PADRAO })).toBe(mensagemConvite(dados));
+  });
+
+  it("modelo da festa: troca cada campo, quantas vezes aparecer", () => {
+    const modelo =
+      "Oi, {nome}! {festa} é {data}, às {hora}, em {local}. Responda até {prazo}: {link}\n{nome}, contamos com você!";
+
+    expect(mensagemConvite({ ...dados, modelo })).toBe(
+      "Oi, Maria! Casamento Ana e João é sábado, 3 de outubro, às 19:30, em Espaço Jardim das Flores. Responda até 23/09: https://exemplo.com/c/abc\nMaria, contamos com você!",
+    );
+  });
+
+  it("modelo sem {link}: o link vai no fim, para o convite nunca sair sem ele", () => {
+    expect(mensagemConvite({ ...dados, modelo: "Oi, {nome}! Vem?  " })).toBe(
+      "Oi, Maria! Vem?\n\nhttps://exemplo.com/c/abc",
+    );
+  });
+
+  it("campo desconhecido fica como ela escreveu, e o nome do convidado não é reinterpretado", () => {
+    expect(
+      mensagemConvite({ ...dados, nomeConvidado: "{link}", modelo: "{nome} {apelido} {link}" }),
+    ).toBe("{link} {apelido} https://exemplo.com/c/abc");
+  });
+
+  it("modelo vazio ou só com espaços vale como o padrão", () => {
+    expect(mensagemConvite({ ...dados, modelo: "  \n " })).toBe(mensagemConvite(dados));
+    expect(mensagemConvite({ ...dados, modelo: null })).toBe(mensagemConvite(dados));
   });
 });

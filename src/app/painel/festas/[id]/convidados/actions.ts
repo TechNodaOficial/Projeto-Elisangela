@@ -13,6 +13,7 @@ import { exigirUsuario } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { gerarTokensConvidado } from "@/lib/tokens";
 import { lerLista, MAXIMO_LINHAS } from "@/lib/convidados/importar";
+import { MENSAGEM_MAXIMO, MODELO_PADRAO } from "@/lib/convidados/mensagem";
 
 export type EstadoFormConvidado = {
   erros?: ErrosConvidado;
@@ -70,6 +71,27 @@ export async function definirMesasDemarcadas(festaId: string, demarcadas: boolea
   });
   atualizarTelas(festaId);
   revalidatePath("/c/[token]", "page");
+}
+
+// Texto do WhatsApp do convite desta festa. Vazio (ou igual ao padrão) volta ao texto padrão.
+export async function salvarMensagemConvite(
+  festaId: string,
+  texto: string,
+): Promise<{ erro?: string }> {
+  await exigirUsuario();
+  if (typeof texto !== "string") return { erro: "Texto inválido." };
+  // O Windows manda \r\n; o WhatsApp e a contagem de caracteres usam \n.
+  const limpo = texto.replace(/\r\n?/g, "\n").trim();
+  if (limpo.length > MENSAGEM_MAXIMO) {
+    return { erro: `Use até ${MENSAGEM_MAXIMO} caracteres.` };
+  }
+  const { count } = await prisma.festa.updateMany({
+    where: { id: festaId },
+    data: { mensagemConvite: limpo && limpo !== MODELO_PADRAO ? limpo : null },
+  });
+  if (count === 0) return { erro: "Esta festa não existe mais." };
+  atualizarTelas(festaId);
+  return {};
 }
 
 export async function editarConvidado(

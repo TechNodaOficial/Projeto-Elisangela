@@ -126,6 +126,7 @@ export function EnvioEmSequencia({
       tituloFesta: festa.titulo,
       dataHora: festa.dataHora,
       localNome: festa.localNome,
+      modelo: festa.mensagemConvite,
       link: linksDoConvite(atual, festa, origem).link,
     });
 

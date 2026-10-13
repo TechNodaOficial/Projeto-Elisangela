@@ -37,7 +37,13 @@ import { cn } from "@/lib/utils";
 import { editarConvidado, marcarEnvio, removerConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
 
-export type DadosFesta = { titulo: string; dataHora: Date; localNome: string };
+export type DadosFesta = {
+  titulo: string;
+  dataHora: Date;
+  localNome: string;
+  // Texto do WhatsApp escrito por ela para esta festa (vazio = o padrão).
+  mensagemConvite: string | null;
+};
 
 // Link do convite e o WhatsApp já com a mensagem (usados na linha e na fila de envio).
 export function linksDoConvite(convidado: ConvidadoResumo, festa: DadosFesta, origem: string) {
@@ -50,6 +56,7 @@ export function linksDoConvite(convidado: ConvidadoResumo, festa: DadosFesta, or
       tituloFesta: festa.titulo,
       dataHora: festa.dataHora,
       localNome: festa.localNome,
+      modelo: festa.mensagemConvite,
       link,
     }),
   );

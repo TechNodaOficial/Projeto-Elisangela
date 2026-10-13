@@ -19,6 +19,7 @@ import { EnvioEmSequencia } from "./envio-em-sequencia";
 import { FormConvidado } from "./form-convidado";
 import { ImportarConvidados } from "./importar-convidados";
 import { CabecalhoLista, LinhaConvidado, type DadosFesta } from "./linha-convidado";
+import { MensagemDoConvite } from "./mensagem-do-convite";
 
 // A partir daqui vale mostrar a busca.
 const MOSTRAR_BUSCA_A_PARTIR_DE = 8;
@@ -301,6 +302,7 @@ export function SecaoConvidados({
       {convidados.length > 0 && (
         <EnvioEmSequencia convidados={convidados} festa={festa} origem={origem} />
       )}
+      <MensagemDoConvite festaId={festaId} festa={festa} exemplo={convidados[0]} origem={origem} />
 
       {/* No celular, com a lista já começada, o formulário (três campos empilhados) fica
           atrás de um botão, para a lista aparecer logo. No computador ele é uma linha só. */}
