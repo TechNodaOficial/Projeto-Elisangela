@@ -13,7 +13,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await props.params;
   const festa = await buscarFesta(id);
-  return { title: festa ? `Layout das mesas · ${festa.titulo}` : "Festa não encontrada" };
+  return { title: festa ? `Croqui das mesas · ${festa.titulo}` : "Festa não encontrada" };
 }
 
 export default async function PaginaMesas(props: PageProps<"/painel/festas/[id]/mesas">) {

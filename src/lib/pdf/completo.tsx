@@ -349,7 +349,7 @@ function Completo(d: DadosCompletos) {
         <Rodape titulo={festa.titulo} rotulo="Arquivo completo" />
       </Page>
 
-      {d.planta && <PaginaImagem titulo="Croqui do salão" img={d.planta} festa={festa.titulo} />}
+      {d.planta && <PaginaImagem titulo="Layout do salão" img={d.planta} festa={festa.titulo} />}
       {d.foto && <PaginaImagem titulo="Foto da festa" img={d.foto} festa={festa.titulo} />}
     </Document>
   );

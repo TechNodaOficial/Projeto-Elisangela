@@ -210,7 +210,7 @@ export function ColunaMesas({
   return (
     <Coluna
       id="mesas"
-      titulo="Layout das mesas"
+      titulo="Croqui das mesas"
       resumo={
         mesas.length > 0 && (
           <>

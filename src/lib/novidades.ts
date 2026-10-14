@@ -11,6 +11,26 @@ export type Novidade = {
 
 export const NOVIDADES: Novidade[] = [
   {
+    id: "2026-10-14-croqui-planilha",
+    data: "2026-10-14",
+    titulo: "Croqui pela planilha da noiva",
+    secoes: [
+      {
+        titulo: "Nomes trocados",
+        itens: ["A planta do salão agora se chama Layout, e a parte das mesas se chama Croqui."],
+      },
+      {
+        titulo: "Planilha do croqui",
+        itens: [
+          "Na lista de convidados, o botão “Baixar planilha modelo” baixa o modelo de croqui para mandar à noiva. As somas de cada mesa foram corrigidas.",
+          "A aba Plan2 da planilha se preenche sozinha com o que a noiva escreveu nas mesas: é só copiar e colar em “Adicionar vários de uma vez”.",
+          "A lista colada agora aceita a mesa (“Mesa 3”): o convidado já entra sentado. Quem já está na lista só muda de mesa, e mesa que ainda não existe é criada.",
+          "Dica para a noiva: uma linha por família (“Família Silva”, com adultos e crianças), para sair um convite só com um QR Code.",
+        ],
+      },
+    ],
+  },
+  {
     id: "2026-10-08-pendencias",
     data: "2026-10-08",
     titulo: "Pendências mais claras e atalhos",
@@ -37,7 +57,7 @@ export const NOVIDADES: Novidade[] = [
         titulo: "Mais rápido",
         itens: [
           "Ao adicionar um serviço, você já escolhe o fornecedor: depois de escolher o serviço, a lista mostra só os fornecedores dele.",
-          "Dentro de cada parte da festa, uma faixa no topo leva direto para as outras (Fornecedores, Convidados, Layout…), sem voltar ao quadro.",
+          "Dentro de cada parte da festa, uma faixa no topo leva direto para as outras (Fornecedores, Convidados, Croqui…), sem voltar ao quadro.",
           "Os botões de adicionar (serviço, mesa, convidado, padrinho…) ficaram com contorno, mais fáceis de achar.",
         ],
       },
@@ -101,7 +121,7 @@ export const NOVIDADES: Novidade[] = [
       {
         titulo: "Recepção e cerimônia",
         itens: [
-          "Cronograma e menu ficam juntos. Croqui (planta do salão) e Layout (mesas) ficaram separados.",
+          "Cronograma e menu ficam juntos. Layout (planta do salão) e Croqui (mesas) ficaram separados.",
           "Novas páginas: Cerimonial, Entradas da cerimônia (ordem do cortejo com música) e Checklist dos padrinhos.",
         ],
       },

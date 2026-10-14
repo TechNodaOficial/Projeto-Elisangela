@@ -110,8 +110,8 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           icone: Users,
           botao: situacoes.convidados,
         },
-        { href: "croqui", titulo: "Croqui", icone: IconeMapa, botao: situacoes.croqui },
-        { href: "mesas", titulo: "Layout", icone: Armchair, botao: situacoes.layout },
+        { href: "croqui", titulo: "Layout", icone: IconeMapa, botao: situacoes.croqui },
+        { href: "mesas", titulo: "Croqui", icone: Armchair, botao: situacoes.layout },
       ],
     },
     {

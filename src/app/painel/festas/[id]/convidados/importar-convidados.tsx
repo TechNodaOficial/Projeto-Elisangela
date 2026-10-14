@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardPaste } from "lucide-react";
+import { ClipboardPaste, FileSpreadsheet } from "lucide-react";
 import {
   useDeferredValue,
   useMemo,
@@ -19,7 +19,21 @@ import { cn } from "@/lib/utils";
 
 import { importarConvidados } from "./actions";
 
-const EXEMPLO = "Família Silva\t4\t(19) 99876-5432\nAna Souza\t1\nCarlos Lima; 2; 43 99938-6569";
+const EXEMPLO =
+  "Família Silva\t4\t(19) 99876-5432\nAna Souza\t1\nCarlos Lima; 2; 43 99938-6569; Mesa 3";
+
+// Modelo de croqui que ela manda para a noiva quando as mesas são demarcadas: a noiva
+// preenche as mesas na Plan1 e a Plan2 já sai no formato desta lista colada.
+function BaixarModelo() {
+  return (
+    <Button asChild variant="ghost" className="h-10 px-2.5 font-medium">
+      <a href="/modelos/modelo-croqui.xlsx" download="Modelo de Croqui.xlsx">
+        <FileSpreadsheet aria-hidden strokeWidth={1.75} />
+        Baixar planilha modelo
+      </a>
+    </Button>
+  );
+}
 
 // "Adicionar vários": cola a lista inteira, confere a prévia e adiciona de uma vez.
 export function ImportarConvidados({
@@ -40,20 +54,26 @@ export function ImportarConvidados({
   const linhas = useMemo(() => lerLista(adiado, jaCadastrados), [adiado, jaCadastrados]);
   const prontas = linhas.filter((l) => !l.problema);
   const comProblema = linhas.length - prontas.length;
-  const pessoas = prontas.reduce((s, l) => s + l.pessoas, 0);
+  const novas = prontas.filter((l) => l.jaCadastrado === undefined);
+  const mudam = prontas.length - novas.length;
+  const pessoas = novas.reduce((s, l) => s + l.pessoas, 0);
+  const temMesa = linhas.some((l) => l.mesa);
 
   if (!aberto) {
     return (
       <div className="mt-2">
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => setAberto(true)}
-          className="-ml-2.5 h-10 px-2.5 font-medium"
-        >
-          <ClipboardPaste aria-hidden strokeWidth={1.75} />
-          Adicionar vários de uma vez
-        </Button>
+        <div className="flex flex-wrap items-center gap-x-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setAberto(true)}
+            className="-ml-2.5 h-10 px-2.5 font-medium"
+          >
+            <ClipboardPaste aria-hidden strokeWidth={1.75} />
+            Adicionar vários de uma vez
+          </Button>
+          <BaixarModelo />
+        </div>
         {mensagem && (
           <p
             role="status"
@@ -96,6 +116,12 @@ export function ImportarConvidados({
         tipo: "ok",
         texto:
           `${r.adicionados} ${r.adicionados === 1 ? "convite adicionado" : "convites adicionados"}` +
+          (r.mudaramDeMesa > 0
+            ? ` · ${r.mudaramDeMesa} ${r.mudaramDeMesa === 1 ? "mudou" : "mudaram"} de mesa`
+            : "") +
+          (r.mesasCriadas > 0
+            ? ` · ${r.mesasCriadas} ${r.mesasCriadas === 1 ? "mesa criada" : "mesas criadas"}`
+            : "") +
           (r.ignorados > 0
             ? ` · ${r.ignorados} ${r.ignorados === 1 ? "linha ficou" : "linhas ficaram"} de fora`
             : "") +
@@ -109,9 +135,11 @@ export function ImportarConvidados({
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="lista-convidados">Cole a lista: um convite por linha</Label>
         <p id="ajuda-lista" className="text-tinta-suave text-sm leading-snug">
-          Nome e, se quiser, quantas pessoas e o WhatsApp. Dá para copiar direto do Excel, do Google
-          Planilhas, de uma nota ou do WhatsApp. Separe com tabulação (tecla Tab), ponto e vírgula
-          ou vírgula. Para sair do campo pelo teclado, aperte Esc e depois Tab.
+          Nome e, se quiser, quantas pessoas, o WhatsApp e a mesa (&quot;Mesa 3&quot;). Dá para
+          copiar direto do Excel, do Google Planilhas, de uma nota ou do WhatsApp. Separe com
+          tabulação (tecla Tab), ponto e vírgula ou vírgula. Quem já está na lista só muda de mesa;
+          mesa que ainda não existe é criada. Para sair do campo pelo teclado, aperte Esc e depois
+          Tab.
         </p>
         <Textarea
           id="lista-convidados"
@@ -128,9 +156,14 @@ export function ImportarConvidados({
       {linhas.length > 0 && (
         <div>
           <p className="text-sm" aria-live="polite">
-            <strong>{prontas.length}</strong>{" "}
-            {prontas.length === 1 ? "convite pronto" : "convites prontos"} ({pessoas}{" "}
-            {pessoas === 1 ? "pessoa" : "pessoas"})
+            <strong>{novas.length}</strong> {novas.length === 1 ? "convite novo" : "convites novos"}{" "}
+            ({pessoas} {pessoas === 1 ? "pessoa" : "pessoas"})
+            {mudam > 0 && (
+              <>
+                {" · "}
+                <strong>{mudam}</strong> já na lista, só {mudam === 1 ? "muda" : "mudam"} de mesa
+              </>
+            )}
             {comProblema > 0 && (
               <>
                 {" · "}
@@ -155,6 +188,11 @@ export function ImportarConvidados({
                   <th scope="col" className="px-2 py-1.5 font-medium">
                     WhatsApp
                   </th>
+                  {temMesa && (
+                    <th scope="col" className="px-2 py-1.5 font-medium">
+                      Mesa
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -171,11 +209,17 @@ export function ImportarConvidados({
                           {l.problema}
                         </span>
                       )}
+                      {l.jaCadastrado !== undefined && (
+                        <span className="text-tinta-suave block text-xs">
+                          Já está na lista: só muda de mesa
+                        </span>
+                      )}
                     </td>
                     <td className="px-2 py-1 text-right font-mono">{l.pessoas}</td>
                     <td className="px-2 py-1 font-mono text-xs">
                       {l.telefone ? formatarTelefone(l.telefone) : "—"}
                     </td>
+                    {temMesa && <td className="px-2 py-1 whitespace-nowrap">{l.mesa ?? "—"}</td>}
                   </tr>
                 ))}
               </tbody>
@@ -204,7 +248,9 @@ export function ImportarConvidados({
         >
           {enviando
             ? "Adicionando…"
-            : `Adicionar ${prontas.length} ${prontas.length === 1 ? "convite" : "convites"}`}
+            : novas.length > 0
+              ? `Adicionar ${novas.length} ${novas.length === 1 ? "convite" : "convites"}`
+              : `Mudar ${mudam} de mesa`}
         </Button>
         <Button
           type="button"

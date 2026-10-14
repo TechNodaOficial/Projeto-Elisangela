@@ -55,6 +55,43 @@ describe("lerLista", () => {
     expect(r[5].nome).toBe("Jorge");
   });
 
+  it("lê a mesa, como vem da Plan2 da planilha do croqui", () => {
+    const texto = [
+      "Nome\tPessoas\tTelefone\tMesa",
+      "Família Silva\t4\t\tMESA 01 ",
+      "\t\t\t",
+      "Ana Souza\t1\t\tMesa 12",
+      "Carlos; 2; 43 99938-6569; mesa dos noivos",
+      "Mesa 3; Bia",
+    ].join("\n");
+    expect(lerLista(texto)).toEqual([
+      { linha: 2, nome: "Família Silva", pessoas: 4, telefone: null, mesa: "Mesa 1" },
+      { linha: 4, nome: "Ana Souza", pessoas: 1, telefone: null, mesa: "Mesa 12" },
+      { linha: 5, nome: "Carlos", pessoas: 2, telefone: "43999386569", mesa: "Mesa dos noivos" },
+      { linha: 6, nome: "Bia", pessoas: 1, telefone: null, mesa: "Mesa 3" },
+    ]);
+  });
+
+  it("com mesa, quem já está na lista só muda de mesa (sem WhatsApp, basta o nome único)", () => {
+    const cadastrados = [
+      { nome: "Família Silva", telefone: "19998765432" },
+      { nome: "Ana Souza", telefone: null },
+      { nome: "Mariana Costa", telefone: "19987651002" },
+      { nome: "Mariana Costa", telefone: "19987651008" },
+    ];
+    const r = lerLista(
+      "familia silva\t4\tMesa 2\nAna Souza\nMariana Costa\tMesa 3\nBruno\tMesa 3",
+      cadastrados,
+    );
+    expect(r.map((l) => [l.jaCadastrado, l.problema])).toEqual([
+      [0, undefined],
+      [undefined, "Já está na lista (mesmo nome e WhatsApp)"],
+      // Duas Marianas: não dá para saber qual.
+      [undefined, "Mais de um convite com esse nome: ponha na mesa pela página Croqui"],
+      [undefined, undefined],
+    ]);
+  });
+
   it("mesmo nome com WhatsApp diferente é outra pessoa", () => {
     const r = lerLista(
       [

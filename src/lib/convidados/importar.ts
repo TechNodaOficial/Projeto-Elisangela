@@ -4,9 +4,11 @@ import { normalizarTelefone } from "./telefone";
 // Lista de convidados colada de uma vez (do Excel, Google Planilhas, notas ou WhatsApp):
 // um convite por linha, com nome e, se quiser, quantas pessoas e o WhatsApp, separados
 // por tabulação (como vem do Excel), ponto e vírgula ou vírgula, em qualquer ordem.
+// Pode vir também a mesa ("Mesa 3"), como na aba Plan2 da planilha do croqui que a noiva
+// preenche: o convite entra já sentado, e quem já está na lista só muda de mesa.
 //   Ana Souza
 //   Família Silva	4	(19) 99876-5432
-//   Carlos; 2
+//   Carlos; 2; Mesa 3
 
 export const MAXIMO_LINHAS = 1000;
 
@@ -15,12 +17,29 @@ export type LinhaImportada = {
   nome: string;
   pessoas: number;
   telefone: string | null;
+  // Mesa onde o convite vai sentar, já com o nome arrumado ("MESA 01" → "Mesa 1").
+  mesa?: string;
+  // Convite que já está na lista (posição em jaCadastrados): a linha só põe ele na mesa.
+  jaCadastrado?: number;
   // Motivo de a linha não entrar (telefone inválido, nome repetido...).
   problema?: string;
 };
 
 const chaveNome = (nome: string) =>
   nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+const ehMesa = (c: string) => /^mesa[\s\d.:º°#-]/i.test(c);
+
+// "MESA 01", "mesa 1" e "Mesa  1" são a mesma mesa: "Mesa 1".
+export function nomeMesa(texto: string) {
+  const limpo = texto.replace(/\s+/g, " ").trim();
+  const numero = limpo.match(/^mesa[\s.:º°#-]*0*(\d+)$/i);
+  if (numero) return `Mesa ${numero[1]}`;
+  return limpo.replace(/^mesa/i, "Mesa").slice(0, 60);
+}
+
+// Para achar a mesa que a festa já tem, pelo nome.
+export const chaveMesa = (nome: string) => chaveNome(nomeMesa(nome));
 
 // Número copiado do WhatsApp vem cercado de marcas invisíveis de direção (U+202A…U+202C,
 // U+200E…) e com espaço e hífen não separáveis; aqui viram texto comum.
@@ -70,7 +89,7 @@ function desmembrar(celula: string, linhaSemSeparador: boolean): string[] {
 // Primeira linha com cara de cabeçalho ("Nome", "Pessoas", "Telefone") é ignorada.
 const ehCabecalho = (celulas: string[]) =>
   celulas.some((c) =>
-    /^(nome|convidados?|pessoas|qtd|quantidade|telefone|whats(app)?|celular)$/i.test(c),
+    /^(nome|convidados?|pessoas|qtd|quantidade|telefone|whats(app)?|celular|mesa)$/i.test(c),
   );
 
 // Mesmo convite = mesmo nome e mesmo WhatsApp (ou os dois sem). Duas "Mariana Costa"
@@ -79,14 +98,20 @@ type Cadastrado = { nome: string; telefone: string | null };
 const chaveConvite = (c: Cadastrado) => `${chaveNome(c.nome)}|${c.telefone ?? ""}`;
 
 export function lerLista(texto: string, jaCadastrados: Cadastrado[] = []): LinhaImportada[] {
-  const existentes = new Set(jaCadastrados.map(chaveConvite));
+  const existentes = new Map(jaCadastrados.map((c, i) => [chaveConvite(c), i]));
+  // A planilha do croqui não traz o WhatsApp: para mudar de mesa, basta o nome, se for único.
+  const porNome = new Map<string, number[]>();
+  jaCadastrados.forEach((c, i) => {
+    const chave = chaveNome(c.nome);
+    porNome.set(chave, [...(porNome.get(chave) ?? []), i]);
+  });
   const vistos = new Set<string>();
   const resultado: LinhaImportada[] = [];
 
   texto.split(/\r?\n/).forEach((bruta, i) => {
     const separadas = separar(bruta);
     const celulas = separadas.flatMap((c) =>
-      /\p{L}/u.test(c) ? desmembrar(c, separadas.length === 1) : [c],
+      /\p{L}/u.test(c) && !ehMesa(c) ? desmembrar(c, separadas.length === 1) : [c],
     );
     if (celulas.length === 0) return;
     if (resultado.length === 0 && ehCabecalho(celulas)) return;
@@ -94,10 +119,13 @@ export function lerLista(texto: string, jaCadastrados: Cadastrado[] = []): Linha
     let nome = "";
     let pessoas = 1;
     let telefone: string | null = null;
+    let mesa: string | undefined;
     let problema: string | undefined;
 
     for (const c of celulas) {
-      if (/^\d{1,2}$/.test(c)) {
+      if (ehMesa(c)) {
+        mesa = nomeMesa(c);
+      } else if (/^\d{1,2}$/.test(c)) {
         pessoas = Number(c);
       } else if (ehTelefone(c) || (!/\p{L}/u.test(c) && /\d{3}/.test(c))) {
         // Só números (e símbolos): é o WhatsApp, mesmo curto demais ("12345" = inválido).
@@ -111,14 +139,30 @@ export function lerLista(texto: string, jaCadastrados: Cadastrado[] = []): Linha
     }
 
     const chave = chaveConvite({ nome, telefone });
+    let jaCadastrado = existentes.get(chave);
+    if (jaCadastrado === undefined && mesa && !telefone) {
+      const mesmoNome = porNome.get(chaveNome(nome)) ?? [];
+      if (mesmoNome.length === 1) jaCadastrado = mesmoNome[0];
+      else if (mesmoNome.length > 1)
+        problema ??= "Mais de um convite com esse nome: ponha na mesa pela página Croqui";
+    }
     if (!nome) problema ??= "Sem nome";
     else if (pessoas < 1 || pessoas > PESSOAS_MAXIMO)
       problema ??= `De 1 a ${PESSOAS_MAXIMO} pessoas`;
-    else if (existentes.has(chave)) problema ??= "Já está na lista (mesmo nome e WhatsApp)";
     else if (vistos.has(chave)) problema ??= "Repetido na lista colada (mesmo nome e WhatsApp)";
+    else if (jaCadastrado !== undefined && !mesa)
+      problema ??= "Já está na lista (mesmo nome e WhatsApp)";
     if (nome) vistos.add(chave);
 
-    resultado.push({ linha: i + 1, nome, pessoas, telefone, ...(problema ? { problema } : {}) });
+    resultado.push({
+      linha: i + 1,
+      nome,
+      pessoas,
+      telefone,
+      ...(mesa ? { mesa } : {}),
+      ...(mesa && jaCadastrado !== undefined && !problema ? { jaCadastrado } : {}),
+      ...(problema ? { problema } : {}),
+    });
   });
 
   return resultado;

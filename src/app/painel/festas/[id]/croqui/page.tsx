@@ -12,10 +12,10 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { id } = await props.params;
   const festa = await buscarFesta(id);
-  return { title: festa ? `Croqui · ${festa.titulo}` : "Festa não encontrada" };
+  return { title: festa ? `Layout · ${festa.titulo}` : "Festa não encontrada" };
 }
 
-// Croqui: o desenho do salão visto de cima (a "planta"), que também sai no roteiro em PDF.
+// Layout: o desenho do salão visto de cima (a "planta"), que também sai no roteiro em PDF.
 export default async function PaginaCroqui(props: PageProps<"/painel/festas/[id]/croqui">) {
   const { id } = await props.params;
   const festa = await buscarFesta(id);
@@ -30,7 +30,7 @@ export default async function PaginaCroqui(props: PageProps<"/painel/festas/[id]
         className="folha pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
       >
         <h2 id="titulo-planta" className="text-lg font-semibold">
-          Croqui do salão
+          Layout do salão
         </h2>
         <p className="text-tinta-suave text-sm leading-(--linha)">
           O salão visto de cima. Também sai no roteiro em PDF.
