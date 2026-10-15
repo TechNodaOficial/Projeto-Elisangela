@@ -32,7 +32,46 @@ export function documentoValido(valor: unknown): valor is Documento {
   const doc = valor as { type?: unknown; content?: unknown };
   if (doc.type !== "doc") return false;
   if (doc.content !== undefined && !Array.isArray(doc.content)) return false;
-  return JSON.stringify(valor).length <= TAMANHO_MAXIMO_DOCUMENTO;
+  return JSON.stringify(valor).length <= TAMANHO_MAXIMO_DOCUMENTO && linksPermitidos(valor);
+}
+
+// Links da folha: só páginas (http/https), e-mail e telefone. Nada de "javascript:".
+const PROTOCOLOS_LINK = new Set(["http:", "https:", "mailto:", "tel:"]);
+const LINK_MAXIMO = 2000;
+
+export function linkPermitido(href: unknown): href is string {
+  if (typeof href !== "string" || !href || href.length > LINK_MAXIMO) return false;
+  try {
+    return PROTOCOLOS_LINK.has(new URL(href).protocol);
+  } catch {
+    return false;
+  }
+}
+
+// O que ela digita no campo do link vira endereço: "site.com.br" → "https://site.com.br",
+// "fulana@email.com" → "mailto:fulana@email.com". Endereço que não serve vira null.
+export function normalizarLink(texto: string): string | null {
+  const t = texto.trim();
+  if (!t || /\s/.test(t)) return null;
+  let url = t;
+  if (!/^[a-z][a-z\d+.-]*:(?!\d)/i.test(t)) {
+    if (!t.includes(".")) return null;
+    url = /^[^/@]+@[^/@]+$/.test(t) ? `mailto:${t}` : `https://${t}`;
+  }
+  return linkPermitido(url) ? url : null;
+}
+
+// Toda marca de link no documento aponta para um endereço permitido.
+function linksPermitidos(no: unknown): boolean {
+  if (typeof no !== "object" || no === null) return true;
+  const { marks, content } = no as { marks?: unknown; content?: unknown };
+  if (Array.isArray(marks)) {
+    for (const m of marks) {
+      const marca = m as { type?: unknown; attrs?: { href?: unknown } } | null;
+      if (marca?.type === "link" && !linkPermitido(marca.attrs?.href)) return false;
+    }
+  }
+  return !Array.isArray(content) || content.every(linksPermitidos);
 }
 
 // Folha em branco: nenhum texto em lugar nenhum do documento.

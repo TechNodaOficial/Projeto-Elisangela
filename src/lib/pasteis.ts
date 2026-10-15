@@ -31,6 +31,6 @@ export function corDoServico(id: string): string {
 // (o creme das folhas por cima do pastel; nada de branco).
 export const LINHA_ALTERNADA = "rounded-sm odd:bg-card/80 even:bg-card/40";
 
-// Cartão de altura fixa: o conteúdo que passar rola dentro dele.
+// Cartão que cresce com o conteúdo. Nada rola dentro dele (travaria a rolagem da página):
+// lista longa mostra os primeiros itens e um "Ver mais" (useListaRecolhida).
 export const CARTAO = "flex flex-col rounded-xl p-4";
-export const AREA_ROLAVEL = "-mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1";

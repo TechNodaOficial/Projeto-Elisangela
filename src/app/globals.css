@@ -47,6 +47,7 @@
   --color-porta-barrado: var(--porta-barrado);
   --color-porta-atencao: var(--porta-atencao);
   --color-tinta-suave: var(--tinta-suave);
+  --color-link: var(--link);
   --color-pastel-pessego: var(--pastel-pessego);
   --color-pastel-rosa: var(--pastel-rosa);
   --color-pastel-menta: var(--pastel-menta);
@@ -103,6 +104,7 @@
 :root {
   --tinta: oklch(0.255 0.004 250); /* grafite */
   --grifo: oklch(0.92 0.15 103); /* marca-texto */
+  --link: oklch(0.47 0.14 255); /* links da folha de observações; azul de link, 6:1 no papel */
 
   /* Veredito do leitor de QR, em tela cheia na porta (só lá). Contraste: 7.0, 7.2 e 9.5. */
   --porta-ok: oklch(0.45 0.12 152); /* pode entrar, texto branco */
@@ -230,6 +232,12 @@ input::-webkit-calendar-picker-indicator {
   border-left: 3px solid var(--pastel-lilas);
   padding-left: 1em;
   color: var(--tinta-suave);
+}
+.documento a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: text;
 }
 .documento hr {
   border: 0;

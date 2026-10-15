@@ -1,6 +1,13 @@
 import "server-only";
 
-import { corDaLinha, larguraDasColunas, type Celula } from "@/lib/convidados/planilha";
+import {
+  blocoFornecedores,
+  COR_FORNECEDORES,
+  corDaLinha,
+  larguraDasColunas,
+  type Celula,
+  type CelulaBloco,
+} from "@/lib/convidados/planilha";
 
 // Exportar para o Google Planilhas, sem guardar nada do Google: a cada exportação ela
 // autoriza (do segundo uso em diante o Google não pergunta de novo), o painel troca o
@@ -52,7 +59,7 @@ export async function trocarCodigo(origem: string, codigo: string): Promise<stri
 
 // Cria a planilha já preenchida numa chamada só: cabeçalho em negrito e fixo, totais em
 // negrito, cada convite pintado pela situação, colunas na largura do texto. Texto vai como texto (stringValue), então nada
-// vira fórmula.
+// vira fórmula (a única fórmula é a soma do bloco de fornecedores).
 export async function criarPlanilha(
   acesso: string,
   titulo: string,
@@ -74,6 +81,34 @@ export async function criarPlanilha(
     })),
   }));
 
+  // Fornecedores do jantar: total em negrito e destacado, fornecedores em listras;
+  // as quantidades ela preenche.
+  const bloco = blocoFornecedores(linhas.length);
+  const valor = (v: CelulaBloco) =>
+    v === null
+      ? undefined
+      : typeof v === "number"
+        ? { numberValue: v }
+        : typeof v === "string"
+          ? { stringValue: v }
+          : { formulaValue: v.formula };
+  const rowDataBloco = bloco.map((linha, i) => {
+    const destaque = i === bloco.length - 1;
+    return {
+      values: linha.map((v) => ({
+        userEnteredValue: valor(v),
+        userEnteredFormat: {
+          textFormat: { bold: destaque },
+          backgroundColor: destaque
+            ? COR_FORNECEDORES.destaque
+            : i % 2 === 0
+              ? COR_FORNECEDORES.listra
+              : COR_FORNECEDORES.branco,
+        },
+      })),
+    };
+  });
+
   const resposta = await fetch("https://sheets.googleapis.com/v4/spreadsheets", {
     method: "POST",
     headers: { Authorization: `Bearer ${acesso}`, "Content-Type": "application/json" },
@@ -89,8 +124,11 @@ export async function criarPlanilha(
             {
               startRow: 0,
               startColumn: 0,
-              rowData,
-              columnMetadata: larguraDasColunas(linhas).map((pixelSize) => ({ pixelSize })),
+              rowData: [...rowData, ...rowDataBloco],
+              columnMetadata: larguraDasColunas([
+                ...linhas,
+                ...bloco.map((l) => l.map((v) => (typeof v === "object" ? "" : v))),
+              ]).map((pixelSize) => ({ pixelSize })),
             },
           ],
         },

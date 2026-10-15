@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  blocoFornecedores,
   CABECALHO,
   COR_SITUACAO,
   corDaLinha,
@@ -104,5 +105,23 @@ describe("corDaLinha", () => {
     for (const s of ["Não enviado", "Enviado", "Abriu o convite"]) {
       expect(corDaLinha(com(s))).toEqual(COR_SITUACAO.pendente);
     }
+  });
+});
+
+describe("blocoFornecedores", () => {
+  it("pula uma linha depois do total e soma as quantidades da coluna B", () => {
+    // Cabeçalho, 2 convites e total = 4 linhas; linha 5 em branco, 6 a 12 fornecedores.
+    const bloco = blocoFornecedores(4);
+    expect(bloco[0]).toEqual([]);
+    expect(bloco.slice(1, -1)).toEqual([
+      ["Fornecedores jantar", null],
+      ["DJ", null],
+      ["Banda", null],
+      ["Assessoria", null],
+      ["Seguranças/monitora", null],
+      ["Brinquedos", null],
+      ["Barman", null],
+    ]);
+    expect(bloco.at(-1)).toEqual(["Total", { formula: "=SUM(B6:B12)" }]);
   });
 });

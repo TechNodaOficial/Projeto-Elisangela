@@ -1,18 +1,21 @@
 import "server-only";
 
-import { Text, View } from "@react-pdf/renderer";
+import { Link, Text, View } from "@react-pdf/renderer";
+
+import { linkPermitido } from "@/lib/festas/observacoes";
 
 import { base, cor } from "./tema";
 
 // Converte a folha de observações (JSON do editor Tiptap) em blocos do PDF: parágrafos,
 // títulos, listas (com marcador, numeradas e de tarefas), citação e linha divisória.
 // Negrito, sublinhado e riscado viram estilo; itálico fica normal (a fonte não tem itálico).
+// Link sai azul, sublinhado e clicável.
 
 type No = {
   type?: string;
   text?: string;
   attrs?: Record<string, unknown>;
-  marks?: { type?: string }[];
+  marks?: { type?: string; attrs?: { href?: unknown } }[];
   content?: No[];
 };
 
@@ -23,20 +26,25 @@ function Trechos({ nos }: { nos: No[] | undefined }) {
         if (n.type === "hardBreak") return <Text key={i}>{"\n"}</Text>;
         if (n.type !== "text" || !n.text) return null;
         const marcas = new Set((n.marks ?? []).map((m) => m.type));
+        const href = n.marks?.find((m) => m.type === "link")?.attrs?.href;
+        const link = linkPermitido(href) ? href : undefined;
         const decoracao = [
-          marcas.has("underline") && "underline",
+          (link || marcas.has("underline")) && "underline",
           marcas.has("strike") && "line-through",
         ]
           .filter(Boolean)
           .join(" ");
-        return (
-          <Text
-            key={i}
-            style={{
-              fontWeight: marcas.has("bold") ? 600 : undefined,
-              textDecoration: (decoracao || undefined) as "underline" | undefined,
-            }}
-          >
+        const estilo = {
+          fontWeight: marcas.has("bold") ? 600 : undefined,
+          textDecoration: (decoracao || undefined) as "underline" | undefined,
+          color: link ? cor.link : undefined,
+        };
+        return link ? (
+          <Link key={i} src={link} style={estilo}>
+            {n.text}
+          </Link>
+        ) : (
+          <Text key={i} style={estilo}>
             {n.text}
           </Text>
         );

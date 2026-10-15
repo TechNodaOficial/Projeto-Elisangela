@@ -11,6 +11,43 @@ export type Novidade = {
 
 export const NOVIDADES: Novidade[] = [
   {
+    id: "2026-10-15-planilhas-convidados",
+    data: "2026-10-15",
+    titulo: "Duas planilhas para a lista de convidados",
+    secoes: [
+      {
+        titulo: "Planilhas para a noiva",
+        itens: [
+          "Na lista de convidados, os botões “Adicionar vários de uma vez” e das planilhas ficaram mais fáceis de ver.",
+          "“Planilha demarcação” baixa o modelo de croqui, para quando as mesas são demarcadas.",
+          "“Planilha modelo lista de convidados” baixa uma planilha simples, para quando não tem demarcação: nome do convidado, quantidade de pessoas e WhatsApp. Depois é só copiar as linhas e colar em “Adicionar vários de uma vez”.",
+        ],
+      },
+      {
+        titulo: "Fornecedores no jantar",
+        itens: [
+          "A planilha aberta no Google Planilhas ganhou, embaixo do total, um bloco para os fornecedores (Fornecedores jantar, DJ, Banda, Assessoria, Seguranças/monitora, Brinquedos e Barman): preencha a quantidade de cada um na coluna B e o total soma sozinho.",
+        ],
+      },
+      {
+        titulo: "Links nas observações",
+        itens: [
+          "Nas folhas de Observações (e no texto do cerimonial) dá para colocar links: selecione o texto, clique no botão de link da barra (ou Ctrl+K) e cole o endereço.",
+          "Site colado ou digitado já vira link sozinho. Clicando num link aparece um balão para abrir, editar ou remover; Ctrl+clique abre direto.",
+          "No PDF, o link sai azul e dá para clicar.",
+        ],
+      },
+      {
+        titulo: "Checklist dos fornecedores",
+        itens: [
+          "O checklist de cada serviço não rola mais dentro do cartão, então a página rola normalmente com o mouse em cima dele.",
+          "Aparecem só os itens em aberto (até 6, com “Ver mais”); os feitos ficam recolhidos em “✓ 5 feitos”, que abre ao clicar.",
+          "O mesmo vale para as abas Fornecedores e Serviços e checklists: listas longas mostram os primeiros e um “Ver mais”, sem rolagem dentro do cartão.",
+        ],
+      },
+    ],
+  },
+  {
     id: "2026-10-14-croqui-planilha",
     data: "2026-10-14",
     titulo: "Croqui pela planilha da noiva",
@@ -22,7 +59,7 @@ export const NOVIDADES: Novidade[] = [
       {
         titulo: "Planilha do croqui",
         itens: [
-          "Na lista de convidados, o botão “Baixar planilha modelo” baixa o modelo de croqui para mandar à noiva. As somas de cada mesa foram corrigidas.",
+          "Na lista de convidados, o botão “Planilha demarcação” baixa o modelo de croqui para mandar à noiva. As somas de cada mesa foram corrigidas.",
           "A aba Plan2 da planilha se preenche sozinha com o que a noiva escreveu nas mesas: é só copiar e colar em “Adicionar vários de uma vez”.",
           "A lista colada agora aceita a mesa (“Mesa 3”): o convidado já entra sentado. Quem já está na lista só muda de mesa, e mesa que ainda não existe é criada.",
           "Dica para a noiva: uma linha por família (“Família Silva”, com adultos e crianças), para sair um convite só com um QR Code.",

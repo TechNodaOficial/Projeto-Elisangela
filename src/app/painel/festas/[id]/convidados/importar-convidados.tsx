@@ -22,16 +22,25 @@ import { importarConvidados } from "./actions";
 const EXEMPLO =
   "Família Silva\t4\t(19) 99876-5432\nAna Souza\t1\nCarlos Lima; 2; 43 99938-6569; Mesa 3";
 
-// Modelo de croqui que ela manda para a noiva quando as mesas são demarcadas: a noiva
-// preenche as mesas na Plan1 e a Plan2 já sai no formato desta lista colada.
-function BaixarModelo() {
+// Planilhas para mandar à noiva: a de demarcação (croqui) quando as mesas são demarcadas,
+// em que ela preenche as mesas na Plan1 e a Plan2 já sai no formato desta lista colada; e a
+// lista simples (nome, pessoas, WhatsApp) quando não tem demarcação.
+function BaixarModelos() {
   return (
-    <Button asChild variant="ghost" className="h-10 px-2.5 font-medium">
-      <a href="/modelos/modelo-croqui.xlsx" download="Modelo de Croqui.xlsx">
-        <FileSpreadsheet aria-hidden strokeWidth={1.75} />
-        Baixar planilha modelo
-      </a>
-    </Button>
+    <>
+      <Button asChild variant="outline" className="h-10 px-3 font-medium">
+        <a href="/modelos/modelo-croqui.xlsx" download="Planilha demarcação.xlsx">
+          <FileSpreadsheet aria-hidden strokeWidth={1.75} />
+          Planilha demarcação
+        </a>
+      </Button>
+      <Button asChild variant="outline" className="h-10 px-3 font-medium">
+        <a href="/modelos/modelo-lista-convidados.xlsx" download="Lista de convidados.xlsx">
+          <FileSpreadsheet aria-hidden strokeWidth={1.75} />
+          Planilha modelo lista de convidados
+        </a>
+      </Button>
+    </>
   );
 }
 
@@ -62,22 +71,22 @@ export function ImportarConvidados({
   if (!aberto) {
     return (
       <div className="mt-2">
-        <div className="flex flex-wrap items-center gap-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
-            variant="ghost"
+            variant="secondary"
             onClick={() => setAberto(true)}
-            className="-ml-2.5 h-10 px-2.5 font-medium"
+            className="h-10 px-3 font-medium"
           >
             <ClipboardPaste aria-hidden strokeWidth={1.75} />
             Adicionar vários de uma vez
           </Button>
-          <BaixarModelo />
+          <BaixarModelos />
         </div>
         {mensagem && (
           <p
             role="status"
-            className={cn("text-sm", mensagem.tipo === "erro" && "text-destructive")}
+            className={cn("mt-2 text-sm", mensagem.tipo === "erro" && "text-destructive")}
           >
             {mensagem.texto}
           </p>

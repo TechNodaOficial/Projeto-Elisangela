@@ -113,6 +113,32 @@ export function linhasDaPlanilha(convidados: ConvidadoPlanilha[]): Celula[][] {
   return [[...CABECALHO], ...linhas, rodape];
 }
 
+// Bloco embaixo do total (pulando uma linha) para ela anotar quantos fornecedores jantam:
+// um por linha com a quantidade em branco na coluna B, e a soma de todos embaixo.
+// `linhasAcima` é quantas linhas a lista ocupa (cabeçalho, convites e total).
+export const FORNECEDORES = [
+  "Fornecedores jantar",
+  "DJ",
+  "Banda",
+  "Assessoria",
+  "Seguranças/monitora",
+  "Brinquedos",
+  "Barman",
+] as const;
+
+export type CelulaBloco = Celula | { formula: string } | null;
+
+export function blocoFornecedores(linhasAcima: number): CelulaBloco[][] {
+  // Linhas da planilha começam em 1: a linha em branco e então os fornecedores.
+  const primeira = linhasAcima + 2;
+  const ultima = primeira + FORNECEDORES.length - 1;
+  return [
+    [],
+    ...FORNECEDORES.map((nome) => [nome, null]),
+    ["Total", { formula: `=SUM(B${primeira}:B${ultima})` }],
+  ];
+}
+
 // Largura de cada coluna em pixels, pelo texto mais longo dela (o cabeçalho conta, em
 // negrito). O ajuste automático do Google não mede o cabeçalho direito, por isso a conta
 // é feita aqui. Colunas longas param no teto e quebram a linha; o recado é sempre largo.
@@ -147,6 +173,14 @@ export const COR_SITUACAO = {
   confirmou: rgb("#d9ead3"),
   pendente: rgb("#fff2cc"),
   naoVai: rgb("#f4cccc"),
+};
+
+// Bloco dos fornecedores: total em azul claro, e as linhas de cada fornecedor
+// alternando cinza e branco, para não confundir a linha na hora de preencher.
+export const COR_FORNECEDORES = {
+  destaque: rgb("#c9daf8"),
+  listra: rgb("#efefef"),
+  branco: rgb("#ffffff"),
 };
 
 const COLUNA_SITUACAO = CABECALHO.indexOf("Situação");

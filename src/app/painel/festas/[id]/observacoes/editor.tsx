@@ -8,12 +8,15 @@ import {
   type Editor,
   type JSONContent,
 } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
+  ExternalLink,
   Heading1,
   Heading2,
   Italic,
+  Link2,
   List,
   ListChecks,
   ListOrdered,
@@ -23,12 +26,13 @@ import {
   Strikethrough,
   Underline,
   Undo2,
+  Unlink,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { FUSO } from "@/lib/datas";
-import type { Documento } from "@/lib/festas/observacoes";
+import { linkPermitido, normalizarLink, type Documento } from "@/lib/festas/observacoes";
 import { cn } from "@/lib/utils";
 
 import { salvarObservacao } from "./actions";
@@ -91,6 +95,12 @@ const GRUPOS: Acao[][] = [
       ativo: (e) => e.isActive("strike"),
       fazer: (e) => e.chain().focus().toggleStrike().run(),
     },
+    {
+      rotulo: "Link (Ctrl+K)",
+      icone: Link2,
+      ativo: (e) => e.isActive("link"),
+      fazer: (e) => abrirCampoDoLink(e),
+    },
   ],
   [
     {
@@ -138,6 +148,166 @@ const GRUPOS: Acao[][] = [
     },
   ],
 ];
+
+// O campo do link abre num balão sobre o texto. A barra e o Ctrl+K avisam o balão por
+// este evento do editor, para ele abrir já no modo de digitar o endereço.
+const EVENTO_LINK = "abrir-campo-do-link";
+const CHAVE_BALAO = "balaoDoLink";
+function abrirCampoDoLink(editor: Editor) {
+  editor.chain().focus().extendMarkRange("link").run();
+  editor.view.dom.dispatchEvent(new CustomEvent(EVENTO_LINK));
+}
+
+// "https://www.buffet.com.br/cardapio" → "buffet.com.br/cardapio", para caber no balão.
+const linkCurto = (href: string) =>
+  href.replace(/^(https?:\/\/)?(www\.)?/, "").replace(/^(mailto|tel):/, "");
+
+// Balão do link, como no Google Docs: com o cursor num link, mostra o endereço e os botões
+// Abrir, Editar e Remover; ao criar ou editar, mostra o campo para colar o endereço.
+function BalaoDoLink({ editor }: { editor: Editor }) {
+  const [editando, setEditando] = useState(false);
+  const [valor, setValor] = useState("");
+  const [erro, setErro] = useState(false);
+  const campo = useRef<HTMLInputElement>(null);
+  const href = useEditorState({
+    editor,
+    selector: ({ editor: e }) =>
+      e.isActive("link") ? (e.getAttributes("link").href as string | undefined) : undefined,
+  });
+
+  useEffect(() => {
+    const abrir = () => {
+      setValor((editor.getAttributes("link").href as string | undefined) ?? "");
+      setErro(false);
+      setEditando(true);
+      requestAnimationFrame(() => campo.current?.select());
+    };
+    const dom = editor.view.dom;
+    dom.addEventListener(EVENTO_LINK, abrir);
+    return () => dom.removeEventListener(EVENTO_LINK, abrir);
+  }, [editor]);
+
+  // O balão só se reavalia quando o texto ou a seleção mudam: ao abrir ou fechar o campo,
+  // avisa ele (fechando sem cursor num link, some; senão volta a mostrar o link).
+  useEffect(() => {
+    if (editor.isDestroyed) return;
+    const mostrar = editando || editor.isActive("link");
+    editor.view.dispatch(editor.state.tr.setMeta(CHAVE_BALAO, mostrar ? "show" : "hide"));
+  }, [editor, editando]);
+
+  function fechar() {
+    setEditando(false);
+    editor.commands.focus();
+  }
+
+  function aplicar(ev: FormEvent) {
+    ev.preventDefault();
+    if (!valor.trim()) {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      setEditando(false);
+      return;
+    }
+    const url = normalizarLink(valor);
+    if (!url) {
+      setErro(true);
+      return;
+    }
+    const { empty } = editor.state.selection;
+    if (empty && !editor.isActive("link")) {
+      // Nada selecionado: escreve o próprio endereço, já como link.
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: "text",
+          text: linkCurto(url),
+          marks: [{ type: "link", attrs: { href: url } }],
+        })
+        .unsetMark("link")
+        .run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    }
+    setEditando(false);
+  }
+
+  const botao =
+    "text-tinta-suave hover:bg-muted hover:text-foreground focus-visible:outline-ring flex size-8 items-center justify-center rounded-md focus-visible:outline-2";
+
+  return (
+    <BubbleMenu
+      editor={editor}
+      pluginKey={CHAVE_BALAO}
+      // Aparece no link onde está o cursor, ou enquanto ela digita o endereço.
+      shouldShow={({ editor: e }) => editando || e.isActive("link")}
+      options={{ placement: "bottom-start", offset: 6 }}
+      className="papel-solto border-border z-20 flex items-center gap-1 rounded-lg border p-1 text-sm"
+    >
+      {editando ? (
+        <form onSubmit={aplicar} className="flex items-center gap-1">
+          <label htmlFor="endereco-link" className="sr-only">
+            Endereço do link
+          </label>
+          <input
+            ref={campo}
+            id="endereco-link"
+            value={valor}
+            onChange={(e) => {
+              setValor(e.target.value);
+              setErro(false);
+            }}
+            onKeyDown={(e) => e.key === "Escape" && fechar()}
+            placeholder="Cole o link (site, e-mail…)"
+            aria-invalid={erro || undefined}
+            aria-describedby={erro ? "erro-link" : undefined}
+            className="border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:border-destructive h-8 w-64 rounded-md border bg-transparent px-2 outline-none focus-visible:ring-3"
+          />
+          <button
+            type="submit"
+            className="bg-primary text-primary-foreground h-8 rounded-md px-3 font-medium"
+          >
+            Aplicar
+          </button>
+          {erro && (
+            <span id="erro-link" role="alert" className="text-destructive px-1 text-xs">
+              Link inválido
+            </span>
+          )}
+        </form>
+      ) : href && linkPermitido(href) ? (
+        <>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-link flex max-w-64 items-center gap-1.5 truncate px-2 underline underline-offset-2"
+          >
+            <ExternalLink aria-hidden className="size-3.5 shrink-0" />
+            <span className="truncate">{linkCurto(href)}</span>
+          </a>
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => abrirCampoDoLink(editor)}
+            className="text-tinta-suave hover:bg-muted hover:text-foreground focus-visible:outline-ring h-8 rounded-md px-2 font-medium focus-visible:outline-2"
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            title="Remover link"
+            aria-label="Remover link"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => editor.chain().focus().extendMarkRange("link").unsetLink().run()}
+            className={botao}
+          >
+            <Unlink aria-hidden className="size-4" />
+          </button>
+        </>
+      ) : null}
+    </BubbleMenu>
+  );
+}
 
 function Barra({ editor }: { editor: Editor }) {
   // Re-renderiza a barra quando a seleção ou a formatação mudam.
@@ -231,8 +401,19 @@ export function EditorObservacoes({
     // Renderizado no servidor pelo Next: o editor só monta no navegador.
     immediatelyRender: false,
     extensions: [
-      // Sem links: é uma folha de anotações, e assim nenhum link estranho é salvo.
-      StarterKit.configure({ link: false }),
+      // Links: site, e-mail e telefone. O que ela digita ou cola com cara de endereço vira
+      // link sozinho. Clique comum só põe o cursor (para editar o texto); abre pelo balão
+      // ou com Ctrl+clique, sempre em outra aba.
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          autolink: true,
+          linkOnPaste: true,
+          defaultProtocol: "https",
+          isAllowedUri: (url) => linkPermitido(url),
+          HTMLAttributes: { target: "_blank", rel: "noopener noreferrer nofollow" },
+        },
+      }),
       TaskList,
       TaskItem.configure({ nested: true }),
     ],
@@ -241,6 +422,21 @@ export function EditorObservacoes({
       attributes: {
         class: "documento min-h-[60vh] px-6 py-8 outline-none sm:px-12 sm:py-10",
         "aria-label": "Observações",
+      },
+      handleKeyDown: (view, ev) => {
+        if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === "k") {
+          ev.preventDefault();
+          view.dom.dispatchEvent(new CustomEvent(EVENTO_LINK));
+          return true;
+        }
+        return false;
+      },
+      handleClick: (_view, _pos, ev) => {
+        if (!(ev.ctrlKey || ev.metaKey)) return false;
+        const a = (ev.target as HTMLElement).closest("a");
+        if (!a || !linkPermitido(a.getAttribute("href"))) return false;
+        window.open(a.href, "_blank", "noopener,noreferrer");
+        return true;
       },
     },
     onUpdate: ({ editor: e }) => {
@@ -264,6 +460,7 @@ export function EditorObservacoes({
   return (
     <div className="bg-card rounded-xl shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)]">
       {editor && <Barra editor={editor} />}
+      {editor && <BalaoDoLink editor={editor} />}
       <EditorContent editor={editor} />
       <p
         role="status"

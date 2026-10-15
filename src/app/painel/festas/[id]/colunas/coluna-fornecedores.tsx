@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, FileText, MessageCircle, Plus, Upload, X } from "lucide-react";
+import { Check, ChevronRight, FileText, MessageCircle, Plus, Upload, X } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 
@@ -10,7 +10,7 @@ import { formatarTelefone, linkWhatsApp } from "@/lib/convidados/telefone";
 import type { Colunas, Servicos } from "@/lib/festas/consultas";
 import { centavosParaCampo, formatarReais } from "@/lib/festas/formatos";
 import { dividirEmParcelas, valorPago } from "@/lib/festas/parcelas";
-import { AREA_ROLAVEL, CARTAO, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
+import { CARTAO, COR_RAIA, LINHA_ALTERNADA } from "@/lib/pasteis";
 import { cn } from "@/lib/utils";
 
 import {
@@ -24,7 +24,18 @@ import {
   removerContrato,
   removerItemChecklist,
 } from "./actions";
-import { Adicionar, Coluna, FormCampos, MenuLinha, N, NovoItem, Vazio, type Campo } from "./pecas";
+import {
+  Adicionar,
+  BOTAO_RECOLHER,
+  Coluna,
+  FormCampos,
+  MenuLinha,
+  N,
+  NovoItem,
+  useListaRecolhida,
+  Vazio,
+  type Campo,
+} from "./pecas";
 
 type Contratacao = Colunas["contratacoes"][number];
 
@@ -226,73 +237,111 @@ function Contrato({ festaId, contratacao }: { festaId: string; contratacao: Cont
   );
 }
 
+type ItemChecklist = Contratacao["checklist"][number];
+
+function LinhaChecklist({ item }: { item: ItemChecklist }) {
+  return (
+    <li className={cn(LINHA_ALTERNADA, "group/item flex items-center gap-1")}>
+      <form action={alternarItemChecklist.bind(null, item.id)} className="min-w-0 flex-1">
+        <button
+          type="submit"
+          role="checkbox"
+          aria-checked={item.feito}
+          className="focus-visible:outline-ring hover:bg-card flex min-h-9 w-full items-center gap-2.5 rounded-sm px-1.5 text-left text-sm focus-visible:outline-2"
+        >
+          <span
+            aria-hidden
+            className={cn(
+              "flex size-4.5 shrink-0 items-center justify-center rounded-[3px] border",
+              item.feito
+                ? "bg-resolvida-forte border-resolvida-forte text-white"
+                : "border-input bg-card",
+            )}
+          >
+            {item.feito && <Check className="size-3.5" strokeWidth={2.5} />}
+          </span>
+          <span
+            className={cn("min-w-0 break-words", item.feito && "text-tinta-suave line-through")}
+          >
+            {item.texto}
+          </span>
+        </button>
+      </form>
+      <form action={removerItemChecklist.bind(null, item.id)}>
+        <button
+          type="submit"
+          aria-label={`Tirar "${item.texto}" do checklist`}
+          className="text-tinta-suave hover:text-foreground focus-visible:outline-ring hover:bg-card flex size-9 items-center justify-center rounded-sm focus-visible:outline-2 sm:opacity-0 sm:group-hover/item:opacity-100 sm:focus-visible:opacity-100"
+        >
+          <X aria-hidden className="size-4" strokeWidth={1.75} />
+        </button>
+      </form>
+    </li>
+  );
+}
+
+// Sem rolagem dentro do cartão (rolar dentro de quem rola trava a página): à mostra só o
+// que falta fazer (até 6, o resto num "Ver mais"); os itens feitos ficam recolhidos numa
+// linha que abre ao clicar.
 function Checklist({ contratacao }: { contratacao: Contratacao }) {
+  const [verFeitos, setVerFeitos] = useState(false);
   const itens = contratacao.checklist;
-  const feitos = itens.filter((i) => i.feito).length;
-  const abertos = itens.length - feitos;
+  const abertos = itens.filter((i) => !i.feito);
+  const feitos = itens.filter((i) => i.feito);
+  const { visiveis, verMais } = useListaRecolhida(abertos, 6);
+  const idFeitos = `feitos-${contratacao.id}`;
 
   return (
-    <div className="mt-3 flex min-h-0 flex-1 flex-col">
-      <p className="text-tinta-suave shrink-0 text-[0.8125rem]">
+    <div className="mt-3 flex flex-col">
+      <p className="text-tinta-suave text-[0.8125rem]">
         Checklist{" "}
         {itens.length > 0 && (
-          <span className={cn("font-mono", abertos === 0 && "text-foreground")}>
-            {feitos}/{itens.length}
+          <span className={cn("font-mono", abertos.length === 0 && "text-foreground")}>
+            {feitos.length}/{itens.length}
           </span>
         )}
-        {abertos > 0 && (
-          <span className="text-foreground font-semibold"> · {abertos} em aberto</span>
+        {abertos.length > 0 && (
+          <span className="text-foreground font-semibold"> · {abertos.length} em aberto</span>
         )}
       </p>
-      <ul className={cn(AREA_ROLAVEL, "mt-1 flex flex-col")}>
-        {itens.map((item) => (
-          <li key={item.id} className={cn(LINHA_ALTERNADA, "group/item flex items-center gap-1")}>
-            <form action={alternarItemChecklist.bind(null, item.id)} className="min-w-0 flex-1">
-              <button
-                type="submit"
-                role="checkbox"
-                aria-checked={item.feito}
-                className="focus-visible:outline-ring hover:bg-card flex min-h-9 w-full items-center gap-2.5 rounded-sm px-1.5 text-left text-sm focus-visible:outline-2"
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    "flex size-4.5 shrink-0 items-center justify-center rounded-[3px] border",
-                    item.feito
-                      ? "bg-resolvida-forte border-resolvida-forte text-white"
-                      : "border-input bg-card",
-                  )}
-                >
-                  {item.feito && <Check className="size-3.5" strokeWidth={2.5} />}
-                </span>
-                <span
-                  className={cn(
-                    "min-w-0 break-words",
-                    item.feito && "text-tinta-suave line-through",
-                  )}
-                >
-                  {item.texto}
-                </span>
-              </button>
-            </form>
-            <form action={removerItemChecklist.bind(null, item.id)}>
-              <button
-                type="submit"
-                aria-label={`Tirar "${item.texto}" do checklist`}
-                className="text-tinta-suave hover:text-foreground focus-visible:outline-ring hover:bg-card flex size-9 items-center justify-center rounded-sm focus-visible:outline-2 sm:opacity-0 sm:group-hover/item:opacity-100 sm:focus-visible:opacity-100"
-              >
-                <X aria-hidden className="size-4" strokeWidth={1.75} />
-              </button>
-            </form>
-          </li>
-        ))}
-      </ul>
-      <div className="shrink-0">
-        <NovoItem
-          acao={adicionarItemChecklist.bind(null, contratacao.id)}
-          rotulo={`Novo item do checklist de ${contratacao.servico.nome}`}
-        />
-      </div>
+      {abertos.length > 0 && (
+        <ul className="mt-1 flex flex-col">
+          {visiveis.map((item) => (
+            <LinhaChecklist key={item.id} item={item} />
+          ))}
+        </ul>
+      )}
+      {verMais}
+      <NovoItem
+        acao={adicionarItemChecklist.bind(null, contratacao.id)}
+        rotulo={`Novo item do checklist de ${contratacao.servico.nome}`}
+      />
+      {feitos.length > 0 && (
+        <>
+          <button
+            type="button"
+            aria-expanded={verFeitos}
+            aria-controls={idFeitos}
+            onClick={() => setVerFeitos(!verFeitos)}
+            className={cn(BOTAO_RECOLHER, "mt-1")}
+          >
+            <ChevronRight
+              aria-hidden
+              className={cn("size-4 transition-transform", verFeitos && "rotate-90")}
+              strokeWidth={1.75}
+            />
+            <Check aria-hidden className="text-resolvida-forte size-4" strokeWidth={2} />
+            {feitos.length} {feitos.length === 1 ? "feito" : "feitos"}
+          </button>
+          {verFeitos && (
+            <ul id={idFeitos} className="flex flex-col">
+              {feitos.map((item) => (
+                <LinhaChecklist key={item.id} item={item} />
+              ))}
+            </ul>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -310,8 +359,8 @@ function Linha({
   const { fornecedor, servico } = contratacao;
 
   return (
-    // Altura fixa: o checklist rola dentro do cartão. Editando, o cartão cresce para caber o formulário.
-    <li className={cn(CARTAO, COR_RAIA.fornecedores, !editando && "h-[31rem]")}>
+    // O cartão cresce com o conteúdo; o checklist se mantém curto recolhendo os feitos.
+    <li className={cn(CARTAO, COR_RAIA.fornecedores)}>
       <div className="flex shrink-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="font-semibold break-words">{servico.nome}</p>

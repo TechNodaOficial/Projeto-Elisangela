@@ -13,6 +13,7 @@ export const cor = {
   grifo: "#f7e967",
   borda: "#d3d6da",
   superficie: "#f2f4f5",
+  link: "#1f5bb5",
 };
 
 // Logo da Elisangela Schubert (dourado sobre transparente, 900×412). Também vai na

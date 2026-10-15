@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 
 import { ConfirmarExclusao } from "@/components/confirmar-exclusao";
@@ -315,6 +315,36 @@ export function NovoItem({ acao, rotulo }: { acao: Acao; rotulo: string }) {
       {erro && <p className="text-destructive mt-1 text-sm leading-5">{erro}</p>}
     </form>
   );
+}
+
+// ── Lista longa ──────────────────────────────────────────────────────────────
+
+// Botão discreto de abrir/fechar parte de uma lista dentro do cartão.
+export const BOTAO_RECOLHER =
+  "text-tinta-suave hover:text-foreground focus-visible:outline-ring -mx-1.5 flex min-h-9 items-center gap-1.5 self-start rounded-sm px-1.5 text-[0.8125rem] font-medium focus-visible:outline-2";
+
+// Lista sem rolagem dentro do cartão (rolar dentro de quem rola trava a página): mostra os
+// primeiros itens e um "Ver mais N" para o resto.
+export function useListaRecolhida<T>(itens: T[], limite: number) {
+  const [todos, setTodos] = useState(false);
+  const escondidos = Math.max(0, itens.length - limite);
+  const verMais =
+    escondidos > 0 ? (
+      <button type="button" onClick={() => setTodos(!todos)} className={BOTAO_RECOLHER}>
+        {todos ? (
+          <>
+            <ChevronUp aria-hidden className="size-4" strokeWidth={1.75} />
+            Mostrar menos
+          </>
+        ) : (
+          <>
+            <ChevronDown aria-hidden className="size-4" strokeWidth={1.75} />
+            Ver mais {escondidos}
+          </>
+        )}
+      </button>
+    ) : null;
+  return { visiveis: todos ? itens : itens.slice(0, limite), verMais };
 }
 
 // Lista vazia de uma coluna: explica o que entra ali.

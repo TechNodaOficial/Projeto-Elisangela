@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatarTelefone, linkWhatsApp } from "@/lib/convidados/telefone";
 import type { Servicos } from "@/lib/festas/consultas";
-import { AREA_ROLAVEL, CARTAO, corDoServico, LINHA_ALTERNADA } from "@/lib/pasteis";
+import { CARTAO, corDoServico, LINHA_ALTERNADA } from "@/lib/pasteis";
 import { cn } from "@/lib/utils";
 
 import {
@@ -14,6 +14,7 @@ import {
   FormCampos,
   MenuLinha,
   NovoItem,
+  useListaRecolhida,
   Vazio,
   type Campo,
 } from "../festas/[id]/colunas/pecas";
@@ -165,37 +166,39 @@ export function BaseFornecedores({ servicos }: { servicos: Servicos }) {
 
       {total === 0 && <Vazio>Nenhum fornecedor cadastrado ainda.</Vazio>}
 
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3">
+      {/* Cartões da mesma fileira ficam da altura do maior. */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         {servicos
           .filter((s) => s.fornecedores.length > 0)
           .map((servico) => (
-            // Altura fixa (todos os cartões iguais na grade): com muitos fornecedores, a lista rola
-            // dentro do cartão.
-            <section
-              key={servico.id}
-              aria-labelledby={`servico-${servico.id}`}
-              className={cn(CARTAO, corDoServico(servico.id), "h-80")}
-            >
-              <h2 id={`servico-${servico.id}`} className="shrink-0 text-lg font-semibold">
-                {servico.nome}{" "}
-                <span className="text-tinta-suave font-mono text-sm font-normal">
-                  {servico.fornecedores.length}
-                </span>
-              </h2>
-              <ul className={cn(AREA_ROLAVEL, "mt-2")}>
-                {servico.fornecedores.map((f) => (
-                  <LinhaFornecedor
-                    key={f.id}
-                    fornecedor={f}
-                    servico={servico}
-                    servicos={servicos}
-                  />
-                ))}
-              </ul>
-            </section>
+            <CartaoFornecedores key={servico.id} servico={servico} servicos={servicos} />
           ))}
       </div>
     </div>
+  );
+}
+
+// Fornecedores de um serviço. Sem rolagem dentro do cartão: os primeiros e um "Ver mais".
+function CartaoFornecedores({ servico, servicos }: { servico: Servico; servicos: Servicos }) {
+  const { visiveis, verMais } = useListaRecolhida(servico.fornecedores, 6);
+  return (
+    <section
+      aria-labelledby={`servico-${servico.id}`}
+      className={cn(CARTAO, corDoServico(servico.id))}
+    >
+      <h2 id={`servico-${servico.id}`} className="text-lg font-semibold">
+        {servico.nome}{" "}
+        <span className="text-tinta-suave font-mono text-sm font-normal">
+          {servico.fornecedores.length}
+        </span>
+      </h2>
+      <ul className="mt-2">
+        {visiveis.map((f) => (
+          <LinhaFornecedor key={f.id} fornecedor={f} servico={servico} servicos={servicos} />
+        ))}
+      </ul>
+      {verMais}
+    </section>
   );
 }
 
@@ -204,13 +207,11 @@ export function BaseFornecedores({ servicos }: { servicos: Servicos }) {
 function CartaoServico({ servico }: { servico: Servico }) {
   const [editando, setEditando] = useState(false);
   const emUso = servico.fornecedores.length > 0 || servico._count.contratacoes > 0;
+  // Sem rolagem dentro do cartão: os primeiros itens e um "Ver mais".
+  const { visiveis, verMais } = useListaRecolhida(servico.itensModelo, 8);
 
   return (
-    // Altura fixa: o checklist rola dentro do cartão. Renomeando, o cartão cresce.
-    <section
-      aria-label={servico.nome}
-      className={cn(CARTAO, corDoServico(servico.id), !editando && "h-96")}
-    >
+    <section aria-label={servico.nome} className={cn(CARTAO, corDoServico(servico.id))}>
       {editando ? (
         <div className="bg-card -mx-1 shrink-0 rounded-lg px-3">
           <FormCampos
@@ -252,8 +253,8 @@ function CartaoServico({ servico }: { servico: Servico }) {
           Sem itens. A festa começa com o checklist vazio.
         </p>
       ) : (
-        <ul className={cn(AREA_ROLAVEL, "mt-1 flex flex-col")}>
-          {servico.itensModelo.map((item) => (
+        <ul className="mt-1 flex flex-col">
+          {visiveis.map((item) => (
             <li
               key={item.id}
               className={cn(
@@ -275,12 +276,11 @@ function CartaoServico({ servico }: { servico: Servico }) {
           ))}
         </ul>
       )}
-      <div className="shrink-0">
-        <NovoItem
-          acao={adicionarItemModelo.bind(null, servico.id)}
-          rotulo={`Novo item do checklist de ${servico.nome}`}
-        />
-      </div>
+      {verMais}
+      <NovoItem
+        acao={adicionarItemModelo.bind(null, servico.id)}
+        rotulo={`Novo item do checklist de ${servico.nome}`}
+      />
     </section>
   );
 }
@@ -309,7 +309,7 @@ export function ServicosEChecklists({ servicos }: { servicos: Servicos }) {
           </div>
         )}
       </Adicionar>
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         {servicos.map((s) => (
           <CartaoServico key={s.id} servico={s} />
         ))}
