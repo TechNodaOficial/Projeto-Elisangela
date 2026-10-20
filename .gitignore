@@ -56,3 +56,5 @@ next-env.d.ts
 
 # WebAssembly do leitor de QR, copiado no postinstall (scripts/copiar-zxing.mjs)
 /public/zxing/
+
+.vercel
