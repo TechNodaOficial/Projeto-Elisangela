@@ -440,7 +440,10 @@ export function EditorObservacoes({
       },
     },
     onUpdate: ({ editor: e }) => {
-      pendente.current = e.getJSON() as Documento;
+      // O ProseMirror cria os attrs (link, título, lista...) com Object.create(null), e o
+      // React não manda objeto sem protótipo para a server action: chegaria como referência
+      // temporária e o Prisma quebraria ao gravar. A cópia por JSON vira objeto comum.
+      pendente.current = JSON.parse(JSON.stringify(e.getJSON())) as Documento;
       clearTimeout(timer.current);
       timer.current = setTimeout(salvar, PAUSA_MS);
     },
