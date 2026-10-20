@@ -32,7 +32,12 @@ import {
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { FUSO } from "@/lib/datas";
-import { linkPermitido, normalizarLink, type Documento } from "@/lib/festas/observacoes";
+import {
+  documentoValido,
+  linkPermitido,
+  normalizarLink,
+  type Documento,
+} from "@/lib/festas/observacoes";
 import { cn } from "@/lib/utils";
 
 import { salvarObservacao } from "./actions";
@@ -43,8 +48,39 @@ const PAUSA_MS = 800;
 const hora = (iso: string) =>
   new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, timeStyle: "short" }).format(new Date(iso));
 
+// Se a chamada falhar, tenta de novo depois destas esperas; esgotadas, pede para recarregar.
+const RETENTATIVAS_MS = [2_000, 5_000, 15_000];
+
 type Estado =
-  { tipo: "salvo"; em: string | null } | { tipo: "salvando" } | { tipo: "erro"; msg: string };
+  | { tipo: "salvo"; em: string | null }
+  | { tipo: "salvando" }
+  | { tipo: "erro"; msg: string; recarregar?: boolean };
+
+// Cópia do texto no navegador enquanto ele não chega ao servidor: se a página fechar ou
+// recarregar no meio de um erro, o texto volta ao abrir de novo. Sem acesso ao
+// localStorage (aba anônima, bloqueado), segue sem cópia.
+const chaveCopia = (festaId: string, secao: string) => `observacoes:${festaId}:${secao}`;
+
+function guardarCopia(chave: string, doc: Documento) {
+  try {
+    localStorage.setItem(chave, JSON.stringify(doc));
+  } catch {}
+}
+
+function lerCopia(chave: string): Documento | null {
+  try {
+    const doc: unknown = JSON.parse(localStorage.getItem(chave) ?? "null");
+    return documentoValido(doc) ? doc : null;
+  } catch {
+    return null;
+  }
+}
+
+function apagarCopia(chave: string) {
+  try {
+    localStorage.removeItem(chave);
+  } catch {}
+}
 
 type Acao = {
   rotulo: string;
@@ -378,24 +414,59 @@ export function EditorObservacoes({
   const [estado, setEstado] = useState<Estado>({ tipo: "salvo", em: salvoEm });
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pendente = useRef<Documento | null>(null);
+  const enviando = useRef(false);
+  const falhas = useRef(0);
+  const retentativa = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const salvarDeNovo = useRef<() => Promise<void>>(undefined);
+  const chave = chaveCopia(festaId, secao);
 
   const salvar = useCallback(async () => {
     clearTimeout(timer.current);
+    clearTimeout(retentativa.current);
     const doc = pendente.current;
     if (!doc) return;
     pendente.current = null;
+    enviando.current = true;
     setEstado({ tipo: "salvando" });
     try {
       const r = await salvarObservacao(festaId, secao, doc);
-      setEstado(r.ok ? { tipo: "salvo", em: r.salvoEm } : { tipo: "erro", msg: r.erro });
+      falhas.current = 0;
+      if (r.ok) {
+        // Só apaga a cópia se ela não escreveu mais nada enquanto salvava.
+        if (!pendente.current) apagarCopia(chave);
+        setEstado({ tipo: "salvo", em: r.salvoEm });
+      } else {
+        // Recusado pelo servidor (texto inválido, festa apagada): repetir não adianta.
+        setEstado({ tipo: "erro", msg: r.erro });
+      }
     } catch {
+      // A chamada nem chegou a responder: internet caiu, servidor fora do ar ou o
+      // sistema foi atualizado com a página aberta. O texto segue na cópia do navegador.
       pendente.current ??= doc;
-      setEstado({
-        tipo: "erro",
-        msg: "Sem conexão. Tentando de novo quando você voltar a digitar.",
-      });
+      const n = falhas.current++;
+      if (!navigator.onLine) {
+        setEstado({
+          tipo: "erro",
+          msg: "Sem internet. O texto está guardado neste aparelho e salva quando a conexão voltar.",
+        });
+      } else if (n < RETENTATIVAS_MS.length) {
+        retentativa.current = setTimeout(() => void salvarDeNovo.current?.(), RETENTATIVAS_MS[n]);
+        setEstado({ tipo: "erro", msg: "Não consegui salvar. Tentando de novo…" });
+      } else {
+        setEstado({
+          tipo: "erro",
+          msg: "Não consegui salvar. O texto está guardado neste aparelho: recarregue a página.",
+          recarregar: true,
+        });
+      }
+    } finally {
+      enviando.current = false;
     }
-  }, [festaId, secao]);
+  }, [festaId, secao, chave]);
+
+  useEffect(() => {
+    salvarDeNovo.current = salvar;
+  }, [salvar]);
 
   const editor = useEditor({
     // Renderizado no servidor pelo Next: o editor só monta no navegador.
@@ -443,22 +514,57 @@ export function EditorObservacoes({
       // O ProseMirror cria os attrs (link, título, lista...) com Object.create(null), e o
       // React não manda objeto sem protótipo para a server action: chegaria como referência
       // temporária e o Prisma quebraria ao gravar. A cópia por JSON vira objeto comum.
-      pendente.current = JSON.parse(JSON.stringify(e.getJSON())) as Documento;
+      const doc = JSON.parse(JSON.stringify(e.getJSON())) as Documento;
+      pendente.current = doc;
+      guardarCopia(chave, doc);
       clearTimeout(timer.current);
       timer.current = setTimeout(salvar, PAUSA_MS);
     },
     onBlur: () => void salvar(),
   });
 
-  // Salva o que faltar ao sair da página ou trocar de aba.
+  // Texto que não chegou ao servidor da última vez (recarregou ou fechou com erro):
+  // volta para a folha e tenta salvar de novo.
+  const restaurou = useRef(false);
+  useEffect(() => {
+    if (!editor || restaurou.current) return;
+    restaurou.current = true;
+    const copia = lerCopia(chave);
+    if (!copia) return;
+    if (JSON.stringify(copia) === JSON.stringify(inicial)) {
+      apagarCopia(chave);
+      return;
+    }
+    editor.commands.setContent(copia as JSONContent, { emitUpdate: false });
+    pendente.current = copia;
+    void salvar();
+  }, [editor, chave, inicial, salvar]);
+
+  // Salva o que faltar ao trocar de aba, ao sair da página e quando a internet volta.
   useEffect(() => {
     const aoEsconder = () => document.visibilityState === "hidden" && void salvar();
+    const aoVoltarInternet = () => {
+      falhas.current = 0;
+      void salvar();
+    };
     document.addEventListener("visibilitychange", aoEsconder);
+    window.addEventListener("online", aoVoltarInternet);
     return () => {
       document.removeEventListener("visibilitychange", aoEsconder);
+      window.removeEventListener("online", aoVoltarInternet);
+      clearTimeout(retentativa.current);
       void salvar();
     };
   }, [salvar]);
+
+  // Avisa antes de fechar ou recarregar com texto ainda não salvo.
+  useEffect(() => {
+    const aoSair = (ev: BeforeUnloadEvent) => {
+      if (pendente.current || enviando.current) ev.preventDefault();
+    };
+    window.addEventListener("beforeunload", aoSair);
+    return () => window.removeEventListener("beforeunload", aoSair);
+  }, []);
 
   return (
     <div className="bg-card rounded-xl shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)]">
@@ -479,6 +585,15 @@ export function EditorObservacoes({
             : estado.em
               ? `Salvo às ${hora(estado.em)}`
               : "Escreva à vontade: salva sozinho."}
+        {estado.tipo === "erro" && estado.recarregar && (
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="text-foreground focus-visible:outline-ring ml-2 rounded-sm font-medium underline underline-offset-2 focus-visible:outline-2"
+          >
+            Recarregar
+          </button>
+        )}
       </p>
     </div>
   );
