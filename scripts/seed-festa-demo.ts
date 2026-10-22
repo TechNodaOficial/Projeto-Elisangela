@@ -1,21 +1,41 @@
 // Festa fictícia completa para testar e demonstrar o painel: fornecedores com valores e
 // parcelas, convidados em todos os estados do convite, mesas, cronograma, cerimônia,
-// padrinhos e observações. Só roda no banco local (.env); rodar de novo recria a festa.
+// padrinhos e observações. Roda no banco local (.env); rodar de novo recria a festa.
 //
 //   npx tsx scripts/seed-festa-demo.ts
-import "dotenv/config";
-
+//
+// Em produção (.env.producao) só com a flag, e a festa sai marcada como exemplo e sem
+// telefones: os números são inventados e o botão do WhatsApp chamaria um desconhecido.
+//
+//   npx tsx scripts/seed-festa-demo.ts --producao
+//   npx tsx scripts/seed-festa-demo.ts --producao --remover   (apaga a festa de exemplo)
 import { randomBytes } from "node:crypto";
 
 import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
 
 import { PrismaClient, type StatusRsvp } from "../src/generated/prisma/client";
 
-const TITULO = "Casamento Beatriz e Rafael";
+const PRODUCAO = process.argv.includes("--producao");
+const REMOVER = process.argv.includes("--remover");
+
+const TITULO = PRODUCAO ? "Casamento Beatriz e Rafael (exemplo)" : "Casamento Beatriz e Rafael";
+
+const { error } = config({
+  path: PRODUCAO ? ".env.producao" : ".env",
+  override: true,
+  quiet: true,
+});
+if (error) throw new Error(`Não encontrei o ${PRODUCAO ? ".env.producao" : ".env"}.`);
 
 const url = process.env.DATABASE_URL ?? "";
-if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url)) {
-  throw new Error("Este seed só roda no banco local (DATABASE_URL em localhost).");
+const local = /@(localhost|127\.0\.0\.1)[:/]/.test(url);
+if (!url || local === PRODUCAO) {
+  throw new Error(
+    PRODUCAO
+      ? "Com --producao, o DATABASE_URL do .env.producao não pode ser localhost."
+      : "Sem --producao, este seed só roda no banco local (DATABASE_URL em localhost).",
+  );
 }
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
@@ -24,7 +44,7 @@ const token = () => randomBytes(16).toString("base64url");
 // Gerador fixo: a mesma festa sai igual a cada execução.
 let semente = 42;
 const sorte = () => (semente = (semente * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
-const telefone = (i: number) => `4399${String(7000000 + i * 7919).slice(0, 7)}`;
+const telefone = (i: number) => (PRODUCAO ? null : `4399${String(7000000 + i * 7919).slice(0, 7)}`);
 
 // Instante a partir de "AAAA-MM-DD HH:MM" no horário de São Paulo (UTC-3, sem horário de verão).
 const sp = (s: string) => new Date(s.replace(" ", "T") + ":00-03:00");
@@ -243,6 +263,14 @@ async function main() {
     await prisma.festa.deleteMany({ where: { id: { in: antigas.map((f) => f.id) } } });
     console.log(`Festa anterior apagada (${antigas.length}).`);
   }
+  if (REMOVER) {
+    // Os fornecedores fictícios saem da base geral, se nenhuma outra festa os usa.
+    const { count } = await prisma.fornecedor.deleteMany({
+      where: { nome: { in: FORNECEDORES.map((f) => f.fornecedor) }, contratacoes: { none: {} } },
+    });
+    console.log(`Fornecedores de exemplo apagados: ${count}. Os serviços ficam na lista.`);
+    return;
+  }
 
   const festa = await prisma.festa.create({
     data: {
@@ -289,7 +317,11 @@ async function main() {
         where: { nome: f.fornecedor, servicoId: servico.id },
       })) ??
       (await prisma.fornecedor.create({
-        data: { nome: f.fornecedor, servicoId: servico.id, telefone: f.telefone },
+        data: {
+          nome: f.fornecedor,
+          servicoId: servico.id,
+          telefone: PRODUCAO ? null : f.telefone,
+        },
       }));
     const c = await prisma.contratacao.create({
       data: {

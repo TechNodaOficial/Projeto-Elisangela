@@ -70,7 +70,7 @@ export function ImportarConvidados({
 
   if (!aberto) {
     return (
-      <div className="mt-2">
+      <div data-guia="importar-convidados" className="mt-2">
         <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"

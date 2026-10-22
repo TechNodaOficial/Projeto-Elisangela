@@ -121,7 +121,11 @@ function Linha({ entrada, posicao, total }: { entrada: Entrada; posicao: number;
 function ChecklistCerimonia({ festaId, itens }: { festaId: string; itens: ItemCerimonia[] }) {
   const feitos = itens.filter((i) => i.feito).length;
   return (
-    <section aria-labelledby="titulo-checklist-cerimonia" className="mt-(--linha)">
+    <section
+      data-guia="checklist-cerimonia"
+      aria-labelledby="titulo-checklist-cerimonia"
+      className="mt-(--linha)"
+    >
       <h3 id="titulo-checklist-cerimonia" className="flex items-center gap-2 font-semibold">
         <ListChecks aria-hidden className="size-4.5" strokeWidth={1.75} />
         Checklist da cerimônia

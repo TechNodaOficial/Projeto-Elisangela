@@ -36,6 +36,7 @@ export function BotaoNovidades() {
   return (
     <Link
       href="/painel/novidades"
+      data-guia="novidades"
       aria-label={nova ? "Novidades (tem novidade)" : "Novidades"}
       className="text-tinta-suave hover:text-foreground hover:bg-muted focus-visible:outline-ring relative inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm focus-visible:outline-2"
     >

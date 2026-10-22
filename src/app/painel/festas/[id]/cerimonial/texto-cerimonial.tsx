@@ -45,6 +45,7 @@ export function TextoCerimonial({
 
   return (
     <section
+      data-guia="texto-cerimonial"
       aria-labelledby="titulo-texto-cerimonial"
       className="folha mt-6 pt-(--linha) pr-5 pb-(--linha) pl-[calc(var(--margem)+0.875rem)] leading-(--linha)"
     >

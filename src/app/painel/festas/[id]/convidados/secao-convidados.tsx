@@ -82,7 +82,7 @@ function Ficha({
   const [, iniciar] = useTransition();
 
   return (
-    <dl className="border-pauta mt-3 border-t">
+    <dl data-guia="ficha-convidados" className="border-pauta mt-3 border-t">
       {contagem.total > 0 && (
         <LinhaFicha rotulo="Respostas">
           <Numeros
@@ -378,7 +378,11 @@ export function SecaoConvidados({
               <BotaoAtualizar className="h-9 px-2 text-sm" />
             </div>
             <CabecalhoLista />
-            <ul className={cn(BANDEJA, COR_RAIA.recepcao)} aria-label="Lista de convidados">
+            <ul
+              data-guia="lista-convidados"
+              className={cn(BANDEJA, COR_RAIA.recepcao)}
+              aria-label="Lista de convidados"
+            >
               {visiveis.map((convidado) => (
                 <LinhaConvidado
                   className={cn(LINHA_ALTERNADA, "px-2")}

@@ -49,6 +49,7 @@ export function FolhaFesta({ festa, concluida }: { festa: FestaResumo; concluida
   return (
     <Link
       href={`/painel/festas/${festa.id}`}
+      data-guia="festa"
       className={`${FOLHA} ${pendente ? "folha-pendente" : "folha-resolvida"}`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -115,6 +116,7 @@ export function FolhaNovaFesta() {
   return (
     <Link
       href="/painel/festas/nova"
+      data-guia="nova-festa"
       className={`${FOLHA} flex min-h-[calc(var(--linha)*4)] flex-col justify-center sm:min-h-[calc(var(--linha)*8)]`}
     >
       <span className="flex items-center gap-3">

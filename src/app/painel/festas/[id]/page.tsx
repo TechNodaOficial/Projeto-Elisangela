@@ -79,11 +79,13 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   // A cor de raia vale para os botões neutros; verde/amarelo mostram a situação.
   const raias: {
     titulo: string;
+    guia: string;
     cor: string;
     botoes: { href: string; titulo: string; icone: LucideIcon; botao: Botao }[];
   }[] = [
     {
       titulo: "Fornecedores e cronograma",
+      guia: "raia-fornecedores",
       cor: "bg-pastel-pessego",
       botoes: [
         {
@@ -102,6 +104,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
     },
     {
       titulo: "Recepção",
+      guia: "raia-recepcao",
       cor: "bg-pastel-rosa",
       botoes: [
         {
@@ -116,6 +119,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
     },
     {
       titulo: "Cerimônia",
+      guia: "raia-cerimonia",
       cor: "bg-pastel-lilas",
       botoes: [
         {
@@ -174,7 +178,10 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
           {voltar.rotulo}
         </Link>
-        <div className="order-last -mx-4 flex items-center gap-1 overflow-x-auto px-4 md:order-none md:mx-0 md:flex-wrap md:justify-end md:overflow-visible md:px-0 [&>*]:shrink-0">
+        <div
+          data-guia="acoes-festa"
+          className="order-last -mx-4 flex items-center gap-1 overflow-x-auto px-4 md:order-none md:mx-0 md:flex-wrap md:justify-end md:overflow-visible md:px-0 [&>*]:shrink-0"
+        >
           <Button asChild variant="outline" className="bg-card h-9">
             <Link href={`/painel/festas/${festa.id}/editar`}>
               <Pencil aria-hidden strokeWidth={1.75} />
@@ -214,7 +221,7 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </div>
 
         {/* Topo: data, nome e dados da festa. */}
-        <header className="folha px-4 py-3 md:col-span-2 md:px-5">
+        <header data-guia="topo-festa" className="folha px-4 py-3 md:col-span-2 md:px-5">
           <div className="flex items-center gap-3">
             <span className="font-mono text-[2rem] leading-none font-medium tracking-[-0.04em]">
               {data.dia}
@@ -258,12 +265,14 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
       {!festa.convidadosApagadosEm && (
         <nav
           aria-label="Quadro da festa"
+          data-guia="quadro"
           className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-3"
         >
           {raias.map((raia) => (
             <section
               key={raia.titulo}
               aria-labelledby={`raia-${raia.titulo}`}
+              data-guia={raia.guia}
               className="bg-card/75 rounded-2xl p-3 shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)] backdrop-blur-sm"
             >
               <h2

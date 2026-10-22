@@ -10,7 +10,11 @@ export function AbasFornecedores({ atual }: { atual: "fornecedores" | "servicos"
   ] as const;
 
   return (
-    <nav aria-label="Base de fornecedores" className="border-border mb-6 flex gap-1 border-b">
+    <nav
+      aria-label="Base de fornecedores"
+      data-guia="abas-fornecedores"
+      className="border-border mb-6 flex gap-1 border-b"
+    >
       {abas.map((aba) => (
         <Link
           key={aba.id}

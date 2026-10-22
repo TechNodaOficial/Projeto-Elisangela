@@ -17,11 +17,13 @@ export default async function PaginaPendentes(props: PageProps<"/painel">) {
   return (
     <>
       <CabecalhoSecao titulo="Festas pendentes" descricao={descricao} />
-      <Calendario
-        vista={vista === "ano" ? "ano" : "mes"}
-        mes={lerMes(texto(mes))}
-        ano={lerAno(texto(ano))}
-      />
+      <div data-guia="calendario">
+        <Calendario
+          vista={vista === "ano" ? "ano" : "mes"}
+          mes={lerMes(texto(mes))}
+          ano={lerAno(texto(ano))}
+        />
+      </div>
       <GradeFolhas>
         <FolhaNovaFesta />
         {festas.map((festa) => (

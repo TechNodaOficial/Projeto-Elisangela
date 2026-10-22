@@ -218,6 +218,7 @@ export function Adicionar({
       type="button"
       variant="outline"
       onClick={() => setAberto(true)}
+      data-guia="adicionar"
       className="bg-card h-11 self-start px-3.5 font-medium sm:h-10"
     >
       <Plus aria-hidden strokeWidth={2} />

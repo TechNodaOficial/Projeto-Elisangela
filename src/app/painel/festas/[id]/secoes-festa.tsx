@@ -29,7 +29,11 @@ export function SecoesFesta({ festaId }: { festaId: string }) {
   }, [atual]);
 
   return (
-    <nav aria-label="Partes da festa" className="-mx-4 mb-4 overflow-x-auto px-4 md:mx-0 md:px-0">
+    <nav
+      aria-label="Partes da festa"
+      data-guia="abas"
+      className="-mx-4 mb-4 overflow-x-auto px-4 md:mx-0 md:px-0"
+    >
       <ul className="bg-muted flex w-max gap-0.5 rounded-lg p-0.5">
         {SECOES.map((s) => {
           const ativo = s.href === atual;

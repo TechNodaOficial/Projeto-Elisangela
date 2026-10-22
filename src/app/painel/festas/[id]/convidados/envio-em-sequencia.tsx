@@ -100,7 +100,7 @@ export function EnvioEmSequencia({
 
   if (!aberto) {
     return (
-      <div className="mt-(--linha)">
+      <div data-guia="envio-sequencia" className="mt-(--linha)">
         <Button
           type="button"
           variant="outline"

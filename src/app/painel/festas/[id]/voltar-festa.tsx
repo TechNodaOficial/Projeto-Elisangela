@@ -41,6 +41,7 @@ export async function VoltarFesta({
         {observacoes && (
           <Link
             href={`/painel/festas/${festa.id}/observacoes/${observacoes}`}
+            data-guia="observacoes"
             className="bg-pastel-lilas focus-visible:outline-ring inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
           >
             <NotebookPen aria-hidden className="size-4" strokeWidth={1.75} />

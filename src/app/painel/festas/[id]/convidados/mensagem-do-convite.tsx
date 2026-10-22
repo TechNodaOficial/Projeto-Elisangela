@@ -42,7 +42,7 @@ export function MensagemDoConvite({
 
   if (!aberto) {
     return (
-      <div className="mt-2">
+      <div data-guia="mensagem-convite" className="mt-2">
         <Button
           type="button"
           variant="ghost"

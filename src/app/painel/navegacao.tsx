@@ -63,7 +63,7 @@ export function NavegacaoLateral({
   const caminho = usePathname();
 
   return (
-    <nav aria-label="Seções" className="flex h-full flex-col">
+    <nav aria-label="Seções" data-guia="menu" className="flex h-full flex-col">
       <ul className="border-pauta border-t">
         {itens(contagens).map((item) => {
           const ativo = item.ativo(caminho);
@@ -116,6 +116,7 @@ export function NavegacaoInferior({
   return (
     <nav
       aria-label="Seções"
+      data-guia="menu"
       className="bg-card border-border fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="grid grid-cols-4">

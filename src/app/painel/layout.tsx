@@ -8,6 +8,7 @@ import { contarFestas } from "@/lib/festas/consultas";
 import { NOME_COOKIE_TEMA, temaValido } from "@/lib/tema";
 
 import { BotaoTema } from "./botao-tema";
+import { BotaoGuia } from "./guia/guia";
 import { BotaoSairRodape, NavegacaoInferior, NavegacaoLateral } from "./navegacao";
 import { BotaoNovidades } from "./novidades/botao-novidades";
 
@@ -34,6 +35,7 @@ export default async function LayoutPainel({ children }: LayoutProps<"/painel">)
               </span>
             </p>
             <BotaoTema inicial={tema} />
+            <BotaoGuia />
             <BotaoNovidades />
           </div>
         </div>

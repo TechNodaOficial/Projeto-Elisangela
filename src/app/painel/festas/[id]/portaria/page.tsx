@@ -50,7 +50,7 @@ export default async function PaginaPortaria(props: PageProps<"/painel/festas/[i
   return (
     <div className="w-full max-w-2xl">
       <VoltarFesta festa={festa} />
-      <section className="folha px-5 py-6">
+      <section data-guia="portaria" className="folha px-5 py-6">
         <h1 className="flex items-center gap-2 text-xl font-semibold">
           <KeyRound aria-hidden className="size-5" strokeWidth={1.75} />
           Portaria
