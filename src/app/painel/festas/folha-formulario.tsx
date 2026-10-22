@@ -14,7 +14,7 @@ export function FolhaFormulario({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full max-w-2xl">
+    <div className="w-full">
       <Link
         href={voltarPara}
         className="text-tinta-suave hover:text-foreground focus-visible:outline-ring mb-4 inline-flex items-center gap-1.5 rounded-sm text-sm focus-visible:outline-2"
