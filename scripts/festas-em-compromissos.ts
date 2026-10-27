@@ -80,11 +80,19 @@ type Candidata = Prisma.FestaGetPayload<{ select: typeof CAMPOS }>;
 const cortar = (texto: string, max: number) =>
   texto.length > max ? `${texto.slice(0, max - 1)}…` : texto;
 
+// Local e endereço eram obrigatórios na festa, então ela preenchia qualquer coisa ("mmm",
+// "nn", "**"). Texto curto demais, de uma letra repetida ou sem letra nem número é descartado.
+function util(texto: string | null): string {
+  const t = texto?.trim() ?? "";
+  if (t.length < 4 || /^(.)\1*$/i.test(t) || !/[\p{L}\p{N}]/u.test(t)) return "";
+  return t;
+}
+
 function paraCompromisso(festa: Candidata) {
+  const local = util(festa.localNome);
+  const endereco = util(festa.endereco);
   const extras = [
-    festa.endereco.trim() && festa.endereco.trim() !== festa.localNome.trim()
-      ? `Endereço: ${festa.endereco.trim()}`
-      : "",
+    endereco && endereco !== local ? `Endereço: ${endereco}` : "",
     festa.traje ? `Traje: ${festa.traje}` : "",
     festa.linkMapa ? `Mapa: ${festa.linkMapa}` : "",
     festa.observacoes ?? "",
@@ -95,7 +103,7 @@ function paraCompromisso(festa: Candidata) {
       titulo: cortar(festa.titulo.trim(), 120),
       inicio: festa.dataHora,
       fim: null,
-      local: festa.localNome.trim() ? cortar(festa.localNome.trim(), 120) : null,
+      local: local ? cortar(local, 120) : null,
       observacao: observacao ? cortar(observacao, 500) : null,
     },
     cortou: festa.titulo.trim().length > 120 || observacao.length > 500,
