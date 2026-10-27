@@ -15,6 +15,8 @@ const seguranca = [
 ];
 
 const nextConfig: NextConfig = {
+  // Só no `next dev`: deixa abrir o painel pelo celular na mesma rede (http://192.168.x.x:3000).
+  allowedDevOrigins: ["192.168.*.*"],
   async headers() {
     return [{ source: "/:path*", headers: seguranca }];
   },
