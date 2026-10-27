@@ -2,6 +2,7 @@ import "server-only";
 
 import { inicioDeHoje } from "@/lib/datas";
 import { exigirUsuario } from "@/lib/dal";
+import { versaoPlanta } from "@/lib/planta/blob";
 import { prisma } from "@/lib/prisma";
 
 import { chaveHorario, compararNomes } from "./formatos";
@@ -22,6 +23,7 @@ export async function listarFestas(status: StatusLista) {
       titulo: true,
       dataHora: true,
       localNome: true,
+      fotoUrl: true,
       convidadosApagadosEm: true,
       pdfCompletoEm: true,
       resumoConvidados: true,
@@ -60,6 +62,7 @@ export async function listarFestas(status: StatusLista) {
   const confirmadosPorFesta = new Map(confirmados.map((l) => [l.festaId, l._sum.confirmadas]));
 
   // Festas antigas já não têm convidados (LGPD): valem as contagens guardadas na festa.
+  // A foto vai como endereço do painel (com login), nunca a URL do Blob.
   return festas.map(
     ({
       contratacoes,
@@ -67,11 +70,13 @@ export async function listarFestas(status: StatusLista) {
       resumoConvidados,
       resumoConfirmados,
       resumoPresentes,
+      fotoUrl,
       ...festa
     }) =>
       convidadosApagadosEm
         ? {
             ...festa,
+            foto: fotoUrl ? `/painel/festas/${festa.id}/foto?v=${versaoPlanta(fotoUrl)}` : null,
             arquivada: true,
             pendencias: pendenciasDaFesta({ contratacoes }),
             totalConvidados: resumoConvidados ?? 0,
@@ -80,6 +85,7 @@ export async function listarFestas(status: StatusLista) {
           }
         : {
             ...festa,
+            foto: fotoUrl ? `/painel/festas/${festa.id}/foto?v=${versaoPlanta(fotoUrl)}` : null,
             arquivada: false,
             pendencias: pendenciasDaFesta({ contratacoes }),
             totalConvidados: totaisPorFesta.get(festa.id)?.pessoas ?? 0,

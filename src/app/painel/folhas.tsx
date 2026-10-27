@@ -52,6 +52,19 @@ export function FolhaFesta({ festa, concluida }: { festa: FestaResumo; concluida
       data-guia="festa"
       className={`${FOLHA} ${pendente ? "folha-pendente" : "folha-resolvida"}`}
     >
+      {/* Foto da festa no alto da folha, de ponta a ponta (desfaz o padding); a altura é
+          um número inteiro de pautas, para o texto de baixo continuar assentado nelas. O corte
+          puxa para cima do centro: em fotos de pessoas, os rostos costumam estar ali. */}
+      {festa.foto && (
+        // Imagem privada servida pelo próprio painel (com login): o otimizador do next/image não teria a sessão.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={festa.foto}
+          alt=""
+          loading="lazy"
+          className="-mx-5 -mt-(--linha) mb-(--linha) block h-[calc(var(--linha)*5)] w-[calc(100%+2.5rem)] max-w-none rounded-t-[3px] object-cover object-[center_30%]"
+        />
+      )}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
           <span className="font-mono text-[2.75rem] leading-[calc(var(--linha)*2)] font-medium tracking-[-0.04em]">

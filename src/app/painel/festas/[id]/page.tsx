@@ -153,21 +153,8 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
   ].filter((linha) => linha.valor);
 
   return (
-    // Com foto, ela ocupa a área toda do conteúdo (desfaz o padding do <main>), por trás.
-    <div className="relative isolate -mx-4 -mt-4 min-h-[calc(100dvh-3.5rem)] w-auto px-4 pt-4 md:-mx-8 md:-mt-6 md:px-8 md:pt-6">
-      {festa.fotoUrl && (
-        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
-          {/* Imagem privada servida pelo próprio painel (com login): o otimizador do next/image não teria a sessão. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/painel/festas/${festa.id}/foto?v=${versaoPlanta(festa.fotoUrl)}`}
-            alt=""
-            className="size-full object-cover"
-          />
-          {/* Véu bege: a foto aparece, mas texto e cartões continuam legíveis; some no fim. */}
-          <div className="from-mesa/35 via-mesa/15 to-mesa absolute inset-0 bg-linear-to-b" />
-        </div>
-      )}
+    // Ocupa a altura toda do conteúdo, para a foto (abaixo do topo) ir até o fim da tela.
+    <div className="flex min-h-[calc(100dvh-3.5rem)] flex-col">
       {/* Voltar, ações e o topo da festa. No celular as ações vêm depois do topo, numa faixa
           que rola de lado, para o nome da festa aparecer primeiro. */}
       <div className="flex flex-col gap-3 md:grid md:grid-cols-[auto_1fr] md:items-center md:gap-x-2 md:gap-y-4">
@@ -220,8 +207,12 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
           <ExcluirFesta id={festa.id} titulo={festa.titulo} />
         </div>
 
-        {/* Topo: data, nome e dados da festa. */}
-        <header data-guia="topo-festa" className="folha px-4 py-3 md:col-span-2 md:px-5">
+        {/* Topo: data, nome e dados da festa, até a borda direita (desfaz o padding do <main>),
+            emendado com a foto logo abaixo. No computador, mantém o respiro da sidebar. */}
+        <header
+          data-guia="topo-festa"
+          className="folha -mx-4 rounded-none px-4 py-3 md:col-span-2 md:-mr-8 md:ml-0 md:pr-8 md:pl-5"
+        >
           <div className="flex items-center gap-3">
             <span className="font-mono text-[2rem] leading-none font-medium tracking-[-0.04em]">
               {data.dia}
@@ -257,91 +248,111 @@ export default async function PaginaFesta(props: PageProps<"/painel/festas/[id]"
         </header>
       </div>
 
-      {/* Concluída: baixar o PDF completo antes da limpeza (ou o aviso de arquivada). */}
-      {concluida && <AvisoArquivo festa={festa} />}
+      {/* Abaixo do topo, a foto da festa vai por trás, até a borda direita (desfaz o padding do
+          <main>) e até o fim da página, clarinha para o quadro continuar legível. No
+          computador começa alinhada ao topo, com o respiro da sidebar. */}
+      <div className="relative isolate -mx-4 flex-1 px-4 md:-mx-8 md:px-8">
+        {festa.fotoUrl && (
+          <div
+            aria-hidden
+            className="bg-mesa absolute inset-x-0 top-0 -bottom-28 -z-10 overflow-hidden md:-bottom-12 md:left-8"
+          >
+            {/* Imagem privada servida pelo próprio painel (com login): o otimizador do next/image não teria a sessão. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/painel/festas/${festa.id}/foto?v=${versaoPlanta(festa.fotoUrl)}`}
+              alt=""
+              className="size-full object-cover opacity-30"
+            />
+          </div>
+        )}
 
-      {/* Corpo: o quadro, três raias lado a lado (uma embaixo da outra no celular).
+        {/* Concluída: baixar o PDF completo antes da limpeza (ou o aviso de arquivada). */}
+        {concluida && <AvisoArquivo festa={festa} />}
+
+        {/* Corpo: o quadro, três raias lado a lado (uma embaixo da outra no celular).
           Festa arquivada não tem mais dados: o quadro sai. */}
-      {!festa.convidadosApagadosEm && (
-        <nav
-          aria-label="Quadro da festa"
-          data-guia="quadro"
-          className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-3"
-        >
-          {raias.map((raia) => (
-            <section
-              key={raia.titulo}
-              aria-labelledby={`raia-${raia.titulo}`}
-              data-guia={raia.guia}
-              className="bg-card/75 rounded-2xl p-3 shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)] backdrop-blur-sm"
-            >
-              <h2
-                id={`raia-${raia.titulo}`}
-                className="text-tinta-suave px-1 pb-2 text-xs font-semibold tracking-[0.06em] uppercase"
+        {!festa.convidadosApagadosEm && (
+          <nav
+            aria-label="Quadro da festa"
+            data-guia="quadro"
+            className="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-3"
+          >
+            {raias.map((raia) => (
+              <section
+                key={raia.titulo}
+                aria-labelledby={`raia-${raia.titulo}`}
+                data-guia={raia.guia}
+                className="bg-card/75 rounded-2xl p-3 shadow-[0_1px_1px_oklch(0.2_0.01_250/6%),0_6px_16px_-8px_oklch(0.2_0.01_250/22%)] backdrop-blur-sm"
               >
-                {raia.titulo}
-              </h2>
-              <ul className="flex flex-col gap-3">
-                {raia.botoes.map(({ href, titulo, icone: Icone, botao }) => (
-                  <li key={href}>
-                    <Link
-                      href={`/painel/festas/${festa.id}/${href}`}
-                      className={cn(
-                        botao.situacao === "ok"
-                          ? "bg-resolvida"
-                          : botao.situacao === "pendente"
-                            ? "bg-pendente"
-                            : raia.cor,
-                        "group focus-visible:outline-ring flex items-center gap-3 rounded-xl p-4 transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-14px_oklch(0.2_0.01_250/35%)] focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-                      )}
-                    >
-                      <Icone aria-hidden className="size-6 shrink-0" strokeWidth={1.5} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-semibold">{titulo}</span>
-                        <span className="text-tinta-suave flex items-center gap-1 text-sm">
-                          {botao.situacao === "ok" && (
-                            <CircleCheck
-                              aria-hidden
-                              className="text-resolvida-forte size-3.5 shrink-0"
-                              strokeWidth={2}
-                            />
-                          )}
-                          {botao.situacao === "pendente" && (
-                            <CircleAlert
-                              aria-hidden
-                              className="size-3.5 shrink-0"
-                              strokeWidth={2}
-                            />
-                          )}
-                          <span className="truncate">{botao.resumo}</span>
-                        </span>
-                        {/* O que falta, um por linha (spans: dentro do link não cabe lista). */}
-                        {botao.detalhes && (
-                          <span className="mt-1.5 flex flex-col gap-0.5 text-[0.8125rem] leading-snug">
-                            {botao.detalhes.map((d) => (
-                              <span
-                                key={d}
-                                className="before:bg-pendente-forte relative block pl-3 first-letter:uppercase before:absolute before:top-[0.45em] before:left-0.5 before:size-1.5 before:rounded-full"
-                              >
-                                {d}
-                              </span>
-                            ))}
-                          </span>
+                <h2
+                  id={`raia-${raia.titulo}`}
+                  className="text-tinta-suave px-1 pb-2 text-xs font-semibold tracking-[0.06em] uppercase"
+                >
+                  {raia.titulo}
+                </h2>
+                <ul className="flex flex-col gap-3">
+                  {raia.botoes.map(({ href, titulo, icone: Icone, botao }) => (
+                    <li key={href}>
+                      <Link
+                        href={`/painel/festas/${festa.id}/${href}`}
+                        className={cn(
+                          botao.situacao === "ok"
+                            ? "bg-resolvida"
+                            : botao.situacao === "pendente"
+                              ? "bg-pendente"
+                              : raia.cor,
+                          "group focus-visible:outline-ring flex items-center gap-3 rounded-xl p-4 transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_28px_-14px_oklch(0.2_0.01_250/35%)] focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
                         )}
-                      </span>
-                      <ArrowRight
-                        aria-hidden
-                        className="size-5 shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
-                        strokeWidth={1.75}
-                      />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </nav>
-      )}
+                      >
+                        <Icone aria-hidden className="size-6 shrink-0" strokeWidth={1.5} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-semibold">{titulo}</span>
+                          <span className="text-tinta-suave flex items-center gap-1 text-sm">
+                            {botao.situacao === "ok" && (
+                              <CircleCheck
+                                aria-hidden
+                                className="text-resolvida-forte size-3.5 shrink-0"
+                                strokeWidth={2}
+                              />
+                            )}
+                            {botao.situacao === "pendente" && (
+                              <CircleAlert
+                                aria-hidden
+                                className="size-3.5 shrink-0"
+                                strokeWidth={2}
+                              />
+                            )}
+                            <span className="truncate">{botao.resumo}</span>
+                          </span>
+                          {/* O que falta, um por linha (spans: dentro do link não cabe lista). */}
+                          {botao.detalhes && (
+                            <span className="mt-1.5 flex flex-col gap-0.5 text-[0.8125rem] leading-snug">
+                              {botao.detalhes.map((d) => (
+                                <span
+                                  key={d}
+                                  className="before:bg-pendente-forte relative block pl-3 first-letter:uppercase before:absolute before:top-[0.45em] before:left-0.5 before:size-1.5 before:rounded-full"
+                                >
+                                  {d}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                        </span>
+                        <ArrowRight
+                          aria-hidden
+                          className="size-5 shrink-0 transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none"
+                          strokeWidth={1.75}
+                        />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </nav>
+        )}
+      </div>
     </div>
   );
 }
