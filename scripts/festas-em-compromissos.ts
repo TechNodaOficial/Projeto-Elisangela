@@ -12,6 +12,9 @@
 //
 // 2. Converter só as conferidas, pelo id (cria o compromisso e apaga a festa, juntos):
 //      npx tsx scripts/festas-em-compromissos.ts --producao --converter <id> <id> ...
+//
+// Festa que ficou de fora por ter algum dado: ver o que ela tem (não muda nada):
+//      npx tsx scripts/festas-em-compromissos.ts --producao --ver "reunião"
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config } from "dotenv";
 
@@ -19,6 +22,8 @@ import { PrismaClient, type Prisma } from "../src/generated/prisma/client";
 import { paraCampos, partesData } from "../src/lib/datas";
 
 const PRODUCAO = process.argv.includes("--producao");
+const posicaoVer = process.argv.indexOf("--ver");
+const BUSCA = posicaoVer === -1 ? undefined : process.argv[posicaoVer + 1];
 const posicao = process.argv.indexOf("--converter");
 const IDS =
   posicao === -1 ? [] : process.argv.slice(posicao + 1).filter((a) => !a.startsWith("--"));
@@ -166,7 +171,54 @@ async function converter() {
   for (const f of convertidas) console.log(`  ${quando(f.dataHora)}  ${f.titulo}`);
 }
 
-(IDS.length > 0 ? converter() : listar())
+// Festas com o texto no nome, com a contagem de cada tipo de dado que impede a conversão.
+async function ver(busca: string) {
+  const festas = await prisma.festa.findMany({
+    where: { titulo: { contains: busca, mode: "insensitive" } },
+    orderBy: { dataHora: "asc" },
+    select: {
+      ...CAMPOS,
+      plantaUrl: true,
+      fotoUrl: true,
+      cerimonialLink: true,
+      mensagemConvite: true,
+      convidadosApagadosEm: true,
+      _count: {
+        select: {
+          convidados: true,
+          contratacoes: true,
+          mesas: true,
+          cronograma: true,
+          menu: true,
+          entradas: true,
+          checklistCerimonia: true,
+          padrinhos: true,
+          observacoesGerais: true,
+        },
+      },
+    },
+  });
+  if (festas.length === 0) {
+    console.log(`Nenhuma festa com "${busca}" no nome.`);
+    return;
+  }
+  for (const f of festas) {
+    const dados = [
+      ...Object.entries(f._count)
+        .filter(([, n]) => n > 0)
+        .map(([tipo, n]) => `${tipo}: ${n}`),
+      f.plantaUrl && "planta",
+      f.fotoUrl && "foto",
+      f.cerimonialLink && "link do cerimonial",
+      f.mensagemConvite && "mensagem do convite",
+      f.convidadosApagadosEm && "arquivada",
+    ].filter(Boolean);
+    console.log(`  ${f.id}  ${quando(f.dataHora)}  ${f.titulo}`);
+    console.log(`      tem: ${dados.length > 0 ? dados.join(", ") : "nada (está vazia)"}`);
+  }
+}
+
+(BUSCA !== undefined ? ver(BUSCA) : IDS.length > 0 ? converter() : listar())
   .catch((erro) => {
     console.error(erro instanceof Error ? erro.message : erro);
     process.exitCode = 1;
