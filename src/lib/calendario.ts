@@ -48,3 +48,20 @@ export function gradeDoMes({ ano, mes }: Mes): DiaGrade[][] {
   }
   return semanas;
 }
+
+// "?dia=2026-11-03" → "2026-11-03"; sem dia ou inválido, hoje em São Paulo.
+export function lerDia(valor: string | undefined, agora = new Date()): string {
+  const m = valor?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+    // Recusa dias que não existem (ex.: 2026-02-30 viraria 2 de março).
+    if (d.getUTCDate() === Number(m[3]) && d.getUTCMonth() === Number(m[2]) - 1) return valor!;
+  }
+  return paraCampos(agora).data;
+}
+
+// Dia anterior (-1) ou seguinte (+1), no formato do endereço.
+export function diaVizinho(data: string, delta: number): string {
+  const [ano, mes, dia] = data.split("-").map(Number);
+  return new Date(Date.UTC(ano, mes - 1, dia + delta)).toISOString().slice(0, 10);
+}

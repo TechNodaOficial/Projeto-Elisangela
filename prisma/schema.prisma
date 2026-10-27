@@ -417,3 +417,19 @@ model SessaoPortaria {
   @@index([festaId])
   @@map("sessoes_portaria")
 }
+
+// Compromisso da agenda da Elisangela (reunião, visita, degustação...), solto das festas.
+model Compromisso {
+  id           String    @id @default(cuid())
+  titulo       String
+  // Início e fim como instantes (timestamptz), no mesmo dia. Sem fim = só o horário de início.
+  inicio       DateTime  @db.Timestamptz(3)
+  fim          DateTime? @db.Timestamptz(3)
+  local        String?
+  observacao   String?
+  criadoEm     DateTime  @default(now()) @db.Timestamptz(3)
+  atualizadoEm DateTime  @updatedAt @db.Timestamptz(3)
+
+  @@index([inicio])
+  @@map("compromissos")
+}

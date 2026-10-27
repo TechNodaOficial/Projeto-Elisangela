@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { gradeDoMes, lerAno, lerMes, mesVizinho } from "./calendario";
+import { diaVizinho, gradeDoMes, lerAno, lerDia, lerMes, mesVizinho } from "./calendario";
 
 describe("lerMes", () => {
   it("lê o mês do endereço", () => {
@@ -54,5 +54,25 @@ describe("lerAno", () => {
     expect(lerAno(undefined, agora)).toBe(2026);
     expect(lerAno("27", agora)).toBe(2026);
     expect(lerAno("9999", agora)).toBe(2026);
+  });
+});
+
+describe("lerDia", () => {
+  it("lê o dia do endereço", () => {
+    expect(lerDia("2026-11-03")).toBe("2026-11-03");
+  });
+
+  it("sem dia, com dia inválido ou inexistente, usa hoje em São Paulo", () => {
+    const agora = new Date("2026-11-01T01:00:00Z"); // ainda 31/10 em São Paulo
+    expect(lerDia(undefined, agora)).toBe("2026-10-31");
+    expect(lerDia("2026-02-30", agora)).toBe("2026-10-31");
+    expect(lerDia("lixo", agora)).toBe("2026-10-31");
+  });
+});
+
+describe("diaVizinho", () => {
+  it("vira o mês e o ano", () => {
+    expect(diaVizinho("2026-10-31", 1)).toBe("2026-11-01");
+    expect(diaVizinho("2027-01-01", -1)).toBe("2026-12-31");
   });
 });

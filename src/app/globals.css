@@ -116,7 +116,7 @@
   --pastel-rosa: oklch(0.915 0.05 5); /* recepção: convidados e mesas (matiz 5: rosa, não lilás) */
   --pastel-menta: oklch(0.93 0.05 165); /* mesas */
   --pastel-lilas: oklch(0.92 0.045 290); /* cronograma */
-  --pastel-azul: oklch(0.92 0.04 235); /* só nos cartões de serviço */
+  --pastel-azul: oklch(0.92 0.04 235); /* cartões de serviço e agenda do dia */
   --pastel-areia: oklch(0.93 0.045 85); /* só nos cartões de serviço */
 
   /* Calendário: festa com tudo resolvido (verde) ou com pendência (amarelo). Fundo + marcador. */

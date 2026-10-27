@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 import { Logo } from "@/components/logo";
+import { contarCompromissosDeHoje } from "@/lib/agenda/consultas";
 import { exigirUsuario } from "@/lib/dal";
 import { partesData } from "@/lib/datas";
 import { contarFestas } from "@/lib/festas/consultas";
@@ -18,7 +19,12 @@ export const metadata: Metadata = {
 };
 
 export default async function LayoutPainel({ children }: LayoutProps<"/painel">) {
-  const [usuario, contagens] = await Promise.all([exigirUsuario(), contarFestas()]);
+  const [usuario, festas, agenda] = await Promise.all([
+    exigirUsuario(),
+    contarFestas(),
+    contarCompromissosDeHoje(),
+  ]);
+  const contagens = { ...festas, agenda };
   const hoje = partesData(new Date());
   const tema = temaValido((await cookies()).get(NOME_COOKIE_TEMA)?.value);
 

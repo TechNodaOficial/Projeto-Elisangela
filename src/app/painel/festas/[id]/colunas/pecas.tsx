@@ -63,7 +63,7 @@ type Opcao = { valor: string; rotulo: string };
 export type Campo = {
   nome: string;
   rotulo: string;
-  tipo?: "text" | "tel" | "time" | "number" | "select";
+  tipo?: "text" | "tel" | "date" | "time" | "number" | "select";
   placeholder?: string;
   opcional?: boolean;
   mono?: boolean;
@@ -75,6 +75,8 @@ export type Campo = {
   travadoSe?: (selecionados: Record<string, string>) => boolean;
   // Mostra o campo só quando a função, com os valores dos selects, devolver true.
   mostrarSe?: (selecionados: Record<string, string>) => boolean;
+  // Classes do bloco do campo dentro da grade (ex.: "sm:col-span-3").
+  classe?: string;
 };
 
 type Acao = (estado: EstadoForm, formData: FormData) => Promise<EstadoForm>;
@@ -88,6 +90,7 @@ export function FormCampos({
   prefixo,
   aoSalvar,
   aoCancelar,
+  grade = "flex flex-col gap-3",
 }: {
   acao: Acao;
   campos: Campo[];
@@ -97,6 +100,8 @@ export function FormCampos({
   prefixo: string;
   aoSalvar?: () => void;
   aoCancelar?: () => void;
+  // Disposição dos campos: um embaixo do outro, ou uma grade (ex.: horários lado a lado).
+  grade?: string;
 }) {
   const [estado, enviar, enviando] = useActionState(acao, {});
   const primeiroRef = useRef<HTMLInputElement>(null);
@@ -128,56 +133,58 @@ export function FormCampos({
 
   return (
     <form action={enviar} noValidate className="flex flex-col gap-3 pt-2 pb-(--linha)">
-      {campos.map((campo, i) => {
-        if (campo.mostrarSe && !campo.mostrarSe(selecionados)) return null;
-        const erro = erros[campo.nome];
-        const comum = {
-          id: id(campo.nome),
-          name: campo.nome,
-          "aria-invalid": erro ? true : undefined,
-          "aria-describedby": erro ? id(`erro-${campo.nome}`) : undefined,
-        };
-        return (
-          <div key={campo.nome} className="flex flex-col gap-1.5">
-            <Label htmlFor={comum.id}>
-              {campo.rotulo}
-              {campo.opcional && <span className="text-tinta-suave font-normal">(opcional)</span>}
-            </Label>
-            {campo.tipo === "select" ? (
-              <select
-                {...comum}
-                value={valorDoSelect(campo)}
-                disabled={campo.travadoSe?.(selecionados)}
-                onChange={(e) => setSelecionados((s) => ({ ...s, [campo.nome]: e.target.value }))}
-                className="border-input bg-card focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full min-w-0 rounded-md border px-2.5 text-base outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-              >
-                {opcoesDe(campo).map((o) => (
-                  <option key={o.valor} value={o.valor}>
-                    {o.rotulo}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <Input
-                {...comum}
-                ref={i === 0 ? primeiroRef : undefined}
-                type={campo.tipo ?? "text"}
-                inputMode={campo.inputMode}
-                placeholder={campo.placeholder}
-                maxLength={campo.max}
-                defaultValue={valores[campo.nome] ?? ""}
-                autoComplete="off"
-                className={cn("bg-card h-10", campo.mono && "font-mono")}
-              />
-            )}
-            {erro && (
-              <p id={id(`erro-${campo.nome}`)} className="text-destructive text-sm leading-5">
-                {erro}
-              </p>
-            )}
-          </div>
-        );
-      })}
+      <div className={grade}>
+        {campos.map((campo, i) => {
+          if (campo.mostrarSe && !campo.mostrarSe(selecionados)) return null;
+          const erro = erros[campo.nome];
+          const comum = {
+            id: id(campo.nome),
+            name: campo.nome,
+            "aria-invalid": erro ? true : undefined,
+            "aria-describedby": erro ? id(`erro-${campo.nome}`) : undefined,
+          };
+          return (
+            <div key={campo.nome} className={cn("flex flex-col gap-1.5", campo.classe)}>
+              <Label htmlFor={comum.id}>
+                {campo.rotulo}
+                {campo.opcional && <span className="text-tinta-suave font-normal">(opcional)</span>}
+              </Label>
+              {campo.tipo === "select" ? (
+                <select
+                  {...comum}
+                  value={valorDoSelect(campo)}
+                  disabled={campo.travadoSe?.(selecionados)}
+                  onChange={(e) => setSelecionados((s) => ({ ...s, [campo.nome]: e.target.value }))}
+                  className="border-input bg-card focus-visible:border-ring focus-visible:ring-ring/50 h-10 w-full min-w-0 rounded-md border px-2.5 text-base outline-none focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                >
+                  {opcoesDe(campo).map((o) => (
+                    <option key={o.valor} value={o.valor}>
+                      {o.rotulo}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <Input
+                  {...comum}
+                  ref={i === 0 ? primeiroRef : undefined}
+                  type={campo.tipo ?? "text"}
+                  inputMode={campo.inputMode}
+                  placeholder={campo.placeholder}
+                  maxLength={campo.max}
+                  defaultValue={valores[campo.nome] ?? ""}
+                  autoComplete="off"
+                  className={cn("bg-card h-10", campo.mono && "font-mono")}
+                />
+              )}
+              {erro && (
+                <p id={id(`erro-${campo.nome}`)} className="text-destructive text-sm leading-5">
+                  {erro}
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       {estado.erroGeral && (
         <p role="alert" className="text-destructive text-sm leading-5">

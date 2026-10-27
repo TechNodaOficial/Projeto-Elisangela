@@ -21,6 +21,7 @@ describe("guiaDaPagina", () => {
     ["/painel/fornecedores/servicos", "servicos"],
     ["/painel/concluidas", "concluidas"],
     ["/painel/checkin", "checkin"],
+    ["/painel/agenda", "agenda"],
   ])("%s usa o guia %s", (caminho, id) => {
     expect(guiaDaPagina(caminho).id).toBe(id);
   });

@@ -11,6 +11,29 @@ export type Novidade = {
 
 export const NOVIDADES: Novidade[] = [
   {
+    id: "2026-10-27-agenda-do-dia",
+    data: "2026-10-27",
+    titulo: "Agenda do dia",
+    secoes: [
+      {
+        titulo: "Reuniões e compromissos",
+        itens: [
+          "No menu da esquerda (e na barra de baixo, no celular) entrou a “Agenda do dia”: as festas daquele dia e os compromissos que você marcar, na ordem do horário.",
+          "Em “Marcar compromisso”, diga o que é, o dia e o horário. Fim, local e observação são opcionais. Os três pontinhos da linha editam ou removem.",
+          "As setas passam de um dia para outro, e “Hoje” volta para o dia de hoje.",
+        ],
+      },
+      {
+        titulo: "No calendário",
+        itens: [
+          "A chave do calendário ganhou “Dia”, ao lado de Mês e Ano, que abre a agenda.",
+          "Clicando no número de um dia, abre a agenda daquele dia.",
+          "Os compromissos aparecem em cinza no mês, junto com as festas.",
+        ],
+      },
+    ],
+  },
+  {
     id: "2026-10-15-planilhas-convidados",
     data: "2026-10-15",
     titulo: "Duas planilhas para a lista de convidados",

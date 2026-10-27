@@ -53,13 +53,13 @@ const GUIAS: Guia[] = [
         alvo: "menu",
         titulo: "O menu",
         texto:
-          "Festas pendentes são as que ainda vão acontecer; concluídas, as que já passaram. Em Fornecedores fica a lista usada em todas as festas. O Leitor QR Code é para o dia da festa: lê o convite dos convidados na entrada.",
+          "Festas pendentes são as que ainda vão acontecer; concluídas, as que já passaram. Na Agenda do dia você marca reuniões e compromissos. Em Fornecedores fica a lista usada em todas as festas. O Leitor QR Code é para o dia da festa: lê o convite dos convidados na entrada.",
       },
       {
         alvo: "calendario",
         titulo: "Calendário",
         texto:
-          "Mostra os dias com festa. Verde: está tudo resolvido. Amarelo: ainda falta alguma coisa. Clique no nome da festa para abri-la, ou troque para ver o ano inteiro.",
+          "Mostra os dias com festa. Verde: está tudo resolvido. Amarelo: ainda falta alguma coisa. Em cinza, os compromissos da agenda. Clique no nome da festa para abri-la, no número do dia para ver a agenda dele, ou troque para ver o ano inteiro.",
       },
       {
         alvo: "nova-festa",
@@ -376,6 +376,24 @@ const GUIAS: Guia[] = [
         titulo: "Baixe o PDF completo",
         texto:
           "Depois da festa, abra-a e baixe o PDF completo. Feito isso, nomes e telefones dos convidados são apagados a partir de uma data (LGPD); os nomes ficam guardados no PDF.",
+      },
+    ],
+  },
+  {
+    id: "agenda",
+    rota: /^\/painel\/agenda$/,
+    abreSozinho: true,
+    passos: [
+      {
+        titulo: "Agenda do dia",
+        texto:
+          "Aqui ficam as festas do dia e os compromissos que você marcar, como reuniões e visitas, na ordem do horário. As setas passam de um dia para outro.",
+      },
+      {
+        alvo: "adicionar",
+        titulo: "Marcar compromisso",
+        texto:
+          "Diga o que é, o dia e o horário. Fim, local e observação são opcionais. Para mudar ou tirar um compromisso, use os três pontinhos da linha.",
       },
     ],
   },

@@ -1,12 +1,23 @@
 "use client";
 
-import { Archive, CalendarClock, Handshake, LogOut, ScanLine, type LucideIcon } from "lucide-react";
+import {
+  Archive,
+  CalendarClock,
+  CalendarDays,
+  Handshake,
+  LogOut,
+  ScanLine,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
 import { sair } from "./actions";
+
+// Festas por situação e compromissos marcados para hoje.
+type Contagens = { pendentes: number; concluidas: number; agenda: number };
 
 type Item = {
   href: string;
@@ -17,7 +28,7 @@ type Item = {
   ativo: (caminho: string) => boolean;
 };
 
-function itens(contagens: { pendentes: number; concluidas: number }): Item[] {
+function itens(contagens: Contagens): Item[] {
   return [
     {
       href: "/painel",
@@ -26,6 +37,15 @@ function itens(contagens: { pendentes: number; concluidas: number }): Item[] {
       icone: CalendarClock,
       contagem: contagens.pendentes,
       ativo: (c) => c === "/painel" || c.startsWith("/painel/festas"),
+    },
+    {
+      href: "/painel/agenda",
+      rotulo: "Agenda do dia",
+      curto: "Agenda",
+      icone: CalendarDays,
+      // Só aparece quando tem compromisso hoje.
+      contagem: contagens.agenda || undefined,
+      ativo: (c) => c.startsWith("/painel/agenda"),
     },
     {
       href: "/painel/concluidas",
@@ -53,13 +73,7 @@ function itens(contagens: { pendentes: number; concluidas: number }): Item[] {
 }
 
 // Índice pautado na lateral (computador).
-export function NavegacaoLateral({
-  contagens,
-  nome,
-}: {
-  contagens: { pendentes: number; concluidas: number };
-  nome: string;
-}) {
+export function NavegacaoLateral({ contagens, nome }: { contagens: Contagens; nome: string }) {
   const caminho = usePathname();
 
   return (
@@ -105,12 +119,8 @@ export function NavegacaoLateral({
   );
 }
 
-// Barra inferior com as quatro seções (celular).
-export function NavegacaoInferior({
-  contagens,
-}: {
-  contagens: { pendentes: number; concluidas: number };
-}) {
+// Barra inferior com as cinco seções (celular).
+export function NavegacaoInferior({ contagens }: { contagens: Contagens }) {
   const caminho = usePathname();
 
   return (
@@ -119,7 +129,7 @@ export function NavegacaoInferior({
       data-guia="menu"
       className="bg-card border-border fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {itens(contagens).map((item) => {
           const ativo = item.ativo(caminho);
           const Icone = item.icone;

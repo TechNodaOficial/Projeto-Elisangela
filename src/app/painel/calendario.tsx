@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+import { listarCompromissosNoPeriodo } from "@/lib/agenda/consultas";
 import { gradeDoMes, mesVizinho, type Mes } from "@/lib/calendario";
 import { paraCampos, paraInstante } from "@/lib/datas";
 import { listarFestasNoPeriodo } from "@/lib/festas/consultas";
@@ -42,10 +43,29 @@ async function festasPorDia(inicio: string, fimExclusivo: string) {
   return { festas, porDia };
 }
 
-// Topo do calendário: título, a chave Mês | Ano e as setas.
-function Topo({
+// Compromissos da agenda entre dois dias, agrupados por dia (no fuso de São Paulo).
+async function compromissosPorDia(inicio: string, fimExclusivo: string) {
+  const compromissos = await listarCompromissosNoPeriodo(
+    paraInstante(inicio, "00:00"),
+    paraInstante(fimExclusivo, "00:00"),
+  );
+  const porDia = new Map<string, typeof compromissos>();
+  for (const c of compromissos) {
+    const { data } = paraCampos(c.inicio);
+    porDia.set(data, [...(porDia.get(data) ?? []), c]);
+  }
+  return porDia;
+}
+
+// Agenda de um dia ("2026-10-31"); sem dia, a de hoje.
+export const linkDoDia = (data?: string) =>
+  data ? `/painel/agenda?dia=${data}` : "/painel/agenda";
+
+// Topo do calendário (e da agenda do dia): título, a chave Dia | Mês | Ano e as setas.
+export function Topo({
   titulo,
   vista,
+  hrefDia,
   hrefMes,
   hrefAno,
   hoje,
@@ -53,7 +73,8 @@ function Topo({
   proximo,
 }: {
   titulo: React.ReactNode;
-  vista: "mes" | "ano";
+  vista: "dia" | "mes" | "ano";
+  hrefDia: string;
   hrefMes: string;
   hrefAno: string;
   hoje: string;
@@ -74,6 +95,13 @@ function Topo({
       </h2>
       <div className="flex items-center gap-2">
         <nav aria-label="Visão do calendário" className="bg-muted flex rounded-lg p-0.5">
+          <Link
+            href={hrefDia}
+            aria-current={vista === "dia" ? "page" : undefined}
+            className={aba(vista === "dia")}
+          >
+            Dia
+          </Link>
           <Link
             href={hrefMes}
             aria-current={vista === "mes" ? "page" : undefined}
@@ -132,6 +160,10 @@ function Legenda() {
         />
         Já passou (fica em Concluídas)
       </li>
+      <li className="flex items-center gap-1.5">
+        <span aria-hidden className="bg-card border-tinta-suave size-3 rounded-sm border-l-[3px]" />
+        Compromisso da agenda
+      </li>
     </ul>
   );
 }
@@ -139,6 +171,7 @@ function Legenda() {
 // Calendário do painel, em duas visões:
 // - Mês: os dias com as festas escritas, verde se está tudo resolvido, amarelo se falta
 //   algo (ver pendenciasDaFesta). Cada festa leva à sua página.
+//   Os compromissos da agenda aparecem em cinza; o número do dia abre a agenda dele.
 // - Ano: os 12 meses pequenos, com os dias comprometidos marcados; o dia abre o mês.
 // Festas de dias que já passaram aparecem esmaecidas: saíram das pendentes.
 export async function Calendario({
@@ -172,6 +205,7 @@ async function CalendarioAno({ ano }: { ano: number }) {
           </>
         }
         vista="ano"
+        hrefDia={linkDoDia(ano === anoAtual ? undefined : `${ano}-01-01`)}
         hrefMes={`?mes=${mesDeVolta}`}
         hrefAno={`?vista=ano&ano=${ano}`}
         hoje={`?vista=ano&ano=${anoAtual}`}
@@ -267,8 +301,12 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
   const semanas = gradeDoMes(mes);
   const primeiro = semanas[0][0].data;
   const ultimo = semanas[semanas.length - 1][6].data;
-  const { porDia } = await festasPorDia(primeiro, diaSeguinte(ultimo));
+  const [{ porDia }, compromissos] = await Promise.all([
+    festasPorDia(primeiro, diaSeguinte(ultimo)),
+    compromissosPorDia(primeiro, diaSeguinte(ultimo)),
+  ]);
   const hoje = paraCampos(new Date()).data;
+  const chaveMes = `${mes.ano}-${doisDigitos(mes.mes)}`;
 
   return (
     <section aria-labelledby="titulo-calendario" className="folha mb-8 p-4 md:p-5">
@@ -279,7 +317,8 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
           </>
         }
         vista="mes"
-        hrefMes={`?mes=${mes.ano}-${doisDigitos(mes.mes)}`}
+        hrefDia={linkDoDia(hoje.startsWith(chaveMes) ? undefined : `${chaveMes}-01`)}
+        hrefMes={`?mes=${chaveMes}`}
         hrefAno={`?vista=ano&ano=${mes.ano}`}
         hoje={`?mes=${hoje.slice(0, 7)}`}
         anterior={{ href: `?mes=${mesVizinho(mes, -1)}`, rotulo: "Mês anterior" }}
@@ -316,14 +355,18 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
                       (!dia.doMes || passou) && "opacity-45",
                     )}
                   >
-                    <span
+                    {/* O número do dia abre a agenda dele. */}
+                    <Link
+                      href={linkDoDia(dia.data)}
+                      aria-label={`Agenda do dia ${dia.dia}`}
                       className={cn(
-                        "flex size-6 items-center justify-center rounded-full font-mono text-xs",
-                        dia.data === hoje && "bg-foreground text-background font-semibold",
+                        "hover:bg-muted focus-visible:outline-ring flex size-6 items-center justify-center rounded-full font-mono text-xs focus-visible:outline-2",
+                        dia.data === hoje &&
+                          "bg-foreground text-background hover:bg-foreground font-semibold",
                       )}
                     >
                       {dia.dia}
-                    </span>
+                    </Link>
                     <ul className="mt-0.5 flex flex-col gap-0.5">
                       {doDia.map((festa) => {
                         const situacao =
@@ -352,6 +395,22 @@ async function CalendarioMes({ mes }: { mes: Mes }) {
                               </span>
                               <span className="sr-only md:not-sr-only"> {festa.titulo}</span>
                               <span className="sr-only"> · {rotulo}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                      {(compromissos.get(dia.data) ?? []).map((c) => {
+                        const hora = paraCampos(c.inicio).hora;
+                        return (
+                          <li key={c.id}>
+                            <Link
+                              href={linkDoDia(dia.data)}
+                              title={`${hora} ${c.titulo}`}
+                              className="bg-card hover:bg-muted focus-visible:outline-ring border-tinta-suave text-tinta-suave block truncate rounded-sm border-l-[3px] px-1 text-[0.6875rem] leading-5 focus-visible:outline-2 md:text-xs"
+                            >
+                              <span className="font-mono md:hidden">{hora.slice(0, 2)}h</span>
+                              <span className="hidden font-mono md:inline">{hora}</span>
+                              <span className="sr-only md:not-sr-only"> {c.titulo}</span>
                             </Link>
                           </li>
                         );
