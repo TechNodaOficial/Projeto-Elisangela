@@ -10,6 +10,8 @@ import {
   type CamposConvidado,
   type ErrosConvidado,
 } from "@/lib/convidados/schema";
+import { gravarResposta } from "@/lib/convites/gravar-resposta";
+import { erroDoFormato, montarResposta, type PessoaResposta } from "@/lib/convites/resposta";
 import { exigirUsuario } from "@/lib/dal";
 import { prisma } from "@/lib/prisma";
 import { gerarTokensConvidado } from "@/lib/tokens";
@@ -149,6 +151,65 @@ export async function salvarObservacaoConvite(
   });
   atualizarTelas(convidado.festaId);
   revalidatePath("/c/[token]", "page");
+  return {};
+}
+
+// Resposta que ela ouviu do convidado (telefone, de viva voz), registrada no painel. Sem os
+// prazos do link: ela decide quando aceita uma confirmação atrasada. Fica marcada como dela
+// até o convidado responder pelo convite. "PENDENTE" apaga a resposta (marcou errado).
+export async function registrarResposta(
+  id: string,
+  resposta: "CONFIRMADO" | "RECUSADO" | "PENDENTE",
+  quantas = 1,
+  pessoas: PessoaResposta[] = [],
+): Promise<{ erro?: string }> {
+  await exigirUsuario();
+  if (resposta !== "PENDENTE") {
+    const erroFormato = erroDoFormato(resposta, quantas, pessoas);
+    if (erroFormato) return { erro: erroFormato };
+  }
+  const convidado = await prisma.convidado.findUnique({
+    where: { id },
+    select: {
+      festaId: true,
+      tokenConvite: true,
+      pessoas: true,
+      entraram: true,
+      festa: { select: { mesasDemarcadas: true } },
+    },
+  });
+  if (!convidado) return { erro: "Este convidado não existe mais." };
+
+  if (resposta === "PENDENTE") {
+    if (convidado.entraram > 0) {
+      return { erro: `${convidado.entraram} pessoas deste convite já entraram na festa.` };
+    }
+    await prisma.$transaction([
+      prisma.convidado.update({
+        where: { id },
+        data: {
+          rsvp: "PENDENTE",
+          confirmadas: null,
+          criancas4a11: null,
+          criancas0a3: null,
+          respondidoEm: null,
+          respondidoNoPainel: false,
+        },
+      }),
+      prisma.membroConvite.deleteMany({ where: { convidadoId: id } }),
+    ]);
+  } else {
+    const montada = montarResposta(
+      { ...convidado, mesasDemarcadas: convidado.festa.mesasDemarcadas },
+      resposta,
+      quantas,
+      pessoas,
+    );
+    if ("erro" in montada) return montada;
+    await gravarResposta(id, montada, true);
+  }
+  atualizarTelas(convidado.festaId);
+  revalidatePath(`/c/${convidado.tokenConvite}`);
   return {};
 }
 

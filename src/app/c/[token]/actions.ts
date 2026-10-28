@@ -2,46 +2,29 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { FaixaIdade } from "@/lib/convidados/contagem";
 import { buscarConvite } from "@/lib/convites/consultas";
 import { estadoConvite } from "@/lib/convites/estado";
-import { erroDoNome, limparNome, PARA_BANCO } from "@/lib/convites/membros";
+import { gravarResposta } from "@/lib/convites/gravar-resposta";
 import { limparMensagem, TAMANHO_MAXIMO_MENSAGEM } from "@/lib/convites/mensagem";
 import { erroDePrazo, faseDoConvite } from "@/lib/convites/prazo";
 import { conviteBloqueado, registrarErroConvite } from "@/lib/convites/limite";
+import { erroDoFormato, montarResposta, type PessoaResposta } from "@/lib/convites/resposta";
 import { obterUsuarioLogado } from "@/lib/dal";
 import { obterIp } from "@/lib/ip";
 import { prisma } from "@/lib/prisma";
 
 export type EstadoResposta = { erro?: string };
 
-// Uma pessoa da família que vai: a idade (faixa do buffet) e, com mesas demarcadas, o nome.
-export type PessoaResposta = { faixa: FaixaIdade; nome: string };
-
-const FAIXAS: FaixaIdade[] = ["adulto", "4a11", "0a3"];
-
 // Ação pública (sem login): o token do link é a credencial, então ela passa pelo
-// mesmo limite de tentativas da página.
-// Ao confirmar, a família diz quantas pessoas vão (1 a `pessoas` do convite) e, para cada
-// uma, a idade (faixa do buffet) e, se as mesas forem demarcadas, o nome completo.
-// Convite de uma pessoa só não manda `pessoas` (conta como adulto, com o nome do convite).
+// mesmo limite de tentativas da página. As regras da resposta estão em resposta.ts.
 export async function responderConvite(
   token: string,
   resposta: "CONFIRMADO" | "RECUSADO",
   quantas = 1,
   pessoas: PessoaResposta[] = [],
 ): Promise<EstadoResposta> {
-  if (resposta !== "CONFIRMADO" && resposta !== "RECUSADO") return { erro: "Resposta inválida." };
-  if (resposta === "CONFIRMADO" && (!Number.isInteger(quantas) || quantas < 1)) {
-    return { erro: "Diga quantas pessoas vão." };
-  }
-  if (
-    !Array.isArray(pessoas) ||
-    pessoas.length > 50 ||
-    !pessoas.every((p) => FAIXAS.includes(p?.faixa) && typeof p.nome === "string")
-  ) {
-    return { erro: "Confira a idade de cada pessoa." };
-  }
+  const erroFormato = erroDoFormato(resposta, quantas, pessoas);
+  if (erroFormato) return { erro: erroFormato };
 
   const ip = await obterIp();
   if (await conviteBloqueado(ip)) {
@@ -66,63 +49,25 @@ export async function responderConvite(
     faseDoConvite(convite.festa.dataHora),
   );
   if (foraDoPrazo) return { erro: foraDoPrazo };
-  if (resposta === "CONFIRMADO" && quantas > convite.pessoas) {
-    return { erro: `Este convite é para até ${convite.pessoas} pessoas.` };
-  }
-  // Parte da família já entrou: não dá para desistir nem confirmar menos que isso.
-  if (convite.entraram > 0 && (resposta === "RECUSADO" || quantas < convite.entraram)) {
-    return { erro: `${convite.entraram} pessoas deste convite já entraram na festa.` };
-  }
-  const confirmou = resposta === "CONFIRMADO";
-  const familia = convite.pessoas > 1;
-  // Família: uma pessoa por lugar confirmado, cada uma com a idade (e o nome, se pedido).
-  const pedirNomes = familia && convite.festa.mesasDemarcadas;
-  if (confirmou && familia) {
-    if (pessoas.length !== quantas) return { erro: "Confira a idade de cada pessoa." };
-    if (pedirNomes) {
-      const erroNome = pessoas.map((p) => erroDoNome(p.nome)).find(Boolean);
-      if (erroNome) return { erro: erroNome };
-    }
-  }
-  const contar = (faixa: FaixaIdade) =>
-    familia ? pessoas.filter((p) => p.faixa === faixa).length : 0;
-  const dados = {
-    rsvp: resposta,
-    confirmadas: confirmou ? quantas : null,
-    criancas4a11: confirmou ? contar("4a11") : null,
-    criancas0a3: confirmou ? contar("0a3") : null,
-  };
-  const nomesNovos = pedirNomes && confirmou;
+
+  const montada = montarResposta(
+    { ...convite, mesasDemarcadas: convite.festa.mesasDemarcadas },
+    resposta,
+    quantas,
+    pessoas,
+  );
+  if ("erro" in montada) return montada;
+  const { dados } = montada;
   if (
-    nomesNovos ||
+    !!montada.membros?.length ||
+    // Ela tinha registrado a resposta no painel: agora vale a do próprio convidado.
+    convite.respondidoNoPainel ||
     convite.rsvp !== dados.rsvp ||
     convite.confirmadas !== dados.confirmadas ||
     convite.criancas4a11 !== dados.criancas4a11 ||
     convite.criancas0a3 !== dados.criancas0a3
   ) {
-    await prisma.$transaction([
-      prisma.convidado.update({
-        where: { id: convite.id },
-        data: { ...dados, respondidoEm: new Date() },
-      }),
-      // Nomes: trocados a cada resposta com mesas demarcadas; apagados se desistiu.
-      // Sem demarcação, ficam como estavam (se ela desligar e ligar de novo, não se perdem).
-      ...(nomesNovos || !confirmou
-        ? [prisma.membroConvite.deleteMany({ where: { convidadoId: convite.id } })]
-        : []),
-      ...(nomesNovos
-        ? [
-            prisma.membroConvite.createMany({
-              data: pessoas.map((p, ordem) => ({
-                convidadoId: convite.id,
-                ordem,
-                nome: limparNome(p.nome),
-                faixa: PARA_BANCO[p.faixa],
-              })),
-            }),
-          ]
-        : []),
-    ]);
+    await gravarResposta(convite.id, montada, false);
   }
   revalidatePath(`/c/${token}`);
   revalidatePath(`/painel/festas/${convite.festaId}`);

@@ -19,6 +19,7 @@ export async function buscarConvite(token: string) {
       confirmadas: true,
       criancas4a11: true,
       criancas0a3: true,
+      respondidoNoPainel: true,
       entraram: true,
       presenteEm: true,
       codigoCheckin: true,

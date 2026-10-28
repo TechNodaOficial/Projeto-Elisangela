@@ -3,6 +3,7 @@
 import {
   Armchair,
   Check,
+  ClipboardCheck,
   Copy,
   Eye,
   HeartHandshake,
@@ -42,6 +43,7 @@ import { definirMesa } from "../colunas/actions";
 import { editarConvidado, marcarEnvio, marcarPadrinho, removerConvidado } from "./actions";
 import { FormConvidado } from "./form-convidado";
 import { EditorObservacao } from "./observacao-convite";
+import { RegistrarResposta } from "./registrar-resposta";
 
 export type DadosFesta = {
   titulo: string;
@@ -108,7 +110,9 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
       : etapa === "confirmou" && pessoas > 1
         ? ` ${confirmadasDe(convidado)} de ${pessoas}`
         : "";
-  return (
+  // Resposta que ela mesma registrou no painel (o convidado não respondeu pelo link).
+  const porVoce = (etapa === "confirmou" || etapa === "nao_vai") && convidado.respondidoNoPainel;
+  const etiqueta = (
     <span
       className={cn(
         "inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-medium whitespace-nowrap",
@@ -118,6 +122,14 @@ function Status({ convidado }: { convidado: ConvidadoResumo }) {
       <Icone aria-hidden className="size-3.5" strokeWidth={2} />
       {e.rotulo}
       {detalhe}
+    </span>
+  );
+  if (!porVoce) return etiqueta;
+  // Embaixo da etiqueta, não dentro: na folha larga a coluna é estreita e a etiqueta não quebra.
+  return (
+    <span className="inline-flex flex-col items-start gap-0.5">
+      {etiqueta}
+      <span className="text-tinta-suave px-2 text-xs leading-tight">registrado por você</span>
     </span>
   );
 }
@@ -238,6 +250,7 @@ export function LinhaConvidado({
   convidado,
   festa,
   mesas,
+  mesasDemarcadas,
   origem,
   className,
 }: {
@@ -245,11 +258,13 @@ export function LinhaConvidado({
   convidado: ConvidadoResumo;
   festa: DadosFesta;
   mesas: OpcaoMesa[];
+  mesasDemarcadas: boolean;
   origem: string;
 }) {
   const [editando, setEditando] = useState(false);
   const [removendo, setRemovendo] = useState(false);
   const [observando, setObservando] = useState(false);
+  const [respondendo, setRespondendo] = useState(false);
   const [copiado, setCopiado] = useState(false);
 
   const { link, whatsapp } = linksDoConvite(convidado, festa, origem);
@@ -325,8 +340,9 @@ export function LinhaConvidado({
         </p>
       </div>
 
-      {/* Situação, quem vai e mesa: etiquetas numa linha no celular; colunas na folha larga. */}
-      <div className="col-span-2 col-start-1 row-start-2 flex min-w-0 flex-wrap items-center gap-1.5 @3xl:contents">
+      {/* Situação, quem vai e mesa: etiquetas numa linha no celular; colunas na folha larga.
+          Alinhadas pelo topo: a situação pode ter uma segunda linha ("registrado por você"). */}
+      <div className="col-span-2 col-start-1 row-start-2 flex min-w-0 flex-wrap items-start gap-1.5 @3xl:contents">
         <div className="@3xl:col-start-2 @3xl:row-start-1 @3xl:pt-0.5">
           <Status convidado={convidado} />
         </div>
@@ -394,6 +410,10 @@ export function LinhaConvidado({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="papel-solto w-56 rounded-[3px] ring-0">
+            <DropdownMenuItem onSelect={() => setRespondendo(true)}>
+              <ClipboardCheck aria-hidden strokeWidth={1.75} />
+              Registrar resposta
+            </DropdownMenuItem>
             <DropdownMenuItem onSelect={copiar}>
               <Copy aria-hidden strokeWidth={1.75} />
               Copiar link do convite
@@ -432,6 +452,14 @@ export function LinhaConvidado({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {respondendo && (
+        <RegistrarResposta
+          convidado={convidado}
+          mesasDemarcadas={mesasDemarcadas}
+          aoFechar={() => setRespondendo(false)}
+        />
+      )}
 
       {/* Observação dela para este convidado: é o que ele lê no convite. */}
       {observando ? (

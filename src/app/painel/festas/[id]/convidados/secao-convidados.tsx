@@ -390,6 +390,7 @@ export function SecaoConvidados({
                   convidado={convidado}
                   festa={festa}
                   mesas={opcoesMesa}
+                  mesasDemarcadas={mesasDemarcadas}
                   origem={origem}
                 />
               ))}

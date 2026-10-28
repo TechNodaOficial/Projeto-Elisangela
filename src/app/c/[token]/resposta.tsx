@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { descreverFaixas, faixasDe, type FaixaIdade } from "@/lib/convidados/contagem";
 import { erroDoNome, TAMANHO_MAXIMO_NOME } from "@/lib/convites/membros";
 import type { FaseConvite } from "@/lib/convites/prazo";
+import { ajustarPessoas, pessoasDasContagens, type PessoaResposta } from "@/lib/convites/resposta";
 import { cn } from "@/lib/utils";
 
-import { responderConvite, type PessoaResposta } from "./actions";
+import { responderConvite } from "./actions";
 
 type Estado = "aberto" | "confirmado" | "recusado";
 
@@ -65,25 +66,6 @@ const OPCOES_IDADE: { faixa: FaixaIdade; rotulo: string }[] = [
 ];
 
 const ROTULO_CURTO: Record<FaixaIdade, string> = { adulto: "", "4a11": "4 a 11", "0a3": "0 a 3" };
-
-const pessoaNova = (faixa: FaixaIdade = "adulto"): PessoaResposta => ({ faixa, nome: "" });
-
-// Faixas guardadas (quantas crianças de cada) → uma pessoa por lugar: adultos primeiro.
-function pessoasDasContagens(n: number, criancas4a11: number | null, criancas0a3: number | null) {
-  const c0a3 = Math.min(criancas0a3 ?? 0, n);
-  const c4a11 = Math.min(criancas4a11 ?? 0, n - c0a3);
-  return [
-    ...Array.from({ length: n - c4a11 - c0a3 }, () => pessoaNova("adulto")),
-    ...Array.from({ length: c4a11 }, () => pessoaNova("4a11")),
-    ...Array.from({ length: c0a3 }, () => pessoaNova("0a3")),
-  ];
-}
-
-// Mudou o número de pessoas: mantém quem continua e completa com adultos sem nome.
-const ajustarPessoas = (lista: PessoaResposta[], n: number) =>
-  lista.length >= n
-    ? lista.slice(0, n)
-    : [...lista, ...Array.from({ length: n - lista.length }, () => pessoaNova())];
 
 // Cada pessoa da família: a idade, pela faixa que o buffet cobra (três botões grandes, que
 // funcionam como opções de rádio) e, com mesas demarcadas, o nome completo para a plaquinha.

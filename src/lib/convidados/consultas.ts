@@ -22,6 +22,7 @@ export async function listarConvidados(festaId: string) {
       mensagem: true,
       mensagemEm: true,
       respondidoEm: true,
+      respondidoNoPainel: true,
       enviadoEm: true,
       abertoEm: true,
       entraram: true,
