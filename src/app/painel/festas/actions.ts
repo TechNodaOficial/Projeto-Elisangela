@@ -12,6 +12,7 @@ import {
   type CamposFesta,
   type ErrosFesta,
 } from "@/lib/festas/schema";
+import { apagarAnexos } from "@/lib/anexos/blob";
 import { apagarContratos } from "@/lib/contratos/blob";
 import { apagarFoto } from "@/lib/festas/foto";
 import { apagarPlanta } from "@/lib/planta/blob";
@@ -73,6 +74,7 @@ export async function excluirFesta(id: string) {
       plantaUrl: true,
       fotoUrl: true,
       contratacoes: { select: { contratoUrl: true } },
+      anexos: { select: { url: true } },
     },
   });
   // deleteMany não falha se outra aba já excluiu; convidados e serviços saem junto (cascade).
@@ -80,6 +82,7 @@ export async function excluirFesta(id: string) {
   await apagarPlanta(festa?.plantaUrl);
   await apagarFoto(festa?.fotoUrl);
   await apagarContratos(festa?.contratacoes.map((c) => c.contratoUrl) ?? []);
+  await apagarAnexos(festa?.anexos.map((a) => a.url) ?? []);
   revalidatePath("/painel", "layout");
   redirect("/painel");
 }

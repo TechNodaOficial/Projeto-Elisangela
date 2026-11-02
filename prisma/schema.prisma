@@ -93,6 +93,7 @@ model Festa {
   checklistCerimonia   ItemCerimonia[]
   padrinhos            Padrinho[]
   observacoesGerais    Observacao[]
+  anexos               Anexo[]
   sessoesPortaria      SessaoPortaria[]
 
   @@index([dataHora])
@@ -405,6 +406,23 @@ model Observacao {
 
   @@unique([festaId, secao])
   @@map("observacoes")
+}
+
+// Arquivo anexado numa parte da festa (as mesmas seções das observações). O arquivo fica no
+// Blob store privado; o painel serve por /painel/festas/[id]/anexos/[secao]/[anexoId].
+model Anexo {
+  id       String   @id @default(cuid())
+  festaId  String
+  festa    Festa    @relation(fields: [festaId], references: [id], onDelete: Cascade)
+  secao    String
+  url      String
+  nome     String
+  tipo     String
+  tamanho  Int
+  criadoEm DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([festaId, secao])
+  @@map("anexos")
 }
 
 // Ajudante da portaria que entrou com o link e o PIN: só o leitor de QR desta festa.

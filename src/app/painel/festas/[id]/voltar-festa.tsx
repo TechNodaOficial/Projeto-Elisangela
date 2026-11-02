@@ -1,4 +1,4 @@
-import { ArrowLeft, NotebookPen } from "lucide-react";
+import { ArrowLeft, NotebookPen, Paperclip } from "lucide-react";
 import Link from "next/link";
 
 import { partesData } from "@/lib/datas";
@@ -8,7 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { SecoesFesta } from "./secoes-festa";
 
 // Topo das páginas de seção (fornecedores, convidados...): volta para a festa e, à direita,
-// abre a folha de observações gerais daquela seção (com um ponto se já tem texto).
+// abre a folha de observações gerais daquela seção (com um ponto se já tem texto) e os
+// anexos dela (com quantos são).
 // Embaixo, o atalho para as outras partes da festa.
 export async function VoltarFesta({
   festa,
@@ -18,12 +19,15 @@ export async function VoltarFesta({
   observacoes?: SecaoObservacao;
 }) {
   const data = partesData(festa.dataHora);
-  const salvo =
-    observacoes &&
-    (await prisma.observacao.findUnique({
-      where: { festaId_secao: { festaId: festa.id, secao: observacoes } },
-      select: { conteudo: true },
-    }));
+  const [salvo, anexos] = observacoes
+    ? await Promise.all([
+        prisma.observacao.findUnique({
+          where: { festaId_secao: { festaId: festa.id, secao: observacoes } },
+          select: { conteudo: true },
+        }),
+        prisma.anexo.count({ where: { festaId: festa.id, secao: observacoes } }),
+      ])
+    : [null, 0];
   const temTexto = !!salvo && !documentoVazio(salvo.conteudo);
 
   return (
@@ -39,17 +43,30 @@ export async function VoltarFesta({
           </span>
         </Link>
         {observacoes && (
-          <Link
-            href={`/painel/festas/${festa.id}/observacoes/${observacoes}`}
-            data-guia="observacoes"
-            className="bg-pastel-lilas focus-visible:outline-ring inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            <NotebookPen aria-hidden className="size-4" strokeWidth={1.75} />
-            Observações
-            {temTexto && (
-              <span className="bg-foreground size-1.5 rounded-full" aria-label="(com anotações)" />
-            )}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/painel/festas/${festa.id}/anexos/${observacoes}`}
+              className="bg-card focus-visible:outline-ring inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <Paperclip aria-hidden className="size-4" strokeWidth={1.75} />
+              Anexos
+              {anexos > 0 && <span className="text-tinta-suave tabular-nums">{anexos}</span>}
+            </Link>
+            <Link
+              href={`/painel/festas/${festa.id}/observacoes/${observacoes}`}
+              data-guia="observacoes"
+              className="bg-pastel-lilas focus-visible:outline-ring inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm font-medium transition-[filter] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <NotebookPen aria-hidden className="size-4" strokeWidth={1.75} />
+              Observações
+              {temTexto && (
+                <span
+                  className="bg-foreground size-1.5 rounded-full"
+                  aria-label="(com anotações)"
+                />
+              )}
+            </Link>
+          </div>
         )}
       </div>
       <SecoesFesta festaId={festa.id} />

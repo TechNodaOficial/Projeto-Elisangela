@@ -1,5 +1,6 @@
 import "server-only";
 
+import { apagarAnexos } from "@/lib/anexos/blob";
 import { apagarContratos } from "@/lib/contratos/blob";
 import { apagarFoto } from "@/lib/festas/foto";
 import { apagarPlanta } from "@/lib/planta/blob";
@@ -10,7 +11,7 @@ import { limiteArquivo, limiteRetencao } from "./prazo";
 // Rodada diária (cron da Vercel, /api/cron/limpeza):
 // 1. Festas que já podem ser arquivadas (ver prazo.ts: 30 dias com o PDF completo
 //    baixado, 90 dias de qualquer jeito): guarda as contagens e apaga todos os dados da
-//    festa e os arquivos (contratos, planta, foto). Fica só o cartão: nome, data, local e
+//    festa e os arquivos (contratos, anexos, planta, foto). Fica só o cartão: nome, data, local e
 //    os números. A base geral de fornecedores não é da festa e continua.
 // 2. Sessões vencidas e tentativas de login antigas.
 export async function limparDadosAntigos(agora = new Date()) {
@@ -27,6 +28,7 @@ export async function limparDadosAntigos(agora = new Date()) {
       plantaUrl: true,
       fotoUrl: true,
       contratacoes: { select: { contratoUrl: true } },
+      anexos: { select: { url: true } },
     },
   });
 
@@ -72,11 +74,13 @@ export async function limparDadosAntigos(agora = new Date()) {
       prisma.itemMenu.deleteMany({ where: { festaId: id } }),
       prisma.entradaCerimonia.deleteMany({ where: { festaId: id } }),
       prisma.observacao.deleteMany({ where: { festaId: id } }),
+      prisma.anexo.deleteMany({ where: { festaId: id } }),
     ]);
     convidadosApagados += apagados.count;
 
     // Arquivos no Blob: depois do banco (se falhar, sobra só um arquivo órfão, sem link).
     await apagarContratos(festa.contratacoes.map((c) => c.contratoUrl));
+    await apagarAnexos(festa.anexos.map((a) => a.url));
     await apagarPlanta(festa.plantaUrl);
     await apagarFoto(festa.fotoUrl);
   }
